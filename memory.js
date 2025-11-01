@@ -51,17 +51,35 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function onTile(e){
-    if(locked) return;
-    if(flipped.length >= 2) return; // Already have 2 cards flipped
+    console.log('Click received. locked:', locked, 'flipped.length:', flipped.length);
+    if(locked) {
+      console.log('Blocked: locked');
+      return;
+    }
+    if(flipped.length >= 2) {
+      console.log('Blocked: already 2 flipped');
+      return;
+    }
     const idx = Number(e.currentTarget.dataset.idx);
-    if(matched.has(idx) || flipped.includes(idx)) return;
+    if(matched.has(idx)) {
+      console.log('Blocked: already matched');
+      return;
+    }
+    if(flipped.includes(idx)) {
+      console.log('Blocked: already in flipped array');
+      return;
+    }
     
+    console.log('Flipping card', idx);
     flipTile(e.currentTarget, deck[idx]);
     flipped.push(idx);
+    console.log('Flipped array now:', flipped);
     
     // Lock immediately after flipping second card
     if(flipped.length === 2){
       locked = true;
+      grid.classList.add('locked');
+      console.log('LOCKED - have 2 cards');
     }
     
     if(flipped.length === 2){
@@ -77,6 +95,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         if(elB) elB.classList.add('matched');
         flipped = [];
         locked = false;
+        grid.classList.remove('locked');
         if(matched.size === deck.length){
           if(level < levels.length){
             status.textContent = `Level ${level} complete! Next level in 2s...`;
@@ -93,6 +112,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
           unflip(a); unflip(b);
           flipped = [];
           locked = false;
+          grid.classList.remove('locked');
         },700);
       }
     }
