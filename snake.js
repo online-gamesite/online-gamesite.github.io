@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.font = '18px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('Press arrow key or WASD to start', canvas.width/2, canvas.height/2);
+      ctx.fillText('Press arrow/WASD or swipe to start', canvas.width/2, canvas.height/2);
       console.log('Drawing start text');
     }
   }
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.fillText('Game Over! Hit a wall', canvas.width/2, canvas.height/2 - 20);
       ctx.fillStyle = '#fff';
       ctx.font = '16px Arial, sans-serif';
-      ctx.fillText('Press any key to restart', canvas.width/2, canvas.height/2 + 20);
+      ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
       return;
     }
     
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.fillText('Game Over! Hit yourself', canvas.width/2, canvas.height/2 - 20);
       ctx.fillStyle = '#fff';
       ctx.font = '16px Arial, sans-serif';
-      ctx.fillText('Press any key to restart', canvas.width/2, canvas.height/2 + 20);
+      ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
       return;
     }
     
@@ -145,6 +145,66 @@ document.addEventListener('DOMContentLoaded', ()=>{
       reset();
     }
   });
+
+  // Touch/swipe controls for mobile
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let touchEndX = 0;
+  let touchEndY = 0;
+
+  canvas.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, {passive: false});
+
+  canvas.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    touchEndX = e.changedTouches[0].screenX;
+    touchEndY = e.changedTouches[0].screenY;
+    handleSwipe();
+  }, {passive: false});
+
+  function handleSwipe() {
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const minSwipeDistance = 30;
+
+    // If game is over, restart on any touch
+    if(!running && gameStarted){
+      reset();
+      return;
+    }
+
+    // Determine swipe direction
+    if(Math.abs(deltaX) > Math.abs(deltaY)) {
+      // Horizontal swipe
+      if(Math.abs(deltaX) > minSwipeDistance) {
+        if(deltaX > 0 && dir.x !== -1) {
+          // Swipe right
+          dir = {x:1, y:0};
+          if(!running) start();
+        } else if(deltaX < 0 && dir.x !== 1) {
+          // Swipe left
+          dir = {x:-1, y:0};
+          if(!running) start();
+        }
+      }
+    } else {
+      // Vertical swipe
+      if(Math.abs(deltaY) > minSwipeDistance) {
+        if(deltaY > 0 && dir.y !== -1) {
+          // Swipe down
+          dir = {x:0, y:1};
+          if(!running) start();
+        } else if(deltaY < 0 && dir.y !== 1) {
+          // Swipe up
+          dir = {x:0, y:-1};
+          if(!running) start();
+        }
+      }
+    }
+  }
 
   reset();
 });

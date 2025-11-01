@@ -378,3 +378,23 @@ body{
 .simon-blue{background:linear-gradient(180deg,#60a5fa,#1e40af)}
 .whack-hole{width:100px;height:100px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .whack-grid{display:grid;grid-template-columns:repeat(3,100px);gap:12px;justify-content:center;margin-top:1rem}
+
+/* Touch-friendly improvements */
+.ttt-cell, .card-tile, .btn, .simon-pad, .whack-hole {
+  -webkit-tap-highlight-color: rgba(0,0,0,0);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.snake-canvas {
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Prevent text selection on game elements */
+.game-wrap {
+  -webkit-user-select: none;
+  user-select: none;
+}
