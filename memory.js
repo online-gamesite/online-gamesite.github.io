@@ -46,75 +46,120 @@ document.addEventListener('DOMContentLoaded', ()=>{
     
     flipped = [];
     matched = new Set();
+    locked = false;
+    grid.classList.remove('locked');
     levelEl.textContent = level;
     status.textContent = '';
   }
 
+  function cleanupVisualState(){
+    // Ensure only cards in our flipped/matched arrays are shown
+    const allTiles = grid.querySelectorAll('.card-tile');
+    allTiles.forEach((tile, idx) => {
+      if(!flipped.includes(idx) && !matched.has(idx)){
+        tile.classList.remove('flipped');
+        tile.textContent = '';
+      }
+    });
+  }
+
   function onTile(e){
     console.log('Click received. locked:', locked, 'flipped.length:', flipped.length);
+    
+    // CRITICAL: Block ALL clicks if locked
     if(locked) {
       console.log('Blocked: locked');
+      e.preventDefault();
+      e.stopPropagation();
       return;
     }
-    if(flipped.length >= 2) {
-      console.log('Blocked: already 2 flipped');
-      return;
-    }
+    
     const idx = Number(e.currentTarget.dataset.idx);
+    
+    // Check if already matched
     if(matched.has(idx)) {
       console.log('Blocked: already matched');
       return;
     }
+    
+    // Check if already flipped
     if(flipped.includes(idx)) {
       console.log('Blocked: already in flipped array');
       return;
     }
     
-    console.log('Flipping card', idx);
-    flipTile(e.currentTarget, deck[idx]);
-    flipped.push(idx);
-    console.log('Flipped array now:', flipped);
+    // CRITICAL: If we already have 2 cards, ignore this click completely
+    if(flipped.length >= 2) {
+      console.log('Blocked: already 2 flipped');
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
     
-    // Lock immediately after flipping second card
+    // Add to flipped array FIRST before any DOM manipulation
+    flipped.push(idx);
+    console.log('Added to flipped array. Now:', flipped);
+    
+    // Then flip the tile visually
+    flipTile(e.currentTarget, deck[idx]);
+    
+    // If this is the second card, lock immediately and process
     if(flipped.length === 2){
       locked = true;
       grid.classList.add('locked');
-      console.log('LOCKED - have 2 cards');
+      console.log('LOCKED - have 2 cards, will process in 50ms');
+      
+      // Small delay to ensure DOM updates, then process the pair
+      setTimeout(() => {
+        processFlippedPair();
+      }, 50);
     }
+  }
+
+  function processFlippedPair(){
+    console.log('Processing pair:', flipped);
+    moves++;
+    movesEl.textContent = moves;
+    const [a,b] = flipped;
     
-    if(flipped.length === 2){
-      moves++;
-      movesEl.textContent = moves;
-      const [a,b] = flipped;
-      if(deck[a] === deck[b]){
-        matched.add(a); matched.add(b);
-        // mark tiles as matched
-        const elA = grid.querySelector(`[data-idx="${a}"]`);
-        const elB = grid.querySelector(`[data-idx="${b}"]`);
-        if(elA) elA.classList.add('matched');
-        if(elB) elB.classList.add('matched');
+    if(deck[a] === deck[b]){
+      console.log('Match found!');
+      matched.add(a); 
+      matched.add(b);
+      // mark tiles as matched
+      const elA = grid.querySelector(`[data-idx="${a}"]`);
+      const elB = grid.querySelector(`[data-idx="${b}"]`);
+      if(elA) elA.classList.add('matched');
+      if(elB) elB.classList.add('matched');
+      flipped = [];
+      cleanupVisualState(); // Clean up any stuck cards
+      locked = false;
+      grid.classList.remove('locked');
+      console.log('Unlocked after match');
+      
+      if(matched.size === deck.length){
+        if(level < levels.length){
+          status.textContent = `Level ${level} complete! Next level in 2s...`;
+          setTimeout(()=>{
+            level++;
+            build();
+          }, 2000);
+        } else {
+          status.textContent = `🎉 All levels complete! Moves: ${moves}`;
+        }
+      }
+    } else {
+      console.log('No match, will unflip in 700ms');
+      setTimeout(()=>{
+        console.log('Unflipping cards:', a, b);
+        unflip(a); 
+        unflip(b);
         flipped = [];
+        cleanupVisualState(); // Clean up any stuck cards
         locked = false;
         grid.classList.remove('locked');
-        if(matched.size === deck.length){
-          if(level < levels.length){
-            status.textContent = `Level ${level} complete! Next level in 2s...`;
-            setTimeout(()=>{
-              level++;
-              build();
-            }, 2000);
-          } else {
-            status.textContent = `🎉 All levels complete! Moves: ${moves}`;
-          }
-        }
-      } else {
-        setTimeout(()=>{
-          unflip(a); unflip(b);
-          flipped = [];
-          locked = false;
-          grid.classList.remove('locked');
-        },700);
-      }
+        console.log('Unlocked after unflip');
+      }, 700);
     }
   }
 
