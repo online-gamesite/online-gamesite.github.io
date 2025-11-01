@@ -1,19 +1,18 @@
 document.addEventListener('DOMContentLoaded', ()=>{
   const canvas = document.getElementById('snake');
   const ctx = canvas.getContext('2d');
-  const startBtn = document.getElementById('start');
-  const stopBtn = document.getElementById('stop');
   const scoreEl = document.getElementById('snake-score');
   const size = 20;
   const cols = canvas.width / size;
   const rows = canvas.height / size;
-  let snake, dir, food, running, loopId;
+  let snake, dir, food, running, loopId, gameStarted;
 
   function reset(){
     snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}];
     dir = {x:1,y:0};
     placeFood();
     running = false;
+    gameStarted = false;
     updateScore();
     draw();
   }
@@ -31,18 +30,43 @@ document.addEventListener('DOMContentLoaded', ()=>{
     // snake
     ctx.fillStyle = '#10b981';
     snake.forEach(s=>ctx.fillRect(s.x*size, s.y*size, size-1, size-1));
+    
+    // Show instruction if not started
+    if(!gameStarted){
+      ctx.fillStyle = '#fff';
+      ctx.font = '20px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Press arrow key or WASD to start', canvas.width/2, canvas.height/2 - 40);
+    }
   }
 
   function step(){
     const head = {x: snake[0].x + dir.x, y: snake[0].y + dir.y};
-    // wrap
-    head.x = (head.x + cols) % cols;
-    head.y = (head.y + rows) % rows;
+    
+    // Check wall collision
+    if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows){
+      stop();
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 24px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over! Hit a wall', canvas.width/2, canvas.height/2);
+      ctx.font = '16px Inter, sans-serif';
+      ctx.fillText('Press any key to restart', canvas.width/2, canvas.height/2 + 30);
+      return;
+    }
+    
     // collision with self
     if(snake.some(s=>s.x===head.x && s.y===head.y)){
       stop();
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 24px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Game Over! Hit yourself', canvas.width/2, canvas.height/2);
+      ctx.font = '16px Inter, sans-serif';
+      ctx.fillText('Press any key to restart', canvas.width/2, canvas.height/2 + 30);
       return;
     }
+    
     snake.unshift(head);
     if(head.x===food.x && head.y===food.y){
       placeFood();
@@ -60,22 +84,57 @@ document.addEventListener('DOMContentLoaded', ()=>{
   function start(){
     if(running) return;
     running = true;
+    gameStarted = true;
     loopId = setInterval(step, 120);
   }
+  
   function stop(){
     running = false;
     clearInterval(loopId);
   }
 
   document.addEventListener('keydown', (e)=>{
-    if(e.key === 'ArrowUp' && dir.y!==1) dir = {x:0,y:-1};
-    if(e.key === 'ArrowDown' && dir.y!==-1) dir = {x:0,y:1};
-    if(e.key === 'ArrowLeft' && dir.x!==1) dir = {x:-1,y:0};
-    if(e.key === 'ArrowRight' && dir.x!==-1) dir = {x:1,y:0};
+    // Arrow keys
+    if(e.key === 'ArrowUp' && dir.y!==1) {
+      dir = {x:0,y:-1};
+      if(!running) start();
+    }
+    if(e.key === 'ArrowDown' && dir.y!==-1) {
+      dir = {x:0,y:1};
+      if(!running) start();
+    }
+    if(e.key === 'ArrowLeft' && dir.x!==1) {
+      dir = {x:-1,y:0};
+      if(!running) start();
+    }
+    if(e.key === 'ArrowRight' && dir.x!==-1) {
+      dir = {x:1,y:0};
+      if(!running) start();
+    }
+    
+    // WASD keys
+    if((e.key === 'w' || e.key === 'W') && dir.y!==1) {
+      dir = {x:0,y:-1};
+      if(!running) start();
+    }
+    if((e.key === 's' || e.key === 'S') && dir.y!==-1) {
+      dir = {x:0,y:1};
+      if(!running) start();
+    }
+    if((e.key === 'a' || e.key === 'A') && dir.x!==1) {
+      dir = {x:-1,y:0};
+      if(!running) start();
+    }
+    if((e.key === 'd' || e.key === 'D') && dir.x!==-1) {
+      dir = {x:1,y:0};
+      if(!running) start();
+    }
+    
+    // Any key to restart after game over
+    if(!running && gameStarted){
+      reset();
+    }
   });
-
-  startBtn.addEventListener('click', start);
-  stopBtn.addEventListener('click', stop);
 
   reset();
 });
