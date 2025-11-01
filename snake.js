@@ -1,13 +1,16 @@
 document.addEventListener('DOMContentLoaded', ()=>{
+  console.log('Snake game loaded');
   const canvas = document.getElementById('snake');
   const ctx = canvas.getContext('2d');
   const scoreEl = document.getElementById('snake-score');
+  console.log('Canvas:', canvas, 'Context:', ctx, 'Score element:', scoreEl);
   const size = 20;
   const cols = canvas.width / size;
   const rows = canvas.height / size;
   let snake, dir, food, running, loopId, gameStarted;
 
   function reset(){
+    console.log('Reset called');
     snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}];
     dir = {x:1,y:0};
     placeFood();
@@ -22,6 +25,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function draw(){
+    console.log('Draw called, gameStarted:', gameStarted);
     ctx.fillStyle = '#000';
     ctx.fillRect(0,0,canvas.width,canvas.height);
     // food
@@ -38,6 +42,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('Press arrow key or WASD to start', canvas.width/2, canvas.height/2);
+      console.log('Drawing start text');
     }
   }
 
