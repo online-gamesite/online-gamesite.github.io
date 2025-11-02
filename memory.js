@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const status = document.getElementById('mem-status');
   const levelEl = document.getElementById('mem-level');
   const movesEl = document.getElementById('mem-moves');
+  const singleBtn = document.getElementById('singleBtn');
+  const multiBtn = document.getElementById('multiBtn');
+  const modeText = document.getElementById('modeText');
+  const playerScores = document.getElementById('player-scores');
+  const p1ScoreEl = document.getElementById('p1-score');
+  const p2ScoreEl = document.getElementById('p2-score');
   
   const allEmojis = ['🍎','🍌','🍇','🍓','🍍','🥝','🍑','🍊','🍒','🥭','🍐','🥑','🌶️','🥕','🌽','🥒'];
   
@@ -13,6 +19,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let flipped = [];
   let matched = new Set();
   let locked = false;
+  let isMultiplayer = false;
+  let currentPlayer = 1;
+  let p1Score = 0;
+  let p2Score = 0;
 
   // Level configs: [pairs, gridCols]
   const levels = [
@@ -22,6 +32,33 @@ document.addEventListener('DOMContentLoaded', ()=>{
     {pairs: 10, cols: 5},  // Level 4: 5x4 (20 cards)
     {pairs: 12, cols: 6},  // Level 5: 6x4 (24 cards)
   ];
+  
+  // Mode selection
+  singleBtn.addEventListener('click', () => {
+    isMultiplayer = false;
+    singleBtn.style.background = '#06b6d4';
+    multiBtn.style.background = '';
+    modeText.textContent = 'Single Player Mode';
+    playerScores.style.display = 'none';
+    restart.click();
+  });
+  
+  multiBtn.addEventListener('click', () => {
+    isMultiplayer = true;
+    multiBtn.style.background = '#06b6d4';
+    singleBtn.style.background = '';
+    modeText.textContent = '2 Player Mode - Player 1\'s turn';
+    playerScores.style.display = 'block';
+    p1Score = 0;
+    p2Score = 0;
+    currentPlayer = 1;
+    p1ScoreEl.textContent = '0';
+    p2ScoreEl.textContent = '0';
+    restart.click();
+  });
+  
+  // Start with single player
+  singleBtn.click();
 
   function shuffle(a){
     return a.sort(()=>Math.random()-0.5);
@@ -131,21 +168,39 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const elB = grid.querySelector(`[data-idx="${b}"]`);
       if(elA) elA.classList.add('matched');
       if(elB) elB.classList.add('matched');
+      
+      // In multiplayer, award point to current player
+      if(isMultiplayer) {
+        if(currentPlayer === 1) {
+          p1Score++;
+          p1ScoreEl.textContent = p1Score;
+        } else {
+          p2Score++;
+          p2ScoreEl.textContent = p2Score;
+        }
+        // Player gets another turn after a match
+      }
+      
       flipped = [];
-      cleanupVisualState(); // Clean up any stuck cards
+      cleanupVisualState();
       locked = false;
       grid.classList.remove('locked');
       console.log('Unlocked after match');
       
       if(matched.size === deck.length){
-        if(level < levels.length){
-          status.textContent = `Level ${level} complete! Next level in 2s...`;
-          setTimeout(()=>{
-            level++;
-            build();
-          }, 2000);
+        if(isMultiplayer) {
+          const winner = p1Score > p2Score ? 'Player 1' : p1Score < p2Score ? 'Player 2' : 'Tie';
+          status.textContent = `🎉 Game Over! ${winner} wins! P1: ${p1Score} P2: ${p2Score}`;
         } else {
-          status.textContent = `🎉 All levels complete! Moves: ${moves}`;
+          if(level < levels.length){
+            status.textContent = `Level ${level} complete! Next level in 2s...`;
+            setTimeout(()=>{
+              level++;
+              build();
+            }, 2000);
+          } else {
+            status.textContent = `🎉 All levels complete! Moves: ${moves}`;
+          }
         }
       }
     } else {
@@ -155,7 +210,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
         unflip(a); 
         unflip(b);
         flipped = [];
-        cleanupVisualState(); // Clean up any stuck cards
+        cleanupVisualState();
+        
+        // In multiplayer, switch turns
+        if(isMultiplayer) {
+          currentPlayer = currentPlayer === 1 ? 2 : 1;
+          modeText.textContent = `Player ${currentPlayer}'s turn`;
+        }
+        
         locked = false;
         grid.classList.remove('locked');
         console.log('Unlocked after unflip');
@@ -173,10 +235,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   restart.addEventListener('click', ()=>{
-    level = 1;
+    if(!isMultiplayer) {
+      level = 1;
+    }
     moves = 0;
     movesEl.textContent = moves;
+    if(isMultiplayer) {
+      p1Score = 0;
+      p2Score = 0;
+      currentPlayer = 1;
+      p1ScoreEl.textContent = '0';
+      p2ScoreEl.textContent = '0';
+      modeText.textContent = 'Player 1\'s turn';
+    }
     build();
   });
-  build();
 });
