@@ -3,16 +3,50 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const canvas = document.getElementById('snake');
   const ctx = canvas.getContext('2d');
   const scoreEl = document.getElementById('snake-score');
+  const singleBtn = document.getElementById('singleBtn');
+  const multiBtn = document.getElementById('multiBtn');
+  const modeText = document.getElementById('modeText');
   console.log('Canvas:', canvas, 'Context:', ctx, 'Score element:', scoreEl);
   const size = 20;
   const cols = canvas.width / size;
   const rows = canvas.height / size;
   let snake, dir, food, running, loopId, gameStarted;
+  let isMultiplayer = false;
+  let snake2, dir2, p1Score, p2Score;
+  
+  // Mode selection
+  singleBtn.addEventListener('click', () => {
+    isMultiplayer = false;
+    singleBtn.style.background = '#06b6d4';
+    multiBtn.style.background = '';
+    modeText.textContent = 'Single Player Mode';
+    reset();
+  });
+  
+  multiBtn.addEventListener('click', () => {
+    isMultiplayer = true;
+    multiBtn.style.background = '#06b6d4';
+    singleBtn.style.background = '';
+    modeText.textContent = '2 Player Mode - P1: Arrows, P2: WASD';
+    reset();
+  });
+  
+  // Start with single player
+  singleBtn.click();
 
   function reset(){
     console.log('Reset called');
-    snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}];
-    dir = {x:1,y:0};
+    if(isMultiplayer) {
+      snake = [{x:5, y:Math.floor(rows/2)}];
+      snake2 = [{x:cols-6, y:Math.floor(rows/2)}];
+      dir = {x:1,y:0};
+      dir2 = {x:-1,y:0};
+      p1Score = 0;
+      p2Score = 0;
+    } else {
+      snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}];
+      dir = {x:1,y:0};
+    }
     placeFood();
     running = false;
     gameStarted = false;
@@ -31,9 +65,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
     // food
     ctx.fillStyle = '#e11d48';
     ctx.fillRect(food.x*size, food.y*size, size, size);
-    // snake
+    // snake 1
     ctx.fillStyle = '#10b981';
     snake.forEach(s=>ctx.fillRect(s.x*size, s.y*size, size-1, size-1));
+    
+    // snake 2 in multiplayer
+    if(isMultiplayer) {
+      ctx.fillStyle = '#3b82f6';
+      snake2.forEach(s=>ctx.fillRect(s.x*size, s.y*size, size-1, size-1));
+    }
     
     // Show instruction if not started
     if(!gameStarted){
@@ -51,26 +91,66 @@ document.addEventListener('DOMContentLoaded', ()=>{
     
     // Check wall collision
     if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows){
-      stop();
-      ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 24px Arial, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('Game Over! Hit a wall', canvas.width/2, canvas.height/2 - 20);
-      ctx.fillStyle = '#fff';
-      ctx.font = '16px Arial, sans-serif';
-      ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
-      return;
+      if(isMultiplayer) {
+        stop();
+        ctx.fillStyle = '#3b82f6';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Player 2 Wins!', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px Arial, sans-serif';
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        return;
+      } else {
+        stop();
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Game Over! Hit a wall', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px Arial, sans-serif';
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        return;
+      }
     }
     
     // collision with self
     if(snake.some(s=>s.x===head.x && s.y===head.y)){
+      if(isMultiplayer) {
+        stop();
+        ctx.fillStyle = '#3b82f6';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Player 2 Wins!', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px Arial, sans-serif';
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        return;
+      } else {
+        stop();
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Game Over! Hit yourself', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px Arial, sans-serif';
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        return;
+      }
+    }
+    
+    // Collision with other snake in multiplayer
+    if(isMultiplayer && snake2.some(s=>s.x===head.x && s.y===head.y)){
       stop();
-      ctx.fillStyle = '#ef4444';
+      ctx.fillStyle = '#3b82f6';
       ctx.font = 'bold 24px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('Game Over! Hit yourself', canvas.width/2, canvas.height/2 - 20);
+      ctx.fillText('Player 2 Wins!', canvas.width/2, canvas.height/2 - 20);
       ctx.fillStyle = '#fff';
       ctx.font = '16px Arial, sans-serif';
       ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
@@ -79,16 +159,51 @@ document.addEventListener('DOMContentLoaded', ()=>{
     
     snake.unshift(head);
     if(head.x===food.x && head.y===food.y){
+      if(isMultiplayer) p1Score++;
       placeFood();
     } else {
       snake.pop();
     }
+    
+    // Move snake 2 in multiplayer
+    if(isMultiplayer) {
+      const head2 = {x: snake2[0].x + dir2.x, y: snake2[0].y + dir2.y};
+      
+      // Check collisions for snake 2
+      if(head2.x < 0 || head2.x >= cols || head2.y < 0 || head2.y >= rows ||
+         snake2.some(s=>s.x===head2.x && s.y===head2.y) ||
+         snake.some(s=>s.x===head2.x && s.y===head2.y)){
+        stop();
+        ctx.fillStyle = '#10b981';
+        ctx.font = 'bold 24px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Player 1 Wins!', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillStyle = '#fff';
+        ctx.font = '16px Arial, sans-serif';
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        return;
+      }
+      
+      snake2.unshift(head2);
+      if(head2.x===food.x && head2.y===food.y){
+        p2Score++;
+        placeFood();
+      } else {
+        snake2.pop();
+      }
+    }
+    
     draw();
     updateScore();
   }
 
   function updateScore(){
-    scoreEl.textContent = `Score: ${snake.length-1}`;
+    if(isMultiplayer) {
+      scoreEl.textContent = `P1 (Green): ${p1Score} | P2 (Blue): ${p2Score}`;
+    } else {
+      scoreEl.textContent = `Score: ${snake.length-1}`;
+    }
   }
 
   function start(){
@@ -104,7 +219,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   document.addEventListener('keydown', (e)=>{
-    // Arrow keys
+    // Player 1: Arrow keys
     if(e.key === 'ArrowUp' && dir.y!==1) {
       dir = {x:0,y:-1};
       if(!running) start();
@@ -122,22 +237,42 @@ document.addEventListener('DOMContentLoaded', ()=>{
       if(!running) start();
     }
     
-    // WASD keys
-    if((e.key === 'w' || e.key === 'W') && dir.y!==1) {
-      dir = {x:0,y:-1};
-      if(!running) start();
-    }
-    if((e.key === 's' || e.key === 'S') && dir.y!==-1) {
-      dir = {x:0,y:1};
-      if(!running) start();
-    }
-    if((e.key === 'a' || e.key === 'A') && dir.x!==1) {
-      dir = {x:-1,y:0};
-      if(!running) start();
-    }
-    if((e.key === 'd' || e.key === 'D') && dir.x!==-1) {
-      dir = {x:1,y:0};
-      if(!running) start();
+    // Player 2 in multiplayer: WASD keys
+    if(isMultiplayer) {
+      if((e.key === 'w' || e.key === 'W') && dir2.y!==1) {
+        dir2 = {x:0,y:-1};
+        if(!running) start();
+      }
+      if((e.key === 's' || e.key === 'S') && dir2.y!==-1) {
+        dir2 = {x:0,y:1};
+        if(!running) start();
+      }
+      if((e.key === 'a' || e.key === 'A') && dir2.x!==1) {
+        dir2 = {x:-1,y:0};
+        if(!running) start();
+      }
+      if((e.key === 'd' || e.key === 'D') && dir2.x!==-1) {
+        dir2 = {x:1,y:0};
+        if(!running) start();
+      }
+    } else {
+      // Single player: WASD also controls snake
+      if((e.key === 'w' || e.key === 'W') && dir.y!==1) {
+        dir = {x:0,y:-1};
+        if(!running) start();
+      }
+      if((e.key === 's' || e.key === 'S') && dir.y!==-1) {
+        dir = {x:0,y:1};
+        if(!running) start();
+      }
+      if((e.key === 'a' || e.key === 'A') && dir.x!==1) {
+        dir = {x:-1,y:0};
+        if(!running) start();
+      }
+      if((e.key === 'd' || e.key === 'D') && dir.x!==-1) {
+        dir = {x:1,y:0};
+        if(!running) start();
+      }
     }
     
     // Any key to restart after game over
