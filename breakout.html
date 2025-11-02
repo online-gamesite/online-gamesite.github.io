@@ -3,18 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Whack-a-Mole — Game Site</title>
+    <title>Breakout — Game Site</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css" />
-    <meta name="description" content="Whack-a-Mole game with 30-second rounds. Click the mole as fast as you can and beat your high score!" />
+    <meta name="description" content="Classic Breakout brick breaker game. Use arrow keys, mouse, or touch to control the paddle!" />
   </head>
   <body>
     <header class="site-header shadow">
       <div class="container header-inner">
-        <a class="brand" href="index.html"><img src="assets/favicon.svg" class="logo" alt="logo"/><span class="brand-text">Game Site</span></a>
+        <a class="brand" href="index.html">
+          <img src="assets/favicon.svg" alt="logo" class="logo" />
+          <span class="brand-text">Game Site</span>
+        </a>
         <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
         <nav class="site-nav" id="site-nav">
           <a href="index.html">Home</a>
@@ -22,27 +25,24 @@
           <a href="memory.html">Memory</a>
           <a href="snake.html">Snake</a>
           <a href="simon.html">Simon</a>
-          <a href="breakout.html">Breakout</a>
+          <a href="whack.html">Whack</a>
         </nav>
       </div>
     </header>
 
     <main class="container">
       <section class="game-wrap center">
-        <h1>Whack-a-Mole</h1>
-        <p class="muted">Click the mole when it appears. 30-second rounds.</p>
-        <div id="whack-grid" class="whack-grid">
-        </div>
-        <div class="flex-center mt-1">
-          <button id="whack-start" class="btn">Start</button>
-          <div class="muted">Time: <strong id="whack-time">30</strong>s</div>
-          <div class="muted">Score: <strong id="whack-score">0</strong></div>
+        <h1>Breakout</h1>
+        <p style="text-align:center;color:#94a3b8;margin-bottom:1rem;">Use arrow keys, mouse, or touch to move the paddle. Break all bricks!</p>
+        <canvas id="breakout" class="snake-canvas" width="480" height="400"></canvas>
+        <div class="controls">
+          <div class="status" id="breakout-score" style="margin:0 auto;">Score: 0 | Lives: 3</div>
         </div>
       </section>
     </main>
 
     <footer class="site-footer"><div class="container"><small>&copy; <span id="year"></span> Game Site</small></div></footer>
     <script src="script.js" defer></script>
-    <script src="whack.js" defer></script>
+    <script src="breakout.js" defer></script>
   </body>
 </html>
