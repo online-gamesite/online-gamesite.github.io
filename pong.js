@@ -2,18 +2,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const canvas = document.getElementById('pong');
   const ctx = canvas.getContext('2d');
   const statusEl = document.getElementById('pong-score');
+  const singleBtn = document.getElementById('singleBtn');
+  const multiBtn = document.getElementById('multiBtn');
+  const modeText = document.getElementById('modeText');
 
   // Game objects
   const paddleW = 12;
   const paddleH = 80;
   const ballSize = 8;
   
+  let mode = 'single'; // 'single' or 'multi'
   let player = {x: 20, y: canvas.height/2 - paddleH/2, w: paddleW, h: paddleH, speed: 6, dy: 0};
-  let ai = {x: canvas.width - 20 - paddleW, y: canvas.height/2 - paddleH/2, w: paddleW, h: paddleH, speed: 4};
+  let opponent = {x: canvas.width - 20 - paddleW, y: canvas.height/2 - paddleH/2, w: paddleW, h: paddleH, speed: 4, dy: 0};
   let ball = {x: canvas.width/2, y: canvas.height/2, dx: 4, dy: 3, size: ballSize};
   
   let playerScore = 0;
-  let aiScore = 0;
+  let opponentScore = 0;
   let running = false;
   let gameOver = false;
   let winner = '';
@@ -24,12 +28,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     ball.dx = (Math.random() > 0.5 ? 1 : -1) * 4;
     ball.dy = (Math.random() - 0.5) * 6;
     player.y = canvas.height/2 - paddleH/2;
-    ai.y = canvas.height/2 - paddleH/2;
+    opponent.y = canvas.height/2 - paddleH/2;
   }
 
   function resetGame(){
     playerScore = 0;
-    aiScore = 0;
+    opponentScore = 0;
     gameOver = false;
     winner = '';
     reset();
@@ -37,7 +41,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function updateScore(){
-    statusEl.textContent = `You: ${playerScore} | AI: ${aiScore}`;
+    const label1 = mode === 'single' ? 'You' : 'Player 1';
+    const label2 = mode === 'single' ? 'AI' : 'Player 2';
+    statusEl.textContent = `${label1}: ${playerScore} | ${label2}: ${opponentScore}`;
   }
 
   function draw(){
@@ -59,9 +65,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     ctx.fillStyle = '#06b6d4';
     ctx.fillRect(player.x, player.y, player.w, player.h);
 
-    // AI paddle (right)
+    // Opponent paddle (right)
     ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(ai.x, ai.y, ai.w, ai.h);
+    ctx.fillRect(opponent.x, opponent.y, opponent.w, opponent.h);
 
     // Ball
     ctx.fillStyle = '#fff';
@@ -82,7 +88,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.font = 'bold 32px Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(winner === 'player' ? 'You Win!' : 'AI Wins!', canvas.width/2, canvas.height/2 - 20);
+      const winText = mode === 'single' 
+        ? (winner === 'player' ? 'You Win!' : 'AI Wins!')
+        : (winner === 'player' ? 'Player 1 Wins!' : 'Player 2 Wins!');
+      ctx.fillText(winText, canvas.width/2, canvas.height/2 - 20);
       ctx.fillStyle = '#fff';
       ctx.font = '16px Arial, sans-serif';
       ctx.fillText('Press SPACE or tap to play again', canvas.width/2, canvas.height/2 + 20);
@@ -112,23 +121,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ball.dy = relativeHit * 5;
     }
 
-    // Ball collision with AI paddle
-    if(ball.x + ball.size/2 >= ai.x &&
-       ball.x - ball.size/2 <= ai.x + ai.w &&
-       ball.y >= ai.y &&
-       ball.y <= ai.y + ai.h){
+    // Ball collision with opponent paddle
+    if(ball.x + ball.size/2 >= opponent.x &&
+       ball.x - ball.size/2 <= opponent.x + opponent.w &&
+       ball.y >= opponent.y &&
+       ball.y <= opponent.y + opponent.h){
       ball.dx = -Math.abs(ball.dx);
-      let relativeHit = (ball.y - (ai.y + ai.h/2)) / (ai.h/2);
+      let relativeHit = (ball.y - (opponent.y + opponent.h/2)) / (opponent.h/2);
       ball.dy = relativeHit * 5;
     }
 
     // Score points
     if(ball.x < 0){
-      aiScore++;
+      opponentScore++;
       updateScore();
-      if(aiScore >= 5){
+      if(opponentScore >= 5){
         gameOver = true;
-        winner = 'ai';
+        winner = 'opponent';
         running = false;
       } else {
         reset();
@@ -153,17 +162,24 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(player.y < 0) player.y = 0;
     if(player.y + player.h > canvas.height) player.y = canvas.height - player.h;
 
-    // AI follows ball with slight delay
-    const aiCenter = ai.y + ai.h/2;
-    if(ball.x > canvas.width/2){ // Only track when ball is on AI side
-      if(ball.y < aiCenter - 10){
-        ai.y -= ai.speed;
-      } else if(ball.y > aiCenter + 10){
-        ai.y += ai.speed;
+    // Move opponent paddle (AI or Player 2)
+    if (mode === 'single') {
+      // AI follows ball with slight delay
+      const aiCenter = opponent.y + opponent.h/2;
+      if(ball.x > canvas.width/2){ // Only track when ball is on AI side
+        if(ball.y < aiCenter - 10){
+          opponent.y -= opponent.speed;
+        } else if(ball.y > aiCenter + 10){
+          opponent.y += opponent.speed;
+        }
       }
+    } else {
+      // Player 2 controls
+      opponent.y += opponent.dy;
     }
-    if(ai.y < 0) ai.y = 0;
-    if(ai.y + ai.h > canvas.height) ai.y = canvas.height - ai.h;
+    
+    if(opponent.y < 0) opponent.y = 0;
+    if(opponent.y + opponent.h > canvas.height) opponent.y = canvas.height - opponent.h;
   }
 
   function start(){
@@ -190,11 +206,24 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   function handleKeyboard(){
     player.dy = 0;
-    if(keys['ArrowUp'] || keys['w'] || keys['W']){
+    opponent.dy = 0;
+    
+    // Player 1 controls (left paddle)
+    if(keys['w'] || keys['W']){
       player.dy = -player.speed;
     }
-    if(keys['ArrowDown'] || keys['s'] || keys['S']){
+    if(keys['s'] || keys['S']){
       player.dy = player.speed;
+    }
+    
+    // Player 2 controls (right paddle) - only in multiplayer mode
+    if(mode === 'multi'){
+      if(keys['ArrowUp']){
+        opponent.dy = -opponent.speed;
+      }
+      if(keys['ArrowDown']){
+        opponent.dy = opponent.speed;
+      }
     }
   }
 
@@ -233,7 +262,29 @@ document.addEventListener('DOMContentLoaded', ()=>{
     requestAnimationFrame(gameLoop);
   }
 
-  resetGame();
+  function setMode(newMode) {
+    mode = newMode;
+    resetGame();
+    running = false;
+    
+    if (mode === 'single') {
+      singleBtn.classList.add('active');
+      multiBtn.classList.remove('active');
+      modeText.textContent = 'Single Player: W/S to move. Play against AI!';
+      opponent.speed = 4; // AI speed
+    } else {
+      multiBtn.classList.add('active');
+      singleBtn.classList.remove('active');
+      modeText.textContent = 'Multiplayer: Player 1 (W/S) vs Player 2 (Arrow Keys)';
+      opponent.speed = 6; // Player 2 speed
+    }
+  }
+
+  singleBtn.addEventListener('click', () => setMode('single'));
+  multiBtn.addEventListener('click', () => setMode('multi'));
+
+  // Start in single player mode
+  setMode('single');
   draw();
   gameLoop();
 });
