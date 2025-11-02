@@ -1,55 +1,70 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris - Game Collection</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <nav>
-        <h1>🎮 Game Collection</h1>
-        <div class="nav-links">
-            <a href="index.html">Home</a>
-            <a href="tictactoe.html">Tic Tac Toe</a>
-            <a href="memory.html">Memory</a>
-            <a href="snake.html">Snake</a>
-            <a href="simon.html">Simon</a>
-            <a href="whack.html">Whack-a-Mole</a>
-            <a href="breakout.html">Breakout</a>
-            <a href="pong.html">Pong</a>
-            <a href="2048.html">2048</a>
-            <a href="minesweeper.html">Minesweeper</a>
-            <a href="flappy.html">Flappy Bird</a>
-            <a href="invaders.html">Space Invaders</a>
-            <a href="tetris.html" class="active">Tetris</a>
-        </div>
-    </nav>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Tetris — Game Site</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="description" content="Play classic Tetris online. Stack falling blocks and clear lines!" />
+  </head>
+  <body>
+    <header class="site-header shadow">
+      <div class="container header-inner">
+        <a class="brand" href="index.html">
+          <img src="assets/favicon.svg" alt="logo" class="logo" />
+          <span class="brand-text">Game Site</span>
+        </a>
+        <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="site-nav" id="site-nav">
+          <a href="index.html">Home</a>
+          <a href="tictactoe.html">Tic Tac Toe</a>
+          <a href="memory.html">Memory</a>
+          <a href="snake.html">Snake</a>
+          <a href="simon.html">Simon</a>
+          <a href="whack.html">Whack</a>
+          <a href="breakout.html">Breakout</a>
+          <a href="pong.html">Pong</a>
+          <a href="2048.html">2048</a>
+          <a href="minesweeper.html">Minesweeper</a>
+          <a href="flappy.html">Flappy Bird</a>
+          <a href="invaders.html">Space Invaders</a>
+          <a href="tetris.html">Tetris</a>
+        </nav>
+      </div>
+    </header>
 
-    <main>
-        <h2>Tetris</h2>
-        <div class="game-info">
-            <p>Score: <span id="score">0</span></p>
-            <p>Lines: <span id="lines">0</span></p>
-            <p>Level: <span id="level">1</span></p>
+    <main class="container">
+      <section class="game-wrap center">
+        <h1>Tetris</h1>
+        <p style="text-align:center;color:#94a3b8;margin-bottom:1rem;">Arrow keys to move/rotate, SPACE to drop, P to pause!</p>
+        
+        <div style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
+          <div class="muted">Score: <strong id="score">0</strong></div>
+          <div class="muted">Lines: <strong id="lines">0</strong></div>
+          <div class="muted">Level: <strong id="level">1</strong></div>
         </div>
         
-        <div style="display: flex; gap: 20px; justify-content: center; align-items: flex-start; flex-wrap: wrap;">
-            <canvas id="tetrisCanvas" width="300" height="600"></canvas>
-            <div>
-                <h3>Next Piece</h3>
-                <canvas id="nextCanvas" width="120" height="120"></canvas>
-                <div style="margin-top: 20px;">
-                    <h3>Controls</h3>
-                    <p>⬅️ ➡️ Move</p>
-                    <p>⬆️ Rotate</p>
-                    <p>⬇️ Soft Drop</p>
-                    <p>SPACE Hard Drop</p>
-                    <p>P Pause</p>
+        <div style="display: flex; gap: 2rem; justify-content: center; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <canvas id="tetrisCanvas" width="300" height="600" style="border: 2px solid #475569; border-radius: 8px;"></canvas>
+            <div style="text-align:center;">
+                <h3 style="margin-bottom:0.5rem;">Next Piece</h3>
+                <canvas id="nextCanvas" width="120" height="120" style="border: 2px solid #475569; border-radius: 8px; margin-bottom:1.5rem;"></canvas>
+                <div style="text-align:left; background:#1e293b; padding:1rem; border-radius:8px; margin-bottom:1rem;">
+                    <h3 style="margin-bottom:0.5rem;">Controls</h3>
+                    <p style="margin:0.25rem 0;">⬅️ ➡️ Move</p>
+                    <p style="margin:0.25rem 0;">⬆️ Rotate</p>
+                    <p style="margin:0.25rem 0;">⬇️ Soft Drop</p>
+                    <p style="margin:0.25rem 0;">SPACE Hard Drop</p>
+                    <p style="margin:0.25rem 0;">P Pause</p>
                 </div>
-                <button id="restartBtn" style="margin-top: 20px;">New Game</button>
+                <button id="restartBtn" class="btn">New Game</button>
             </div>
         </div>
+      </section>
     </main>
 
     <script src="script.js"></script>
