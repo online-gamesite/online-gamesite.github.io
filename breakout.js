@@ -2,9 +2,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const canvas = document.getElementById('breakout');
   const ctx = canvas.getContext('2d');
   const statusEl = document.getElementById('breakout-score');
-  const singleBtn = document.getElementById('singleBtn');
-  const multiBtn = document.getElementById('multiBtn');
-  const modeText = document.getElementById('modeText');
 
   // Game state
   let mode = 'single'; // 'single' or 'multi'
@@ -391,20 +388,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     mode = newMode;
     reset();
     running = false;
-    
-    if(mode === 'single'){
-      singleBtn.classList.add('active');
-      multiBtn.classList.remove('active');
-      modeText.textContent = 'Single Player: Break all bricks across 10 levels!';
-    } else {
-      multiBtn.classList.add('active');
-      singleBtn.classList.remove('active');
-      modeText.textContent = 'Multiplayer: Players take turns. Highest score wins!';
-    }
   }
-
-  singleBtn.addEventListener('click', () => setMode('single'));
-  multiBtn.addEventListener('click', () => setMode('multi'));
 
   setMode('single');
   mainLoop();

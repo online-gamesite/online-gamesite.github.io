@@ -3,9 +3,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const start = document.getElementById('simon-start');
   const levelEl = document.getElementById('simon-level');
   const resultEl = document.getElementById('simon-result');
-  const singleBtn = document.getElementById('singleBtn');
-  const multiBtn = document.getElementById('multiBtn');
-  const modeText = document.getElementById('modeText');
   const playerScores = document.getElementById('player-scores');
   const p1ScoreEl = document.getElementById('p1-score');
   const p2ScoreEl = document.getElementById('p2-score');
@@ -17,37 +14,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let currentPlayer = 1;
   let p1Score = 0;
   let p2Score = 0;
-  
-  // Mode selection
-  singleBtn.addEventListener('click', () => {
-    isMultiplayer = false;
-    singleBtn.style.background = '#06b6d4';
-    multiBtn.style.background = '';
-    modeText.textContent = 'Single Player Mode';
-    playerScores.style.display = 'none';
-    sequence = [];
-    levelEl.textContent = 0;
-    resultEl.textContent = '';
-  });
-  
-  multiBtn.addEventListener('click', () => {
-    isMultiplayer = true;
-    multiBtn.style.background = '#06b6d4';
-    singleBtn.style.background = '';
-    modeText.textContent = 'Player 1\'s turn';
-    playerScores.style.display = 'block';
-    p1Score = 0;
-    p2Score = 0;
-    currentPlayer = 1;
-    p1ScoreEl.textContent = '0';
-    p2ScoreEl.textContent = '0';
-    sequence = [];
-    levelEl.textContent = 0;
-    resultEl.textContent = '';
-  });
-  
-  // Start with single player
-  singleBtn.click();
 
   function flashPad(i, ms=500){
     const el = pads[i];

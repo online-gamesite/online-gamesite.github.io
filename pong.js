@@ -2,9 +2,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const canvas = document.getElementById('pong');
   const ctx = canvas.getContext('2d');
   const statusEl = document.getElementById('pong-score');
-  const singleBtn = document.getElementById('singleBtn');
-  const multiBtn = document.getElementById('multiBtn');
-  const modeText = document.getElementById('modeText');
 
   // Game objects
   const paddleW = 12;
@@ -268,20 +265,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
     running = false;
     
     if (mode === 'single') {
-      singleBtn.classList.add('active');
-      multiBtn.classList.remove('active');
-      modeText.textContent = 'Single Player: W/S to move. Play against AI!';
       opponent.speed = 4; // AI speed
     } else {
-      multiBtn.classList.add('active');
-      singleBtn.classList.remove('active');
-      modeText.textContent = 'Multiplayer: Player 1 (W/S) vs Player 2 (Arrow Keys)';
       opponent.speed = 6; // Player 2 speed
     }
   }
-
-  singleBtn.addEventListener('click', () => setMode('single'));
-  multiBtn.addEventListener('click', () => setMode('multi'));
 
   // Start in single player mode
   setMode('single');

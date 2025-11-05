@@ -2,9 +2,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const gridEl = document.getElementById('game-2048');
   const statusEl = document.getElementById('status-2048');
   const restartBtn = document.getElementById('restart-2048');
-  const singleBtn = document.getElementById('mode-single');
-  const multiBtn = document.getElementById('mode-multi');
-  const modeText = document.getElementById('game-mode-text');
 
   let grid = [];
   let score = 0;
@@ -253,19 +250,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   }, {passive: true});
 
-  // Mode switching
-  singleBtn.addEventListener('click', ()=>{
-    mode = 'single';
-    modeText.textContent = 'Single Player: Use arrow keys or swipe to combine tiles!';
-    init();
-  });
-
-  multiBtn.addEventListener('click', ()=>{
-    mode = 'multi';
-    modeText.textContent = 'Multiplayer: Players take turns. Highest score when 2048 is reached or no moves left!';
-    init();
-  });
-
+  // Mode: default to single
   restartBtn.addEventListener('click', init);
 
   init();

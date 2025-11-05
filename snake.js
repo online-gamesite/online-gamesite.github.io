@@ -3,9 +3,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const canvas = document.getElementById('snake');
   const ctx = canvas.getContext('2d');
   const scoreEl = document.getElementById('snake-score');
-  const singleBtn = document.getElementById('singleBtn');
-  const multiBtn = document.getElementById('multiBtn');
-  const modeText = document.getElementById('modeText');
   console.log('Canvas:', canvas, 'Context:', ctx, 'Score element:', scoreEl);
   const size = 20;
   const cols = canvas.width / size;
@@ -13,26 +10,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let snake, dir, food, running, loopId, gameStarted;
   let isMultiplayer = false;
   let snake2, dir2, p1Score, p2Score;
-  
-  // Mode selection
-  singleBtn.addEventListener('click', () => {
-    isMultiplayer = false;
-    singleBtn.style.background = '#06b6d4';
-    multiBtn.style.background = '';
-    modeText.textContent = 'Single Player Mode';
-    reset();
-  });
-  
-  multiBtn.addEventListener('click', () => {
-    isMultiplayer = true;
-    multiBtn.style.background = '#06b6d4';
-    singleBtn.style.background = '';
-    modeText.textContent = '2 Player Mode - P1: Arrows, P2: WASD';
-    reset();
-  });
-  
-  // Start with single player
-  singleBtn.click();
 
   function reset(){
     console.log('Reset called');

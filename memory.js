@@ -215,7 +215,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
         // In multiplayer, switch turns
         if(isMultiplayer) {
           currentPlayer = currentPlayer === 1 ? 2 : 1;
-          modeText.textContent = `Player ${currentPlayer}'s turn`;
         }
         
         locked = false;
@@ -246,7 +245,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       currentPlayer = 1;
       p1ScoreEl.textContent = '0';
       p2ScoreEl.textContent = '0';
-      modeText.textContent = 'Player 1\'s turn';
     }
     build();
   });

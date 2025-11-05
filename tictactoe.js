@@ -5,9 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreX = document.getElementById('score-x');
   const scoreO = document.getElementById('score-o');
   const scoreDraws = document.getElementById('score-draws');
-  const singleBtn = document.getElementById('singleBtn');
-  const multiBtn = document.getElementById('multiBtn');
-  const modeText = document.getElementById('modeText');
   
   let board = Array(9).fill(null);
   let turn = 'X';
@@ -179,22 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
     scoreX.textContent = '0';
     scoreO.textContent = '0';
     scoreDraws.textContent = '0';
-    
-    if (mode === 'single') {
-      singleBtn.classList.add('active');
-      multiBtn.classList.remove('active');
-      modeText.textContent = 'Single Player: You are X, AI is O';
-    } else {
-      multiBtn.classList.add('active');
-      singleBtn.classList.remove('active');
-      modeText.textContent = 'Multiplayer: Two players share the same keyboard';
-    }
   }
 
   cells.forEach(c=>c.addEventListener('click', cellClick));
   reset.addEventListener('click', resetBoard);
-  singleBtn.addEventListener('click', () => setMode('single'));
-  multiBtn.addEventListener('click', () => setMode('multi'));
   
   // Start in single player mode
   setMode('single');

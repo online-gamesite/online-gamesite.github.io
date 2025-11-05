@@ -6,9 +6,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const scoreEl2 = document.getElementById('whack-score2');
   const score1Container = document.getElementById('score1-container');
   const score2Container = document.getElementById('score2-container');
-  const singleBtn = document.getElementById('singleBtn');
-  const multiBtn = document.getElementById('multiBtn');
-  const modeText = document.getElementById('modeText');
   
   let holes = [];
   let molePos = -1;
@@ -111,15 +108,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
     
     if(mode === 'single'){
-      singleBtn.classList.add('active');
-      multiBtn.classList.remove('active');
-      modeText.textContent = 'Single Player: Click the moles as fast as you can!';
       score1Container.innerHTML = 'Score: <strong id="whack-score">0</strong>';
       score2Container.style.display = 'none';
     } else {
-      multiBtn.classList.add('active');
-      singleBtn.classList.remove('active');
-      modeText.textContent = 'Multiplayer: 🐹 = Player 1, 🐰 = Player 2. Compete for highest score!';
       score1Container.innerHTML = 'P1: <strong id="whack-score">0</strong>';
       score2Container.style.display = 'block';
     }
@@ -133,9 +124,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(timerId) return; 
     startRound();
   });
-
-  singleBtn.addEventListener('click', () => setMode('single'));
-  multiBtn.addEventListener('click', () => setMode('multi'));
 
   setup();
   setMode('single');
