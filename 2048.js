@@ -217,7 +217,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   // Keyboard controls
   let lastMoveTime = 0;
-  const MOVE_COOLDOWN = 120; // ms
+  const MOVE_COOLDOWN = 220; // ms
+  let moveLocked = false; // prevent input while move resolves/animates
   document.addEventListener('keydown', (e)=>{
     // ignore auto-repeats to prevent spamming
     if (e.repeat) return;
@@ -235,6 +236,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(e.key === 'w' || e.key === 'W') { e.preventDefault(); handle('up'); }
     if(e.key === 's' || e.key === 'S') { e.preventDefault(); handle('down'); }
   });
+
+  // guard move to prevent spamming from touch or other inputs
+  const originalMove = move;
+  move = function(direction){
+    if(moveLocked) return;
+    moveLocked = true;
+    try { originalMove(direction); } finally {
+      // keep locked for a short animation/cooldown window
+      setTimeout(()=>{ moveLocked = false; }, MOVE_COOLDOWN);
+    }
+  };
 
   // Touch controls
   let touchStartX = 0;
