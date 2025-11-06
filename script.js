@@ -54,4 +54,74 @@ document.addEventListener('DOMContentLoaded', function () {
       form.reset();
     });
   }
+
+  // global reset-scores handler: when a page's Reset button is clicked
+  // also clear common score/status elements across the games so users
+  // get a full reset (not only the board/game state).
+  function resetCommonScores() {
+    const setText = (id, txt) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = txt;
+    };
+
+    // Tic Tac Toe
+    setText('score-x', '0');
+    setText('score-o', '0');
+    setText('score-draws', '0');
+
+    // Pong
+    setText('pong-score', 'You: 0 | AI: 0');
+
+    // Snake
+  // do not reset snake-score here; snake maintains high score in localStorage
+
+    // Invaders
+    setText('invaders-status', 'Score: 0 | Lives: 3 | Level: 1');
+
+    // Breakout
+    setText('breakout-score', 'Level: 1 | Score: 0 | Lives: 3');
+
+    // Flappy
+    setText('flappy-status', 'Score: 0 | High Score: 0');
+
+    // Simon
+    setText('simon-level', '0');
+    setText('p1-score', '0');
+    setText('p2-score', '0');
+
+    // Whack-a-Mole
+    setText('whack-score', '0');
+    setText('whack-score2', '0');
+    setText('whack-time', '30');
+
+    // 2048
+    setText('status-2048', 'Score: 0');
+
+  // Memory Match - don't reset level here; memory level is persisted per-game
+  setText('mem-moves', '0');
+
+    // Minesweeper
+    setText('mine-count', '10');
+    setText('timer', '0');
+
+    // Tetris
+    setText('score', '0');
+    setText('lines', '0');
+    setText('level', '1');
+  }
+
+  document.addEventListener('click', function (e) {
+    const target = e.target;
+    if (!target) return;
+    // Trigger when a Reset button (common id) or any element marked with
+    // the `reset-scores` class is clicked.
+    if (target.id === 'reset' || target.classList?.contains('reset-scores')) {
+      try {
+        resetCommonScores();
+      } catch (err) {
+        // swallow — non-critical
+        console.error('resetCommonScores failed', err);
+      }
+    }
+  });
 });

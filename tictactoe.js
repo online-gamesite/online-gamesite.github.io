@@ -179,7 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   cells.forEach(c=>c.addEventListener('click', cellClick));
-  reset.addEventListener('click', resetBoard);
+  reset.addEventListener('click', () => {
+    // Also clear cumulative scores when user clicks Reset
+    scores = {X: 0, O: 0, draws: 0};
+    scoreX.textContent = '0';
+    scoreO.textContent = '0';
+    scoreDraws.textContent = '0';
+    resetBoard();
+  });
   
   // Start in single player mode
   setMode('single');

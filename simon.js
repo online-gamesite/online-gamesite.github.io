@@ -86,4 +86,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
     sequence = [];
     nextRound();
   });
+
+  // Reset button (if present) — clear state and scores
+  const resetBtn = document.getElementById('reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', ()=>{
+      sequence = [];
+      input = [];
+      playing = false;
+      levelEl.textContent = 0;
+      resultEl.textContent = '';
+      currentPlayer = 1;
+      p1Score = 0;
+      p2Score = 0;
+      p1ScoreEl.textContent = '0';
+      p2ScoreEl.textContent = '0';
+      playerScores.style.display = 'none';
+    });
+  }
 });

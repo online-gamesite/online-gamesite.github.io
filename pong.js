@@ -276,3 +276,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   draw();
   gameLoop();
 });
+
+// Reset button (if present)
+document.addEventListener('DOMContentLoaded', () => {
+  const resetBtn = document.getElementById('reset');
+  if (resetBtn) resetBtn.addEventListener('click', () => resetGame());
+});

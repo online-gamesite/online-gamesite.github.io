@@ -128,3 +128,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
   setup();
   setMode('single');
 });
+
+// Reset button for whack page
+document.addEventListener('DOMContentLoaded', ()=>{
+  const resetBtn = document.getElementById('reset');
+  if(!resetBtn) return;
+  resetBtn.addEventListener('click', ()=>{
+    if(timerId){ clearInterval(timerId); timerId = null; }
+    holes.forEach(h=>h.textContent='');
+    score1 = 0; score2 = 0;
+    scoreEl.textContent = '0';
+    if(scoreEl2) scoreEl2.textContent = '0';
+    countdown = 30; timeEl.textContent = countdown;
+  });
+});

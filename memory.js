@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   
   const allEmojis = ['🍎','🍌','🍇','🍓','🍍','🥝','🍑','🍊','🍒','🥭','🍐','🥑','🌶️','🥕','🌽','🥒'];
   
-  let level = 1;
+  // Persisted level: remember across sessions and resets
+  const stored = parseInt(localStorage.getItem('memory-level'));
+  let level = Number.isFinite(stored) && stored >= 1 ? stored : 1;
   let moves = 0;
   let deck = [];
   let flipped = [];
@@ -56,6 +58,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     locked = false;
     grid.classList.remove('locked');
     levelEl.textContent = level;
+    // persist current level
+    try { localStorage.setItem('memory-level', String(level)); } catch (e) { /* ignore */ }
     status.textContent = '';
   }
 
@@ -157,7 +161,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
       grid.classList.remove('locked');
       console.log('Unlocked after match');
       
-      if(matched.size === deck.length){
+  if(matched.size === deck.length){
         if(isMultiplayer) {
           const winner = p1Score > p2Score ? 'Player 1' : p1Score < p2Score ? 'Player 2' : 'Tie';
           status.textContent = `🎉 Game Over! ${winner} wins! P1: ${p1Score} P2: ${p2Score}`;
@@ -166,6 +170,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
             status.textContent = `Level ${level} complete! Next level in 2s...`;
             setTimeout(()=>{
               level++;
+              try { localStorage.setItem('memory-level', String(level)); } catch (e) {}
               build();
             }, 2000);
           } else {
@@ -204,9 +209,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   restart.addEventListener('click', ()=>{
-    if(!isMultiplayer) {
-      level = 1;
-    }
+    // Do NOT reset the level — level is persisted across sessions and resets
     moves = 0;
     movesEl.textContent = moves;
     if(isMultiplayer) {

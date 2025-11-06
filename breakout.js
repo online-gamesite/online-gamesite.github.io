@@ -393,3 +393,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   setMode('single');
   mainLoop();
 });
+
+// Global reset button (if present in HTML)
+document.addEventListener('DOMContentLoaded', () => {
+  const resetBtn = document.getElementById('reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      // call game reset
+      reset();
+      // ensure UI shows level/score reset
+      updateStatus();
+    });
+  }
+});

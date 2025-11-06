@@ -344,6 +344,15 @@ document.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(gameLoop);
   }
 
+  // Reset button (if present)
+  const resetBtn = document.getElementById('reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      resetGame();
+      updateStatus();
+    });
+  }
+
   resetGame();
   draw();
   gameLoop();

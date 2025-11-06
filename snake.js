@@ -10,6 +10,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let snake, dir, food, running, loopId, gameStarted;
   let isMultiplayer = false;
   let snake2, dir2, p1Score, p2Score;
+  // High score persistence for single-player
+  const storedHS = parseInt(localStorage.getItem('snake-highscore'));
+  let highScore = Number.isFinite(storedHS) ? storedHS : 0;
 
   function reset(){
     console.log('Reset called');
@@ -81,6 +84,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       } else {
         stop();
+        // update high score for single player
+        try {
+          const current = Math.max(0, snake.length - 1);
+          if (checkAndSetHighScore(current)) updateScore();
+        } catch (e) {}
         ctx.fillStyle = '#ef4444';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -108,6 +116,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       } else {
         stop();
+        // update high score for single player
+        try {
+          const current = Math.max(0, snake.length - 1);
+          if (checkAndSetHighScore(current)) updateScore();
+        } catch (e) {}
         ctx.fillStyle = '#ef4444';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -179,8 +192,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(isMultiplayer) {
       scoreEl.textContent = `P1 (Green): ${p1Score} | P2 (Blue): ${p2Score}`;
     } else {
-      scoreEl.textContent = `Score: ${snake.length-1}`;
+      scoreEl.textContent = `Score: ${snake.length-1} | High: ${highScore}`;
     }
+  }
+
+  function checkAndSetHighScore(current) {
+    if (current > highScore) {
+      highScore = current;
+      try { localStorage.setItem('snake-highscore', String(highScore)); } catch (e) {}
+      return true;
+    }
+    return false;
   }
 
   function start(){
@@ -319,4 +341,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   reset();
+  // wire reset button (ensure handler is in same scope)
+  const resetBtn = document.getElementById('reset');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      reset();
+      updateScore();
+    });
+  }
 });
+
