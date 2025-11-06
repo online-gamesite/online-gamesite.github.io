@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     cells.forEach((c,i)=>{c.textContent = board[i] || ''});
   }
 
+  // difficulty: easy, medium, hard, impossible
+  const diffEl = document.getElementById('ttt-difficulty');
+  let difficulty = diffEl?.value || 'impossible';
+  if (diffEl) {
+    diffEl.addEventListener('change', (e) => {
+      difficulty = e.target.value;
+    });
+  }
+
   function findWinningLine(){
     for(const w of wins){
       const [a,b,c] = w;
@@ -103,9 +112,47 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add slight delay for better UX
     setTimeout(() => {
-      const bestMove = minimax([...board], 'O');
-      if (bestMove && bestMove.index !== undefined) {
-        board[bestMove.index] = 'O';
+      // choose move based on difficulty
+      const chooseAIMove = () => {
+        const avail = board.map((v,i)=>v===null?i:null).filter(v=>v!==null);
+        if (avail.length === 0) return null;
+        if (difficulty === 'easy') {
+          return avail[Math.floor(Math.random()*avail.length)];
+        }
+        // medium: try win, block, otherwise 50% random else minimax
+        if (difficulty === 'medium') {
+          // win
+          for (const pos of avail) {
+            const tb = [...board]; tb[pos] = 'O';
+            if (checkWinnerOnBoard(tb) === 'O') return pos;
+          }
+          // block
+          for (const pos of avail) {
+            const tb = [...board]; tb[pos] = 'X';
+            if (checkWinnerOnBoard(tb) === 'X') return pos;
+          }
+          if (Math.random() < 0.5) return avail[Math.floor(Math.random()*avail.length)];
+          const m = minimax([...board], 'O'); return m && m.index !== undefined ? m.index : avail[0];
+        }
+        // hard: win/block, then minimax
+        if (difficulty === 'hard') {
+          for (const pos of avail) {
+            const tb = [...board]; tb[pos] = 'O';
+            if (checkWinnerOnBoard(tb) === 'O') return pos;
+          }
+          for (const pos of avail) {
+            const tb = [...board]; tb[pos] = 'X';
+            if (checkWinnerOnBoard(tb) === 'X') return pos;
+          }
+          const m = minimax([...board], 'O'); return m && m.index !== undefined ? m.index : avail[0];
+        }
+        // impossible
+        const m = minimax([...board], 'O'); return m && m.index !== undefined ? m.index : avail[0];
+      };
+
+      const bestIdx = chooseAIMove();
+      if (bestIdx !== null && bestIdx !== undefined) {
+        board[bestIdx] = 'O';
         turn = 'X';
         render();
         checkGameEnd();

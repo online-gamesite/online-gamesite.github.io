@@ -42,6 +42,21 @@ document.addEventListener('DOMContentLoaded', ()=>{
     console.log('Draw called, gameStarted:', gameStarted);
     ctx.fillStyle = '#000';
     ctx.fillRect(0,0,canvas.width,canvas.height);
+    // subtle themed grid lines for smoother visual feel
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for(let gx = 0; gx <= cols; gx++){
+      ctx.beginPath();
+      ctx.moveTo(gx*size, 0);
+      ctx.lineTo(gx*size, canvas.height);
+      ctx.stroke();
+    }
+    for(let gy = 0; gy <= rows; gy++){
+      ctx.beginPath();
+      ctx.moveTo(0, gy*size);
+      ctx.lineTo(canvas.width, gy*size);
+      ctx.stroke();
+    }
     // food
     ctx.fillStyle = '#e11d48';
     ctx.fillRect(food.x*size, food.y*size, size, size);
@@ -209,7 +224,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(running) return;
     running = true;
     gameStarted = true;
-    loopId = setInterval(step, 120);
+    // faster tick for smoother movement
+    loopId = setInterval(step, 90);
   }
   
   function stop(){
@@ -218,6 +234,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   document.addEventListener('keydown', (e)=>{
+    // If game is over, any key should restart first (prevent immediate resume glitch)
+    if(!running && gameStarted){
+      reset();
+      return;
+    }
     // Player 1: Arrow keys
     if(e.key === 'ArrowUp' && dir.y!==1) {
       dir = {x:0,y:-1};
