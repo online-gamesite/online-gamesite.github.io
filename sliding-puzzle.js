@@ -102,14 +102,9 @@ function checkWin() {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
-    // Draw grid background with subtle pattern
+    // Draw grid background - match site background
     ctx.fillStyle = '#0a0e1a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw border around puzzle
-    ctx.strokeStyle = '#06b6d4';
-    ctx.lineWidth = 4;
-    ctx.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
     
     // Draw tiles
     for (let row = 0; row < GRID_SIZE; row++) {
