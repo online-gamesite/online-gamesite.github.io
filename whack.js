@@ -2,6 +2,7 @@
 document.addEventListener('DOMContentLoaded', ()=>{
   const grid = document.getElementById('whack-grid');
   const start = document.getElementById('whack-start');
+  const resetBtn = document.getElementById('reset');
   const timeEl = document.getElementById('whack-time');
   const score1Container = document.getElementById('score1-container');
   const score2Container = document.getElementById('score2-container');
@@ -149,13 +150,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
   // Reset button
   if(resetBtn) {
     resetBtn.addEventListener('click', ()=>{
+      if(timerId) {
+        clearInterval(timerId);
+        timerId = null;
+        holes.forEach(h=>h.textContent='');
+      }
+      
+      score1 = 0;
+      score2 = 0;
+      countdown = 30;
+      
       const scoreEl = document.getElementById('whack-score');
       const scoreEl2 = document.getElementById('whack-score2');
       const timeEl = document.getElementById('whack-time');
       
-      scoreEl.textContent = '0';
+      if(scoreEl) scoreEl.textContent = '0';
       if(scoreEl2) scoreEl2.textContent = '0';
-      timeEl.textContent = '30';
+      if(timeEl) timeEl.textContent = '30';
       if(statusEl){
         statusEl.textContent = 'Click Start to begin!';
         statusEl.style.color = '#9ca3af';
