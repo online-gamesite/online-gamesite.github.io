@@ -1,11 +1,11 @@
+// Whack-a-Mole Game - Updated version with silent status messages
 document.addEventListener('DOMContentLoaded', ()=>{
   const grid = document.getElementById('whack-grid');
   const start = document.getElementById('whack-start');
   const timeEl = document.getElementById('whack-time');
-  const scoreEl = document.getElementById('whack-score');
-  const scoreEl2 = document.getElementById('whack-score2');
   const score1Container = document.getElementById('score1-container');
   const score2Container = document.getElementById('score2-container');
+  const statusEl = document.getElementById('whack-status');
   
   let holes = [];
   let molePos = -1;
@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let score1 = 0;
   let score2 = 0;
   let mode = 'single'; // 'single' or 'multi'
+
+  // Helper to get current score elements
+  function getScoreElements(){
+    return {
+      scoreEl: document.getElementById('whack-score'),
+      scoreEl2: document.getElementById('whack-score2')
+    };
+  }
 
   function setup(){
     grid.innerHTML=''; holes = [];
@@ -43,18 +51,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const idx = Number(e.currentTarget.dataset.idx);
     if(idx === molePos){
       const moleType = holes[molePos].textContent;
+      const {scoreEl, scoreEl2} = getScoreElements();
       
       if(mode === 'single'){
         score1++; 
-        scoreEl.textContent = score1;
+        if(scoreEl) scoreEl.textContent = score1;
       } else {
         // In multiplayer, pink mole = player 1, bunny = player 2
         if(moleType === '🐹'){
           score1++; 
-          scoreEl.textContent = score1;
+          if(scoreEl) scoreEl.textContent = score1;
         } else {
           score2++; 
-          scoreEl2.textContent = score2;
+          if(scoreEl2) scoreEl2.textContent = score2;
         }
       }
       
@@ -66,29 +75,38 @@ document.addEventListener('DOMContentLoaded', ()=>{
   function startRound(){
     score1 = 0; 
     score2 = 0;
-    countdown = 30; 
-    scoreEl.textContent = 0; 
-    scoreEl2.textContent = 0;
-    timeEl.textContent = countdown;
+    countdown = 30;
+    const {scoreEl, scoreEl2} = getScoreElements();
+    if(scoreEl) scoreEl.textContent = 0; 
+    if(scoreEl2) scoreEl2.textContent = 0;
+    if(timeEl) timeEl.textContent = countdown;
+    if(statusEl){
+      statusEl.textContent = 'Game in progress...';
+      statusEl.style.color = '#9ca3af';
+    }
     placeMole();
     
     timerId = setInterval(()=>{
       placeMole();
       countdown -= 1; 
-      timeEl.textContent = countdown;
+      if(timeEl) timeEl.textContent = countdown;
       
       if(countdown <= 0){ 
         clearInterval(timerId); 
         timerId = null; 
         holes.forEach(h=>h.textContent='');
         
-        if(mode === 'single'){
-          alert('Time\'s up! Score: ' + score1);
-        } else {
-          const result = score1 > score2 ? 'Player 1 Wins!' : 
-                        score2 > score1 ? 'Player 2 Wins!' : 
-                        'It\'s a Tie!';
-          alert(`Time's up!\n${result}\nPlayer 1: ${score1} | Player 2: ${score2}`);
+        if(statusEl){
+          if(mode === 'single'){
+            statusEl.textContent = `Game Over! Final Score: ${score1}`;
+            statusEl.style.color = '#06b6d4';
+          } else {
+            const result = score1 > score2 ? 'Player 1 Wins!' : 
+                          score2 > score1 ? 'Player 2 Wins!' : 
+                          'It\'s a Tie!';
+            statusEl.textContent = `Game Over! ${result} (P1: ${score1} | P2: ${score2})`;
+            statusEl.style.color = '#06b6d4';
+          }
         }
       }
     }, 800);
@@ -98,8 +116,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     mode = newMode;
     score1 = 0;
     score2 = 0;
-    scoreEl.textContent = 0;
-    scoreEl2.textContent = 0;
     
     if(timerId){
       clearInterval(timerId);
@@ -115,9 +131,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
       score2Container.style.display = 'block';
     }
     
-    // Re-get references after innerHTML change
-    const newScoreEl = document.getElementById('whack-score');
-    if(newScoreEl) Object.defineProperty(window, 'scoreEl', {value: newScoreEl, writable: true});
+    const {scoreEl, scoreEl2} = getScoreElements();
+    if(scoreEl) scoreEl.textContent = 0;
+    if(scoreEl2) scoreEl2.textContent = 0;
+    
+    if(statusEl){
+      statusEl.textContent = 'Click Start to begin!';
+      statusEl.style.color = '#9ca3af';
+    }
   }
 
   start.addEventListener('click', ()=>{
@@ -125,20 +146,23 @@ document.addEventListener('DOMContentLoaded', ()=>{
     startRound();
   });
 
+  // Reset button
+  if(resetBtn) {
+    resetBtn.addEventListener('click', ()=>{
+      const scoreEl = document.getElementById('whack-score');
+      const scoreEl2 = document.getElementById('whack-score2');
+      const timeEl = document.getElementById('whack-time');
+      
+      scoreEl.textContent = '0';
+      if(scoreEl2) scoreEl2.textContent = '0';
+      timeEl.textContent = '30';
+      if(statusEl){
+        statusEl.textContent = 'Click Start to begin!';
+        statusEl.style.color = '#9ca3af';
+      }
+    });
+  }
+
   setup();
   setMode('single');
-});
-
-// Reset button for whack page
-document.addEventListener('DOMContentLoaded', ()=>{
-  const resetBtn = document.getElementById('reset');
-  if(!resetBtn) return;
-  resetBtn.addEventListener('click', ()=>{
-    if(timerId){ clearInterval(timerId); timerId = null; }
-    holes.forEach(h=>h.textContent='');
-    score1 = 0; score2 = 0;
-    scoreEl.textContent = '0';
-    if(scoreEl2) scoreEl2.textContent = '0';
-    countdown = 30; timeEl.textContent = countdown;
-  });
 });

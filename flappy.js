@@ -24,11 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let gameStarted = false;
   let gameOver = false;
 
-  // Colors
-  const skyColor = '#87CEEB';
-  const birdColor = '#FFD700';
-  const pipeColor = '#228B22';
-  const groundColor = '#8B4513';
+  // Colors - matching website theme
+  const birdColor = '#06b6d4'; // cyan accent
+  const birdAccentColor = '#3b82f6'; // blue accent
+  const pipeColor = '#1e293b'; // dark slate
+  const pipeBorderColor = '#334155'; // lighter slate
 
   function createPipe() {
     const minHeight = 50;
@@ -59,21 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function draw() {
-    // Sky
-    ctx.fillStyle = skyColor;
-    ctx.fillRect(0, 0, canvas.width, canvas.height - 100);
-
-    // Ground
-    ctx.fillStyle = groundColor;
-    ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
-
-    // Bird
-    ctx.fillStyle = birdColor;
-    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
-    
-    // Bird eye
-    ctx.fillStyle = '#000';
-    ctx.fillRect(bird.x + 24, bird.y + 8, 4, 4);
+    // Clear with transparency to show game-wrap background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Pipes
     ctx.fillStyle = pipeColor;
@@ -83,12 +70,39 @@ document.addEventListener('DOMContentLoaded', () => {
       // Bottom pipe
       ctx.fillRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY - 100);
       
-      // Pipe borders
-      ctx.strokeStyle = '#1a5f1a';
-      ctx.lineWidth = 3;
+      // Pipe borders with theme color
+      ctx.strokeStyle = pipeBorderColor;
+      ctx.lineWidth = 2;
       ctx.strokeRect(pipe.x, 0, pipeWidth, pipe.topHeight);
       ctx.strokeRect(pipe.x, pipe.bottomY, pipeWidth, canvas.height - pipe.bottomY - 100);
     });
+
+    // Bird with gradient effect
+    const gradient = ctx.createLinearGradient(bird.x, bird.y, bird.x + bird.width, bird.y + bird.height);
+    gradient.addColorStop(0, birdColor);
+    gradient.addColorStop(1, birdAccentColor);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+    
+    // Bird eye
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(bird.x + 26, bird.y + 10, 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#000';
+    ctx.beginPath();
+    ctx.arc(bird.x + 27, bird.y + 10, 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Ground line indicator
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.3)'; // cyan accent with transparency
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 5]);
+    ctx.beginPath();
+    ctx.moveTo(0, canvas.height - 100);
+    ctx.lineTo(canvas.width, canvas.height - 100);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
     // Instructions or game over
     if (!gameStarted && !gameOver) {
@@ -204,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Controls
   document.addEventListener('keydown', (e) => {
-    if (e.key === ' ' || e.key === 'ArrowUp') {
+    if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown' || e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       e.preventDefault();
       flap();
     }

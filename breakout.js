@@ -87,9 +87,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function draw(){
-    // Clear
-    ctx.fillStyle = '#0f172a';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
+    // Clear with transparency to show game-wrap background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Bricks
     bricks.forEach(b=>{
@@ -112,7 +111,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     // Instructions or game over
     if(!running && !gameOver && !won){
       ctx.fillStyle = 'rgba(255,255,255,0.9)';
-      ctx.font = '18px Arial, sans-serif';
+      ctx.font = '18px Inter, Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       const startText = mode === 'multi' ? `Player ${currentPlayer}: Press SPACE to start` : 'Press SPACE or tap to start';
@@ -121,7 +120,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
     if(gameOver){
       ctx.fillStyle = '#ef4444';
-      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.font = 'bold 28px Inter, Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
@@ -129,20 +128,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
         const winner = player1Score > player2Score ? 'Player 1' : player2Score > player1Score ? 'Player 2' : 'Tie';
         ctx.fillText(winner === 'Tie' ? "It's a Tie!" : `${winner} Wins!`, canvas.width/2, canvas.height/2 - 30);
         ctx.fillStyle = '#fff';
-        ctx.font = '16px Arial, sans-serif';
+        ctx.font = '16px Inter, Arial, sans-serif';
         ctx.fillText(`P1: ${player1Score} | P2: ${player2Score}`, canvas.width/2, canvas.height/2);
         ctx.fillText('Press SPACE or tap to restart', canvas.width/2, canvas.height/2 + 30);
       } else {
         ctx.fillText('Game Over!', canvas.width/2, canvas.height/2 - 20);
         ctx.fillStyle = '#fff';
-        ctx.font = '16px Arial, sans-serif';
+        ctx.font = '16px Inter, Arial, sans-serif';
         ctx.fillText('Press SPACE or tap to restart', canvas.width/2, canvas.height/2 + 20);
       }
     }
 
     if(won){
       ctx.fillStyle = '#10b981';
-      ctx.font = 'bold 28px Arial, sans-serif';
+      ctx.font = 'bold 28px Inter, Arial, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       if(level >= 10){
@@ -151,7 +150,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         ctx.fillText(`Level ${level} Complete!`, canvas.width/2, canvas.height/2 - 20);
       }
       ctx.fillStyle = '#fff';
-      ctx.font = '16px Arial, sans-serif';
+      ctx.font = '16px Inter, Arial, sans-serif';
       if(level >= 10){
         ctx.fillText('Press SPACE or tap to restart', canvas.width/2, canvas.height/2 + 20);
       } else {
@@ -397,12 +396,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     running = false;
   }
 
-  setMode('single');
-  mainLoop();
-});
-
-// Global reset button (if present in HTML)
-document.addEventListener('DOMContentLoaded', () => {
+  // Global reset button (if present in HTML)
   const resetBtn = document.getElementById('reset');
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
@@ -412,4 +406,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateStatus();
     });
   }
+
+  setMode('single');
+  mainLoop();
 });

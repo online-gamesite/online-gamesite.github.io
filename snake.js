@@ -1,13 +1,11 @@
 document.addEventListener('DOMContentLoaded', ()=>{
-  console.log('Snake game loaded');
   const canvas = document.getElementById('snake');
   const ctx = canvas.getContext('2d');
   const scoreEl = document.getElementById('snake-score');
-  console.log('Canvas:', canvas, 'Context:', ctx, 'Score element:', scoreEl);
   const size = 20;
   const cols = canvas.width / size;
   const rows = canvas.height / size;
-  let snake, dir, food, running, loopId, gameStarted;
+  let snake, dir, food, running, loopId, gameStarted, gameOver;
   let isMultiplayer = false;
   let snake2, dir2, p1Score, p2Score;
   // High score persistence for single-player
@@ -15,7 +13,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let highScore = Number.isFinite(storedHS) ? storedHS : 0;
 
   function reset(){
-    console.log('Reset called');
     if(isMultiplayer) {
       snake = [{x:5, y:Math.floor(rows/2)}];
       snake2 = [{x:cols-6, y:Math.floor(rows/2)}];
@@ -30,6 +27,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     placeFood();
     running = false;
     gameStarted = false;
+    // clear any ended-game marker so inputs start a fresh session
+    gameOver = false;
     updateScore();
     draw();
   }
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function draw(){
-    console.log('Draw called, gameStarted:', gameStarted);
     ctx.fillStyle = '#000';
     ctx.fillRect(0,0,canvas.width,canvas.height);
     // subtle themed grid lines for smoother visual feel
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('Press arrow/WASD or swipe to start', canvas.width/2, canvas.height/2);
-      console.log('Drawing start text');
     }
   }
 
@@ -88,6 +85,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(head.x < 0 || head.x >= cols || head.y < 0 || head.y >= rows){
       if(isMultiplayer) {
         stop();
+        gameOver = true;
         ctx.fillStyle = '#3b82f6';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -99,6 +97,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       } else {
         stop();
+        gameOver = true;
         // update high score for single player
         try {
           const current = Math.max(0, snake.length - 1);
@@ -120,6 +119,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(snake.some(s=>s.x===head.x && s.y===head.y)){
       if(isMultiplayer) {
         stop();
+        gameOver = true;
         ctx.fillStyle = '#3b82f6';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       } else {
         stop();
+        gameOver = true;
         // update high score for single player
         try {
           const current = Math.max(0, snake.length - 1);
@@ -151,6 +152,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     // Collision with other snake in multiplayer
     if(isMultiplayer && snake2.some(s=>s.x===head.x && s.y===head.y)){
       stop();
+      gameOver = true;
       ctx.fillStyle = '#3b82f6';
       ctx.font = 'bold 24px Arial, sans-serif';
       ctx.textAlign = 'center';
@@ -175,10 +177,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const head2 = {x: snake2[0].x + dir2.x, y: snake2[0].y + dir2.y};
       
       // Check collisions for snake 2
-      if(head2.x < 0 || head2.x >= cols || head2.y < 0 || head2.y >= rows ||
-         snake2.some(s=>s.x===head2.x && s.y===head2.y) ||
-         snake.some(s=>s.x===head2.x && s.y===head2.y)){
-        stop();
+    if(head2.x < 0 || head2.x >= cols || head2.y < 0 || head2.y >= rows ||
+      snake2.some(s=>s.x===head2.x && s.y===head2.y) ||
+      snake.some(s=>s.x===head2.x && s.y===head2.y)){
+      stop();
+      gameOver = true;
         ctx.fillStyle = '#10b981';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -235,7 +238,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   document.addEventListener('keydown', (e)=>{
     // If game is over, any key should restart first (prevent immediate resume glitch)
-    if(!running && gameStarted){
+    if(gameOver){
       reset();
       return;
     }
@@ -295,8 +298,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
     }
     
-    // Any key to restart after game over
-    if(!running && gameStarted){
+    // Any key to restart after game over (redundant fallback)
+    if(gameOver){
       reset();
     }
   });
@@ -326,7 +329,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     const minSwipeDistance = 30;
 
     // If game is over, restart on any touch
-    if(!running && gameStarted){
+    if(gameOver){
       reset();
       return;
     }

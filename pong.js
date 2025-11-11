@@ -8,7 +8,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const paddleH = 80;
   const ballSize = 8;
   
-  let mode = 'single'; // 'single' or 'multi'
+  // Check for forced mode
+  let mode = 'single';
+  if (window.FORCE_SINGLE_PLAYER) {
+    mode = 'single';
+  } else if (window.FORCE_MULTIPLAYER) {
+    mode = 'multi';
+  }
+  
   let player = {x: 20, y: canvas.height/2 - paddleH/2, w: paddleW, h: paddleH, speed: 6, dy: 0};
   let opponent = {x: canvas.width - 20 - paddleW, y: canvas.height/2 - paddleH/2, w: paddleW, h: paddleH, speed: 4, dy: 0};
   let ball = {x: canvas.width/2, y: canvas.height/2, dx: 4, dy: 3, size: ballSize};
@@ -232,12 +239,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
     player.dy = 0;
     opponent.dy = 0;
     
-    // Player 1 controls (left paddle)
+    // Player 1 controls (left paddle) - W/S or Arrow keys in single player
     if(keys['w'] || keys['W']){
       player.dy = -player.speed;
     }
     if(keys['s'] || keys['S']){
       player.dy = player.speed;
+    }
+    
+    // In single player mode, arrow keys also control player paddle
+    if(mode === 'single'){
+      if(keys['ArrowUp']){
+        player.dy = -player.speed;
+      }
+      if(keys['ArrowDown']){
+        player.dy = player.speed;
+      }
     }
     
     // Player 2 controls (right paddle) - only in multiplayer mode
@@ -298,14 +315,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   }
 
-  // Start in single player mode
-  setMode('single');
+  // Start in appropriate mode
+  setMode(mode);
   draw();
   gameLoop();
-});
-
-// Reset button (if present)
-document.addEventListener('DOMContentLoaded', () => {
+  
+  // Reset button (if present)
   const resetBtn = document.getElementById('reset');
   if (resetBtn) resetBtn.addEventListener('click', () => resetGame());
 });

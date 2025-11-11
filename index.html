@@ -18,17 +18,27 @@
           <img src="assets/favicon.svg" alt="logo" class="logo" />
           <span class="brand-text">Game Site</span>
         </a>
+        <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="site-nav" id="site-nav">
+          <a href="#" id="nav-singleplayer" class="active">Single Player</a>
+          <a href="#" id="nav-multiplayer">Multiplayer</a>
+        </nav>
       </div>
     </header>
 
     <main class="container">
-      <section class="features">
+      <section class="features" id="section-singleplayer">
         <h2 style="text-align:center;margin-bottom:2rem;">Single Player Games</h2>
         <div class="grid">
           <article class="card">
             <h3>Tic Tac Toe</h3>
-            <p>Play against unbeatable AI or with a friend!</p>
-            <p><a class="btn" href="tictactoe.html">Play</a></p>
+            <p>Play against unbeatable AI!</p>
+            <p><a class="btn" href="tictactoe-single.html">Play</a></p>
+          </article>
+          <article class="card">
+            <h3>Pong</h3>
+            <p>Classic Pong vs AI!</p>
+            <p><a class="btn" href="pong-single.html">Play</a></p>
           </article>
           <article class="card">
             <h3>Memory Match</h3>
@@ -56,16 +66,6 @@
             <p><a class="btn" href="breakout.html">Play</a></p>
           </article>
           <article class="card">
-            <h3>Pong</h3>
-            <p>Classic Pong vs AI or challenge a friend!</p>
-            <p><a class="btn" href="pong.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>2048</h3>
-            <p>Slide and combine tiles to reach 2048!</p>
-            <p><a class="btn" href="2048.html">Play</a></p>
-          </article>
-          <article class="card">
             <h3>Minesweeper</h3>
             <p>Classic mine detection with 3 difficulty levels!</p>
             <p><a class="btn" href="minesweeper.html">Play</a></p>
@@ -88,48 +88,18 @@
         </div>
       </section>
 
-      <section class="features" style="margin-top:3rem;">
+      <section class="features" id="section-multiplayer" style="display:none;">
         <h2 style="text-align:center;margin-bottom:2rem;">Multiplayer Games</h2>
         <div class="grid">
           <article class="card">
             <h3>Tic Tac Toe</h3>
-            <p>Classic 3×3. Two players or vs AI!</p>
-            <p><a class="btn" href="tictactoe.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>Memory Match</h3>
-            <p>Take turns finding pairs. Most pairs wins!</p>
-            <p><a class="btn" href="memory.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>Snake</h3>
-            <p>Two snakes compete for food. Last one alive wins!</p>
-            <p><a class="btn" href="snake.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>Simon</h3>
-            <p>Players alternate. Complete sequences for points!</p>
-            <p><a class="btn" href="simon.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>Whack-a-Mole</h3>
-            <p>Race to whack your moles! Highest score wins!</p>
-            <p><a class="btn" href="whack.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>Breakout</h3>
-            <p>Take turns breaking bricks. Who scores more?</p>
-            <p><a class="btn" href="breakout.html">Play</a></p>
+            <p>Classic 3×3. Two players!</p>
+            <p><a class="btn" href="tictactoe-multi.html">Play</a></p>
           </article>
           <article class="card">
             <h3>Pong</h3>
             <p>Head-to-head Pong. First to 5 wins!</p>
-            <p><a class="btn" href="pong.html">Play</a></p>
-          </article>
-          <article class="card">
-            <h3>2048</h3>
-            <p>Take turns sliding tiles. Highest score wins!</p>
-            <p><a class="btn" href="2048.html">Play</a></p>
+            <p><a class="btn" href="pong-multi.html">Play</a></p>
           </article>
         </div>
       </section>

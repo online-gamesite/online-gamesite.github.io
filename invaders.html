@@ -20,7 +20,8 @@
         </a>
         <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
         <nav class="site-nav" id="site-nav">
-          <a href="index.html">Home</a>
+          <a href="index.html">Single Player</a>
+          <a href="index.html#multiplayer">Multiplayer</a>
         </nav>
       </div>
     </header>
@@ -29,7 +30,7 @@
       <section class="game-wrap center">
         <h1>Space Invaders</h1>
         <p style="text-align:center;color:#94a3b8;margin-bottom:1rem;">Arrow keys to move, SPACE to shoot!</p>
-        <canvas id="invaders" class="snake-canvas" width="600" height="600"></canvas>
+        <canvas id="invaders" class="seamless-canvas" width="600" height="600"></canvas>
         <div class="controls">
           <button id="reset" class="btn reset-scores">Reset</button>
           <div class="status" id="invaders-status" style="margin:0 auto;">Score: 0 | Lives: 3 | Level: 1</div>
@@ -39,6 +40,6 @@
 
     <footer class="site-footer"><div class="container"><small>&copy; <span id="year"></span> Game Site</small></div></footer>
     <script src="script.js" defer></script>
-    <script src="invaders.js" defer></script>
+    <script src="invaders.js?v=2" defer></script>
   </body>
 </html>

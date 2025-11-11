@@ -73,81 +73,83 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function draw() {
-    // Background - space
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Clear with transparency to show game-wrap background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Stars
-    ctx.fillStyle = '#fff';
+    // Subtle stars with theme color
+    ctx.fillStyle = 'rgba(6, 182, 212, 0.2)';
     for (let i = 0; i < 50; i++) {
       const x = (i * 137) % canvas.width;
       const y = (i * 211) % canvas.height;
       ctx.fillRect(x, y, 2, 2);
     }
 
-    // Player
-    ctx.fillStyle = '#0f0';
+    // Player - cyan gradient
+    const playerGradient = ctx.createLinearGradient(player.x, player.y, player.x + player.width, player.y + player.height);
+    playerGradient.addColorStop(0, '#06b6d4');
+    playerGradient.addColorStop(1, '#3b82f6');
+    ctx.fillStyle = playerGradient;
     ctx.fillRect(player.x, player.y, player.width, player.height);
     // Player cannon
     ctx.fillRect(player.x + 15, player.y - 5, 10, 5);
 
-    // Aliens
+    // Aliens with theme colors
     aliens.forEach(alien => {
       if (alien.alive) {
         if (alien.type === 3) {
-          ctx.fillStyle = '#f00';
+          ctx.fillStyle = '#ef4444'; // red
         } else if (alien.type === 2) {
-          ctx.fillStyle = '#ff0';
+          ctx.fillStyle = '#f59e0b'; // amber
         } else {
-          ctx.fillStyle = '#0ff';
+          ctx.fillStyle = '#8b5cf6'; // purple
         }
         ctx.fillRect(alien.x, alien.y, alien.width, alien.height);
         
         // Alien eyes
-        ctx.fillStyle = '#000';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         ctx.fillRect(alien.x + 8, alien.y + 6, 4, 4);
         ctx.fillRect(alien.x + 18, alien.y + 6, 4, 4);
       }
     });
 
-    // Bullets
-    ctx.fillStyle = '#fff';
+    // Player bullets - cyan
+    ctx.fillStyle = '#06b6d4';
     bullets.forEach(bullet => {
       ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
 
-    // Alien bullets
-    ctx.fillStyle = '#f0f';
+    // Alien bullets - red/pink
+    ctx.fillStyle = '#f43f5e';
     alienBullets.forEach(bullet => {
       ctx.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
     });
 
     // Instructions or game over
     if (!gameStarted && !gameOver) {
-      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.fillStyle = 'rgba(10, 14, 26, 0.9)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#0f0';
-      ctx.font = 'bold 32px "Courier New", monospace';
+      ctx.fillStyle = '#06b6d4';
+      ctx.font = 'bold 32px Inter, "Courier New", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('SPACE INVADERS', canvas.width / 2, canvas.height / 2 - 60);
-      ctx.fillStyle = '#fff';
-      ctx.font = '18px "Courier New", monospace';
+      ctx.fillStyle = '#f9fafb';
+      ctx.font = '18px Inter, "Courier New", monospace';
       ctx.fillText('Arrow Keys: Move', canvas.width / 2, canvas.height / 2);
       ctx.fillText('SPACE: Shoot', canvas.width / 2, canvas.height / 2 + 30);
       ctx.fillText('Press SPACE to Start', canvas.width / 2, canvas.height / 2 + 70);
     }
 
     if (gameOver) {
-      ctx.fillStyle = 'rgba(0,0,0,0.8)';
+      ctx.fillStyle = 'rgba(10, 14, 26, 0.9)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#f00';
-      ctx.font = 'bold 40px "Courier New", monospace';
+      ctx.fillStyle = '#ef4444';
+      ctx.font = 'bold 40px Inter, "Courier New", monospace';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2 - 30);
-      ctx.fillStyle = '#fff';
-      ctx.font = '20px "Courier New", monospace';
+      ctx.fillStyle = '#f9fafb';
+      ctx.font = '20px Inter, "Courier New", monospace';
       ctx.fillText(`Final Score: ${score}`, canvas.width / 2, canvas.height / 2 + 20);
       ctx.font = '16px "Courier New", monospace';
       ctx.fillText('Press SPACE to Restart', canvas.width / 2, canvas.height / 2 + 60);

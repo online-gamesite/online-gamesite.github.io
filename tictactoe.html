@@ -20,7 +20,8 @@
         </a>
         <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
         <nav class="site-nav" id="site-nav">
-          <a href="index.html">Home</a>
+          <a href="index.html">Single Player</a>
+          <a href="index.html#multiplayer">Multiplayer</a>
         </nav>
       </div>
     </header>
@@ -28,6 +29,11 @@
     <main class="container">
       <section class="game-wrap">
         <h1>Tic Tac Toe</h1>
+        
+        <div class="flex-center" style="margin-bottom:1rem">
+          <button id="mode-single" class="btn" style="padding:0.5rem 1rem;font-size:0.9rem;">vs AI</button>
+          <button id="mode-multi" class="btn secondary" style="padding:0.5rem 1rem;font-size:0.9rem;">2 Player</button>
+        </div>
         
         <div class="flex-center" style="margin-bottom:1rem">
           <div class="muted">Player X: <strong id="score-x">0</strong></div>
@@ -52,13 +58,15 @@
           </div>
         </div>
         <div class="controls">
-          <label for="ttt-difficulty" style="align-self:center;color:var(--muted)">Difficulty:</label>
-          <select id="ttt-difficulty" class="btn" style="padding:0.5rem 0.75rem;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-            <option value="impossible" selected>Impossible</option>
-          </select>
+          <div id="difficulty-controls" style="display:flex;gap:1rem;align-items:center;">
+            <label for="ttt-difficulty" style="color:var(--muted)">Difficulty:</label>
+            <select id="ttt-difficulty" class="btn" style="padding:0.5rem 0.75rem;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);">
+              <option value="easy">Easy</option>
+              <option value="medium">Medium</option>
+              <option value="hard">Hard</option>
+              <option value="impossible" selected>Impossible</option>
+            </select>
+          </div>
           <button id="reset" class="btn reset-scores">Reset</button>
           <div class="status" id="ttt-status"></div>
         </div>
@@ -67,6 +75,6 @@
 
     <footer class="site-footer"><div class="container"><small>&copy; <span id="year"></span> Game Site</small></div></footer>
     <script src="script.js" defer></script>
-    <script src="tictactoe.js" defer></script>
+    <script src="tictactoe.js?v=2" defer></script>
   </body>
 </html>

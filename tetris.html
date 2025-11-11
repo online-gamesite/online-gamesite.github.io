@@ -20,13 +20,14 @@
         </a>
         <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
         <nav class="site-nav" id="site-nav">
-          <a href="index.html">Home</a>
+          <a href="index.html">Single Player</a>
+          <a href="index.html#multiplayer">Multiplayer</a>
         </nav>
       </div>
     </header>
 
     <main class="container">
-      <section class="game-wrap center">
+      <section class="game-wrap game-wrap-seamless center">
         <h1>Tetris</h1>
         <p style="text-align:center;color:#94a3b8;margin-bottom:1rem;">Arrow keys to move/rotate, SPACE to drop, P to pause!</p>
         
@@ -36,11 +37,15 @@
           <div class="muted">Level: <strong id="level">1</strong></div>
         </div>
         
+        <div style="text-align:center;margin-bottom:1rem;">
+          <p id="tetris-status" class="muted" style="font-size:1.1rem;font-weight:600;min-height:1.5rem;"></p>
+        </div>
+        
         <div style="display: flex; gap: 2rem; justify-content: center; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
-            <canvas id="tetrisCanvas" width="300" height="600" style="border: 2px solid #475569; border-radius: 8px;"></canvas>
+            <canvas id="tetrisCanvas" width="300" height="600" class="seamless-canvas"></canvas>
             <div style="text-align:center;">
                 <h3 style="margin-bottom:0.5rem;">Next Piece</h3>
-                <canvas id="nextCanvas" width="120" height="120" style="border: 2px solid #475569; border-radius: 8px; margin-bottom:1.5rem;"></canvas>
+                <canvas id="nextCanvas" width="120" height="120" class="seamless-canvas" style="margin-bottom:1.5rem;"></canvas>
                 <div style="text-align:left; background:#1e293b; padding:1rem; border-radius:8px; margin-bottom:1rem;">
                     <h3 style="margin-bottom:0.5rem;">Controls</h3>
                     <p style="margin:0.25rem 0;">⬅️ ➡️ Move</p>
@@ -58,6 +63,6 @@
 
     <footer class="site-footer"><div class="container"><small>&copy; <span id="year"></span> Game Site</small></div></footer>
     <script src="script.js" defer></script>
-    <script src="tetris.js" defer></script>
+    <script src="tetris.js?v=4" defer></script>
 </body>
 </html>

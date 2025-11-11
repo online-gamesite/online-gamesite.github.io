@@ -2,6 +2,7 @@ const canvas = document.getElementById('tetrisCanvas');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('nextCanvas');
 const nextCtx = nextCanvas.getContext('2d');
+const statusEl = document.getElementById('tetris-status');
 
 const BLOCK_SIZE = 30;
 const COLS = 10;
@@ -19,13 +20,13 @@ const SHAPES = {
 };
 
 const COLORS = {
-    I: '#00f0f0',
-    O: '#f0f000',
-    T: '#a000f0',
-    S: '#00f000',
-    Z: '#f00000',
-    J: '#0000f0',
-    L: '#f0a000'
+    I: '#06b6d4',  // cyan
+    O: '#f59e0b',  // amber
+    T: '#8b5cf6',  // purple
+    S: '#10b981',  // green
+    Z: '#ef4444',  // red
+    J: '#3b82f6',  // blue
+    L: '#f97316'   // orange
 };
 
 let board = [];
@@ -62,15 +63,14 @@ function createPiece(type) {
 function drawBlock(ctx, x, y, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-    ctx.strokeStyle = '#0f172a';
+    ctx.strokeStyle = 'rgba(10,14,26,0.6)';
     ctx.lineWidth = 2;
     ctx.strokeRect(x * BLOCK_SIZE, y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 }
 
 // Draw the board
 function drawBoard() {
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     for (let y = 0; y < ROWS; y++) {
         for (let x = 0; x < COLS; x++) {
@@ -94,8 +94,7 @@ function drawPiece(piece, context = ctx, offsetX = 0, offsetY = 0) {
 
 // Draw next piece preview
 function drawNextPiece() {
-    nextCtx.fillStyle = '#1e293b';
-    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+    nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
     
     if (nextPiece) {
         const offsetX = (4 - nextPiece.shape[0].length) / 2;
@@ -211,7 +210,10 @@ function drop() {
         
         if (collide(currentPiece, board)) {
             gameOver = true;
-            alert('Game Over! Score: ' + score);
+            if(statusEl){
+                statusEl.textContent = `Game Over! Final Score: ${score}`;
+                statusEl.style.color = '#ef4444';
+            }
         }
     }
 }
@@ -235,9 +237,12 @@ function move(dir) {
 
 // Update score display
 function updateScore() {
-    document.getElementById('score').textContent = score;
-    document.getElementById('lines').textContent = lines;
-    document.getElementById('level').textContent = level;
+    const scoreEl = document.getElementById('score');
+    const linesEl = document.getElementById('lines');
+    const levelEl = document.getElementById('level');
+    if (scoreEl) scoreEl.textContent = score;
+    if (linesEl) linesEl.textContent = lines;
+    if (levelEl) levelEl.textContent = level;
 }
 
 // Game loop
@@ -324,10 +329,12 @@ canvas.addEventListener('touchend', e => {
 });
 
 // Restart button
-document.getElementById('restartBtn').addEventListener('click', () => {
-    score = 0;
-    lines = 0;
-    level = 1;
+const restartBtn = document.getElementById('restartBtn');
+if (restartBtn) {
+    restartBtn.addEventListener('click', () => {
+        score = 0;
+        lines = 0;
+        level = 1;
     dropInterval = 1000;
     gameOver = false;
     isPaused = false;
@@ -335,7 +342,12 @@ document.getElementById('restartBtn').addEventListener('click', () => {
     currentPiece = createPiece();
     nextPiece = createPiece();
     updateScore();
-});
+    if(statusEl){
+        statusEl.textContent = '';
+        statusEl.style.color = '#9ca3af';
+    }
+    });
+}
 
 // Initialize game
 createBoard();

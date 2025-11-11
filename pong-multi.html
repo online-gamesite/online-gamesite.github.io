@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Pong — Game Site</title>
+    <title>Pong (2 Player) — Game Site</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="styles.css" />
-    <meta name="description" content="Classic Pong game. Play against AI. Use arrow keys, WASD, or touch controls!" />
+    <meta name="description" content="Classic Pong 2-player mode. Player 1: W/S, Player 2: Arrow Keys!" />
   </head>
   <body>
     <header class="site-header shadow">
@@ -28,24 +28,21 @@
 
     <main class="container">
       <section class="game-wrap center">
-        <h1>Pong</h1>
+        <h1>Pong (2 Player)</h1>
+        <p style="color:var(--muted);margin-bottom:1rem;">Player 1: W/S keys | Player 2: Arrow keys</p>
         
         <canvas id="pong" class="snake-canvas" width="600" height="400"></canvas>
         <div class="controls">
-          <label for="pong-difficulty" style="align-self:center;color:var(--muted)">Difficulty:</label>
-          <select id="pong-difficulty" class="btn" style="padding:0.5rem 0.75rem;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text);">
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-            <option value="impossible" selected>Impossible</option>
-          </select>
           <button id="reset" class="btn reset-scores">Reset</button>
-          <div class="status" id="pong-score" style="margin:0 auto;">You: 0 | AI: 0</div>
+          <div class="status" id="pong-score" style="margin:0 auto;">Player 1: 0 | Player 2: 0</div>
         </div>
       </section>
     </main>
 
     <footer class="site-footer"><div class="container"><small>&copy; <span id="year"></span> Game Site</small></div></footer>
+    <script>
+      window.FORCE_MULTIPLAYER = true;
+    </script>
     <script src="script.js" defer></script>
     <script src="pong.js?v=4" defer></script>
   </body>

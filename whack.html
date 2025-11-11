@@ -17,7 +17,8 @@
         <a class="brand" href="index.html"><img src="assets/favicon.svg" class="logo" alt="logo"/><span class="brand-text">Game Site</span></a>
         <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">☰</button>
         <nav class="site-nav" id="site-nav">
-          <a href="index.html">Home</a>
+          <a href="index.html">Single Player</a>
+          <a href="index.html#multiplayer">Multiplayer</a>
         </nav>
       </div>
     </header>
@@ -35,11 +36,14 @@
           <div class="muted" id="score1-container">Score: <strong id="whack-score">0</strong></div>
           <div class="muted" id="score2-container" style="display:none;">P2: <strong id="whack-score2">0</strong></div>
         </div>
+        <div class="mt-1 center">
+          <p id="whack-status" class="muted" style="font-size:1.1rem;font-weight:600;">Click Start to begin!</p>
+        </div>
       </section>
     </main>
 
     <footer class="site-footer"><div class="container"><small>&copy; <span id="year"></span> Game Site</small></div></footer>
     <script src="script.js" defer></script>
-    <script src="whack.js" defer></script>
+    <script src="whack.js?v=3" defer></script>
   </body>
 </html>

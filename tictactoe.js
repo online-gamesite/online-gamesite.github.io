@@ -5,11 +5,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreX = document.getElementById('score-x');
   const scoreO = document.getElementById('score-o');
   const scoreDraws = document.getElementById('score-draws');
+  const modeSingleBtn = document.getElementById('mode-single');
+  const modeMultiBtn = document.getElementById('mode-multi');
+  const difficultyControls = document.getElementById('difficulty-controls');
   
   let board = Array(9).fill(null);
   let turn = 'X';
   let scores = {X: 0, O: 0, draws: 0};
-  let mode = 'single'; // 'single' or 'multi'
+  
+  // Check for forced mode
+  let mode = 'single';
+  if (window.FORCE_SINGLE_PLAYER) {
+    mode = 'single';
+  } else if (window.FORCE_MULTIPLAYER) {
+    mode = 'multi';
+  }
+  
   let isAiThinking = false;
   
   const wins = [
@@ -223,6 +234,19 @@ document.addEventListener('DOMContentLoaded', () => {
     scoreX.textContent = '0';
     scoreO.textContent = '0';
     scoreDraws.textContent = '0';
+    
+    // Update button styles (only if buttons exist)
+    if (modeSingleBtn && modeMultiBtn && difficultyControls) {
+      if (mode === 'single') {
+        modeSingleBtn.classList.remove('secondary');
+        modeMultiBtn.classList.add('secondary');
+        difficultyControls.style.display = 'flex';
+      } else {
+        modeSingleBtn.classList.add('secondary');
+        modeMultiBtn.classList.remove('secondary');
+        difficultyControls.style.display = 'none';
+      }
+    }
   }
 
   cells.forEach(c=>c.addEventListener('click', cellClick));
@@ -235,7 +259,13 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBoard();
   });
   
-  // Start in single player mode
-  setMode('single');
+  // Mode switching buttons (only if they exist)
+  if (modeSingleBtn && modeMultiBtn) {
+    modeSingleBtn.addEventListener('click', () => setMode('single'));
+    modeMultiBtn.addEventListener('click', () => setMode('multi'));
+  }
+  
+  // Start in appropriate mode
+  setMode(mode);
   render();
 });

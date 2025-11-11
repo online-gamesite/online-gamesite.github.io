@@ -8,7 +8,7 @@
   --success: #10b981;
   --warning: #f59e0b;
   --radius: 16px;
-  --container: 1200px;
+  --container: 1800px;
   font-size: 16px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -24,7 +24,7 @@ body{
   -moz-osx-font-smoothing:grayscale;
   line-height:1.6;
 }
-.container{max-width:var(--container);margin:0 auto;padding:1.5rem 1.25rem}
+.container{max-width:var(--container);margin:0 auto;padding:1.5rem 2rem}
 .header-inner{display:flex;align-items:center;justify-content:space-between;padding:0.9rem 0}
 .brand{font-weight:700;color:var(--text);text-decoration:none;font-size:1.1rem;display:flex;align-items:center;gap:0.7rem;transition:opacity .2s ease}
 .brand:hover{opacity:0.8}
@@ -47,6 +47,12 @@ body{
   background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(6,182,212,0.06));
   border-color:rgba(59,130,246,0.12);
   box-shadow:0 8px 20px rgba(6,182,212,0.15);
+}
+.site-nav a.active{
+  color:var(--text);
+  background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(6,182,212,0.12));
+  border-color:rgba(59,130,246,0.2);
+  box-shadow:0 4px 12px rgba(6,182,212,0.2);
 }
 .nav-toggle{
   display:none;
@@ -138,7 +144,7 @@ body{
 
 .features{padding:3rem 0 4rem}
 .features h2{margin:0 0 2rem;text-align:center;font-size:2rem;font-weight:700}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:1.75rem}
 .card{
   background:linear-gradient(135deg,rgba(17,24,39,0.9),rgba(17,24,39,0.7));
   padding:1.75rem;
@@ -218,20 +224,35 @@ body{
 }
 
 /* Responsive breakpoints for game grid */
-@media (min-width:1400px){
+@media (min-width:2000px){
+  .grid{grid-template-columns:repeat(7,1fr)}
+}
+@media (min-width:1400px) and (max-width:1999px){
   .grid{grid-template-columns:repeat(6,1fr)}
 }
 @media (max-width:1100px){
-  .container{padding:1.25rem 1rem}
+  .container{padding:1.25rem 1.5rem}
   .hero-title{font-size:2.5rem}
-  .grid{grid-template-columns:repeat(3,1fr)}
+  .grid{grid-template-columns:repeat(4,1fr)}
 }
 @media (max-width:900px){
-  .grid{grid-template-columns:repeat(2,1fr)}
+  .grid{grid-template-columns:repeat(3,1fr)}
   .hero-title{font-size:2.2rem}
+  /* Scale down game elements on tablets */
+  .game-wrap{padding:2rem}
+  .ttt-cell{width:110px;height:110px;font-size:3rem}
+  .card-tile{height:110px;font-size:2rem}
+  .simon-pad{width:120px;height:120px}
+  .whack-hole{width:110px;height:110px}
+  .whack-grid{grid-template-columns:repeat(3,110px);gap:14px}
+  .board{gap:14px}
+  .ttt-row{gap:14px}
+  .memory-grid{gap:14px}
+  .simon-board{gap:14px}
 }
 @media (max-width:640px){
-  .grid{grid-template-columns:1fr}
+  .grid{grid-template-columns:repeat(2,1fr);gap:1.25rem}
+  .container{padding:1.25rem 1rem}
   .hero{padding:3.5rem 0 3rem}
   .hero-title{font-size:1.9rem}
   .hero-sub{font-size:1rem}
@@ -251,17 +272,35 @@ body{
   .site-nav a{padding:0.7rem 1rem;justify-content:flex-start}
   .nav-toggle{display:block}
   .header-inner{position:relative}
+  /* Scale down game elements on mobile */
+  .game-wrap{padding:1.5rem;max-width:100%}
+  .ttt-cell{width:80px;height:80px;font-size:2rem}
+  .card-tile{height:80px;font-size:1.5rem}
+  .simon-pad{width:90px;height:90px}
+  .whack-hole{width:80px;height:80px}
+  .whack-grid{grid-template-columns:repeat(3,80px);gap:10px}
+  .board{gap:12px}
+  .ttt-row{gap:12px}
+  .memory-grid{gap:12px}
+  .simon-board{gap:12px}
 }
 
 /* game-specific */
 .game-wrap{
-  max-width:840px;
+  max-width:1400px;
   margin:2rem auto;
-  padding:2rem;
+  padding:3rem;
   background:linear-gradient(135deg,rgba(17,24,39,0.9),rgba(17,24,39,0.7));
   border-radius:var(--radius);
   box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
   border:1px solid rgba(255,255,255,0.06);
+}
+.game-wrap-seamless{
+  background:transparent !important;
+  border:none !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  padding:2rem 3rem;
 }
 .game-wrap h1{
   margin:0 0 0.5rem;
@@ -269,14 +308,14 @@ body{
   font-weight:700;
   letter-spacing:-0.02em;
 }
-.board{display:grid;gap:14px;margin:1.5rem 0}
+.board{display:grid;gap:18px;margin:2rem 0}
 .ttt-cell{
-  width:100px;
-  height:100px;
+  width:140px;
+  height:140px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:2.5rem;
+  font-size:3.5rem;
   border-radius:14px;
   background:linear-gradient(135deg,rgba(30,41,59,0.8),rgba(15,23,42,0.9));
   cursor:pointer;
@@ -301,7 +340,7 @@ body{
   0%,100%{transform:scale(1)}
   50%{transform:scale(1.08)}
 }
-.ttt-row{display:flex;gap:14px;justify-content:center}
+.ttt-row{display:flex;gap:18px;justify-content:center}
 .controls{
   margin-top:1.5rem;
   display:flex;
@@ -311,15 +350,15 @@ body{
 }
 .status{margin-left:auto;color:var(--muted);font-weight:600}
 
-.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:1.5rem 0}
+.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:2rem 0}
 .card-tile{
-  height:100px;
+  height:140px;
   border-radius:14px;
   display:flex;
   align-items:center;
   justify-content:center;
   background:linear-gradient(135deg,rgba(30,41,59,0.8),rgba(15,23,42,0.9));
-  font-size:2rem;
+  font-size:2.5rem;
   cursor:pointer;
   transition:all .3s cubic-bezier(0.4,0,0.2,1);
   border:2px solid rgba(255,255,255,0.05);
@@ -356,6 +395,14 @@ body{
   border:4px solid rgba(255,255,255,0.05);
 }
 
+.seamless-canvas{
+  background:transparent;
+  display:block;
+  margin:1.5rem auto;
+  border:none;
+  box-shadow:none;
+}
+
 .game-controls{
   display:flex;
   gap:1rem;
@@ -370,14 +417,14 @@ body{
 .flex-center{display:flex;gap:1rem;align-items:center;justify-content:center}
 .mt-1{margin-top:1rem}
 .mt-half{margin-top:0.5rem}
-.simon-pad{width:110px;height:110px;border-radius:14px;cursor:pointer}
-.simon-board{display:flex;gap:12px;justify-content:center;margin-top:1rem}
+.simon-pad{width:150px;height:150px;border-radius:14px;cursor:pointer}
+.simon-board{display:flex;gap:18px;justify-content:center;margin-top:1.5rem}
 .simon-red{background:linear-gradient(180deg,#ef4444,#b91c1c)}
 .simon-yellow{background:linear-gradient(180deg,#f59e0b,#b45309)}
 .simon-green{background:linear-gradient(180deg,#10b981,#065f46)}
 .simon-blue{background:linear-gradient(180deg,#60a5fa,#1e40af)}
-.whack-hole{width:100px;height:100px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.whack-grid{display:grid;grid-template-columns:repeat(3,100px);gap:12px;justify-content:center;margin-top:1rem}
+.whack-hole{width:140px;height:140px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.whack-grid{display:grid;grid-template-columns:repeat(3,140px);gap:18px;justify-content:center;margin-top:1.5rem}
 
 /* Touch-friendly improvements */
 .ttt-cell, .card-tile, .btn, .simon-pad, .whack-hole {

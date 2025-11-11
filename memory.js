@@ -75,11 +75,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function onTile(e){
-    console.log('Click received. locked:', locked, 'flipped.length:', flipped.length);
-    
     // CRITICAL: Block ALL clicks if locked
     if(locked) {
-      console.log('Blocked: locked');
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -89,19 +86,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
     
     // Check if already matched
     if(matched.has(idx)) {
-      console.log('Blocked: already matched');
       return;
     }
     
     // Check if already flipped
     if(flipped.includes(idx)) {
-      console.log('Blocked: already in flipped array');
       return;
     }
     
     // CRITICAL: If we already have 2 cards, ignore this click completely
     if(flipped.length >= 2) {
-      console.log('Blocked: already 2 flipped');
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -109,7 +103,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     
     // Add to flipped array FIRST before any DOM manipulation
     flipped.push(idx);
-    console.log('Added to flipped array. Now:', flipped);
     
     // Then flip the tile visually
     flipTile(e.currentTarget, deck[idx]);
@@ -118,7 +111,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(flipped.length === 2){
       locked = true;
       grid.classList.add('locked');
-      console.log('LOCKED - have 2 cards, will process in 50ms');
       
       // Small delay to ensure DOM updates, then process the pair
       setTimeout(() => {
@@ -128,13 +120,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function processFlippedPair(){
-    console.log('Processing pair:', flipped);
     moves++;
     movesEl.textContent = moves;
     const [a,b] = flipped;
     
     if(deck[a] === deck[b]){
-      console.log('Match found!');
       matched.add(a); 
       matched.add(b);
       // mark tiles as matched
@@ -159,7 +149,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
       cleanupVisualState();
       locked = false;
       grid.classList.remove('locked');
-      console.log('Unlocked after match');
       
   if(matched.size === deck.length){
         if(isMultiplayer) {
@@ -179,9 +168,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         }
       }
     } else {
-      console.log('No match, will unflip in 700ms');
       setTimeout(()=>{
-        console.log('Unflipping cards:', a, b);
         unflip(a); 
         unflip(b);
         flipped = [];
@@ -194,7 +181,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
         
         locked = false;
         grid.classList.remove('locked');
-        console.log('Unlocked after unflip');
       }, 700);
     }
   }
