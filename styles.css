@@ -519,3 +519,72 @@ body{
 .mine-cell.mine-7 { color: #ec4899; }
 .mine-cell.mine-8 { color: #f97316; }
 
+/* Advertisement Containers */
+.ad-container {
+  display: none; /* Hidden by default, shown when ads are enabled */
+  margin: 1.5rem auto;
+  text-align: center;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  min-height: 100px;
+  position: relative;
+}
+
+.ad-container::before {
+  content: 'Advertisement';
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Header ad - horizontal banner */
+.ad-header {
+  max-width: 728px;
+  min-height: 90px;
+}
+
+/* Sidebar ad - vertical */
+.ad-sidebar {
+  max-width: 300px;
+  min-height: 250px;
+  position: sticky;
+  top: 20px;
+}
+
+/* Footer ad - horizontal banner */
+.ad-footer {
+  max-width: 728px;
+  min-height: 90px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* In-content ad - responsive */
+.ad-content {
+  max-width: 100%;
+  min-height: 250px;
+  margin: 2rem auto;
+}
+
+/* Mobile ad adjustments */
+@media (max-width: 768px) {
+  .ad-container {
+    max-width: 100%;
+    min-height: 50px;
+  }
+  
+  .ad-header,
+  .ad-footer {
+    max-width: 320px;
+    min-height: 50px;
+  }
+  
+  .ad-sidebar {
+    display: none; /* Hide sidebar ads on mobile */
+  }
+}
