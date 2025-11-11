@@ -124,6 +124,10 @@ function draw() {
             const correctNum = row * GRID_SIZE + col + 1;
             const isCorrect = showingSolution && (num === correctNum);
             
+            // Check if this tile is hovered and can be moved
+            const isHovered = hoverTile && hoverTile.row === row && hoverTile.col === col;
+            const canMove = isHovered && Math.abs(row - emptyPos.row) + Math.abs(col - emptyPos.col) === 1;
+            
             // Tile background with gradient
             const gradient = ctx.createLinearGradient(x, y, x + TILE_SIZE, y + TILE_SIZE);
             if (showingSolution) {
@@ -135,85 +139,43 @@ function draw() {
                     gradient.addColorStop(1, '#dc2626');
                 }
             } else {
-                // Check if this tile is hovered and can be moved
-                const isHovered = hoverTile && hoverTile.row === row && hoverTile.col === col;
-                const canMove = isHovered && Math.abs(row - emptyPos.row) + Math.abs(col - emptyPos.col) === 1;
-                
                 if (canMove) {
-                    // Brighter gradient for movable tiles with glow
-                    gradient.addColorStop(0, '#67e8f9');
-                    gradient.addColorStop(0.5, '#22d3ee');
-                    gradient.addColorStop(1, '#06b6d4');
+                    // Brighter for hoverable tiles
+                    gradient.addColorStop(0, '#1e3a8a');
+                    gradient.addColorStop(1, '#1e40af');
                 } else {
-                    // Beautiful gradient based on tile number for variety
-                    const hue = 180 + (num * 10) % 60; // Cyan to blue range
-                    gradient.addColorStop(0, `hsl(${hue}, 80%, 60%)`);
-                    gradient.addColorStop(0.5, `hsl(${hue}, 70%, 50%)`);
-                    gradient.addColorStop(1, `hsl(${hue}, 60%, 40%)`);
+                    // Dark blue gradient
+                    gradient.addColorStop(0, '#1e293b');
+                    gradient.addColorStop(1, '#0f172a');
                 }
             }
             ctx.fillStyle = gradient;
             
-            // Rounded rectangle tile with shadow
-            const radius = 12;
+            // Rounded rectangle tile
+            const radius = 10;
             const padding = 5;
-            
-            // Outer shadow
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 10;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 4;
             
             ctx.beginPath();
             ctx.roundRect(x + padding, y + padding, TILE_SIZE - padding * 2, TILE_SIZE - padding * 2, radius);
             ctx.fill();
+            
+            // Glowing edge effect
+            ctx.strokeStyle = canMove && !showingSolution ? '#3b82f6' : '#475569';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = canMove && !showingSolution ? '#3b82f6' : '#475569';
+            ctx.shadowBlur = canMove && !showingSolution ? 8 : 4;
+            ctx.stroke();
             
             // Reset shadow
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
             
-            // Glossy highlight on top
-            const highlightGradient = ctx.createLinearGradient(x, y + padding, x, y + TILE_SIZE / 3);
-            highlightGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-            highlightGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = highlightGradient;
-            ctx.beginPath();
-            ctx.roundRect(x + padding, y + padding, TILE_SIZE - padding * 2, TILE_SIZE / 3, [radius, radius, 0, 0]);
-            ctx.fill();
-            
-            // Tile border with shine
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.roundRect(x + padding, y + padding, TILE_SIZE - padding * 2, TILE_SIZE - padding * 2, radius);
-            ctx.stroke();
-            
-            // Inner darker border for depth
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.roundRect(x + padding + 2, y + padding + 2, TILE_SIZE - padding * 2 - 4, TILE_SIZE - padding * 2 - 4, radius - 2);
-            ctx.stroke();
-            
-            // Tile number with shadow
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 4;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 2;
-            
-            ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 64px Inter, sans-serif';
+            // Tile number
+            ctx.fillStyle = '#e2e8f0';
+            ctx.font = 'bold 48px Inter, sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(num, x + TILE_SIZE / 2, y + TILE_SIZE / 2);
-            
-            // Reset shadow
-            ctx.shadowColor = 'transparent';
-            ctx.shadowBlur = 0;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 0;
             
             // Small indicator for correct position when showing solution
             if (showingSolution && isCorrect) {
