@@ -62,9 +62,7 @@ function generateNewPieces() {
 
 // Draw grid
 function drawGrid() {
-    // Background - match site
-    ctx.fillStyle = '#0a0e1a';
-    ctx.fillRect(GRID_OFFSET_X, GRID_OFFSET_Y, GRID_SIZE * CELL_SIZE, GRID_SIZE * CELL_SIZE);
+    // No background - let it be transparent and show site background
     
     // Subtle grid lines
     ctx.strokeStyle = '#1e293b';
@@ -292,8 +290,8 @@ function isGameOver() {
 
 // Draw everything
 function draw() {
-    ctx.fillStyle = '#0a0e1a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Clear with transparent background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     drawGrid();
     

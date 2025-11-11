@@ -53,8 +53,8 @@ function init() {
 
 // Draw grid
 function draw() {
-    ctx.fillStyle = '#0a0e1a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // Clear with transparent background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     // Draw gems
     for (let row = 0; row < GRID_SIZE; row++) {

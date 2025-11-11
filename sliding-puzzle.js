@@ -100,11 +100,8 @@ function checkWin() {
 
 // Draw the puzzle
 function draw() {
+    // Clear with transparent background
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw grid background - match site background
-    ctx.fillStyle = '#0a0e1a';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     // Draw tiles
     for (let row = 0; row < GRID_SIZE; row++) {
