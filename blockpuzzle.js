@@ -53,7 +53,7 @@ function generateNewPieces() {
         currentPieces.push({
             shape: JSON.parse(JSON.stringify(shape)),
             color: colors[Math.floor(Math.random() * colors.length)],
-            x: GRID_OFFSET_X + i * 150 + 20,
+            x: 50 + i * 160,
             y: PIECES_Y,
             placed: false
         });
@@ -363,7 +363,7 @@ canvas.addEventListener('mouseup', (e) => {
         } else {
             // Return to original position
             const index = currentPieces.indexOf(draggedPiece);
-            draggedPiece.x = GRID_OFFSET_X + index * 150 + 20;
+            draggedPiece.x = 50 + index * 160;
             draggedPiece.y = PIECES_Y;
         }
         
