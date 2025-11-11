@@ -19,8 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Player 1 (Cyan)
     const player1 = {
-        x: 100,
-        y: HEIGHT / 2,
+        x: 50,
+        y: 100,
         width: TANK_SIZE,
         height: TANK_SIZE,
         angle: 0,
@@ -35,8 +35,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Player 2 (Blue)
     const player2 = {
-        x: WIDTH - 100,
-        y: HEIGHT / 2,
+        x: WIDTH - 80,
+        y: HEIGHT - 100,
         width: TANK_SIZE,
         height: TANK_SIZE,
         angle: Math.PI,
@@ -229,11 +229,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function respawnPlayer(player) {
         if (player === player1) {
-            player.x = 100;
-            player.y = HEIGHT / 2;
+            player.x = 50;
+            player.y = 100;
         } else {
-            player.x = WIDTH - 100;
-            player.y = HEIGHT / 2;
+            player.x = WIDTH - 80;
+            player.y = HEIGHT - 100;
         }
         player.health = 3;
         player.bullets = [];
@@ -382,15 +382,15 @@ document.addEventListener('DOMContentLoaded', function() {
         statusEl.textContent = 'First to 5 kills wins!';
         statusEl.style.color = '#06b6d4';
         
-        player1.x = 100;
-        player1.y = HEIGHT / 2;
+        player1.x = 50;
+        player1.y = 100;
         player1.kills = 0;
         player1.health = 3;
         player1.bullets = [];
         player1.angle = 0;
         
-        player2.x = WIDTH - 100;
-        player2.y = HEIGHT / 2;
+        player2.x = WIDTH - 80;
+        player2.y = HEIGHT - 100;
         player2.kills = 0;
         player2.health = 3;
         player2.bullets = [];
