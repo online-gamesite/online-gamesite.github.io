@@ -297,15 +297,27 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.font = '12px Inter';
         ctx.fillText(`${Math.floor(progress * 100)}%`, 220, 25);
         
-        // Draw finish line if close
-        if (distanceTraveled >= RACE_DISTANCE - 500) {
-            const finishY = TRACK_HEIGHT - ((RACE_DISTANCE - distanceTraveled) / 5);
-            if (finishY > 0 && finishY < TRACK_HEIGHT) {
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                ctx.fillRect(0, finishY, TRACK_WIDTH, 5);
-                ctx.fillStyle = '#f59e0b';
-                ctx.font = 'bold 24px Inter';
-                ctx.fillText('FINISH', TRACK_WIDTH / 2 - 50, finishY - 10);
+        // Draw finish line for Player 1 (left lane)
+        if (player1.distance >= RACE_DISTANCE - 500) {
+            const finishY1 = TRACK_HEIGHT - ((RACE_DISTANCE - player1.distance) / 5);
+            if (finishY1 > 0 && finishY1 < TRACK_HEIGHT) {
+                ctx.fillStyle = 'rgba(6, 182, 212, 0.8)'; // Cyan for P1
+                ctx.fillRect(100, finishY1, 100, 5);
+                ctx.fillStyle = player1.color;
+                ctx.font = 'bold 20px Inter';
+                ctx.fillText('FINISH', 110, finishY1 - 10);
+            }
+        }
+        
+        // Draw finish line for Player 2 (right lane)
+        if (player2.distance >= RACE_DISTANCE - 500) {
+            const finishY2 = TRACK_HEIGHT - ((RACE_DISTANCE - player2.distance) / 5);
+            if (finishY2 > 0 && finishY2 < TRACK_HEIGHT) {
+                ctx.fillStyle = 'rgba(59, 130, 246, 0.8)'; // Blue for P2
+                ctx.fillRect(600, finishY2, 100, 5);
+                ctx.fillStyle = player2.color;
+                ctx.font = 'bold 20px Inter';
+                ctx.fillText('FINISH', 610, finishY2 - 10);
             }
         }
     }
