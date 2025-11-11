@@ -197,12 +197,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateStatus() {
         if (gameOver) {
             if (winner === 1) {
-                statusEl.textContent = '🏆 Red Wins!';
+                statusEl.textContent = '🏆 Red Wins! Restarting...';
                 statusEl.style.color = '#ef4444';
             } else {
-                statusEl.textContent = '🏆 Black Wins!';
+                statusEl.textContent = '🏆 Black Wins! Restarting...';
                 statusEl.style.color = '#94a3b8';
             }
+            // Auto-reset after 2 seconds
+            setTimeout(() => {
+                resetGame();
+            }, 2000);
         } else {
             if (currentPlayer === 1) {
                 statusEl.textContent = 'Red\'s Turn';
@@ -241,8 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (!checkWin()) {
                     currentPlayer = currentPlayer === 1 ? -1 : 1;
-                    updateStatus();
                 }
+                updateStatus();
                 draw();
             }
         } else {
