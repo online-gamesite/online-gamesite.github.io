@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Player 1 (Cyan - left lane)
     const player1 = {
-        x: 150,
+        x: 130, // Centered in left lane (100-200)
         y: TRACK_HEIGHT - 100,
         width: CAR_WIDTH,
         height: CAR_HEIGHT,
@@ -27,12 +27,15 @@ document.addEventListener('DOMContentLoaded', function() {
         color: '#06b6d4',
         keys: { up: false, down: false, left: false, right: false },
         lane: 0,
-        laneX: 150
+        laneX: 130,
+        minX: 105,
+        maxX: 175,
+        distance: 0
     };
     
     // Player 2 (Blue - right lane)
     const player2 = {
-        x: 650,
+        x: 630, // Centered in right lane (600-700)
         y: TRACK_HEIGHT - 100,
         width: CAR_WIDTH,
         height: CAR_HEIGHT,
@@ -43,7 +46,10 @@ document.addEventListener('DOMContentLoaded', function() {
         color: '#3b82f6',
         keys: { up: false, down: false, left: false, right: false },
         lane: 1,
-        laneX: 650
+        laneX: 630,
+        minX: 605,
+        maxX: 675,
+        distance: 0
     };
     
     // Obstacles
@@ -62,10 +68,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const RACE_DISTANCE = 3000;
     
     function createObstacle() {
-        const lanes = [150, 650];
+        const lanes = [130, 630]; // Match player lane centers
         const laneIndex = Math.floor(Math.random() * 2);
         obstacles.push({
-            x: lanes[laneIndex],
+            x: lanes[laneIndex] - 25, // Center obstacle (50px wide)
             y: -50,
             width: 50,
             height: 50,
@@ -74,10 +80,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function createBoost() {
-        const lanes = [150, 650];
+        const lanes = [130, 630]; // Match player lane centers
         const laneIndex = Math.floor(Math.random() * 2);
         boosts.push({
-            x: lanes[laneIndex],
+            x: lanes[laneIndex] - 20, // Center boost (40px wide)
             y: -30,
             width: 40,
             height: 40,
@@ -103,12 +109,21 @@ document.addEventListener('DOMContentLoaded', function() {
             player.speed = Math.max(player.speed - player.friction, 0);
         }
         
-        // Lane switching
-        if (player.keys.left && player.x > player.laneX - 20) {
-            player.x -= 3;
+        // Lane switching with boundaries
+        if (player.keys.left && player.x > player.minX) {
+            player.x -= 2;
         }
-        if (player.keys.right && player.x < player.laneX + 20) {
-            player.x += 3;
+        if (player.keys.right && player.x < player.maxX) {
+            player.x += 2;
+        }
+        
+        // Keep car centered in lane when no input
+        if (!player.keys.left && !player.keys.right) {
+            if (player.x < player.laneX - 1) {
+                player.x += 1;
+            } else if (player.x > player.laneX + 1) {
+                player.x -= 1;
+            }
         }
         
         // Check collisions with obstacles
@@ -134,7 +149,11 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePlayer(player1);
         updatePlayer(player2);
         
-        // Update track offset based on average speed
+        // Update individual player distances
+        player1.distance += player1.speed;
+        player2.distance += player2.speed;
+        
+        // Update track offset based on average speed for visual effect
         const avgSpeed = (player1.speed + player2.speed) / 2;
         trackOffset += avgSpeed;
         distanceTraveled += avgSpeed;
@@ -169,14 +188,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Check for winner
-        if (distanceTraveled >= RACE_DISTANCE) {
+        // Check for winner - first to reach RACE_DISTANCE
+        if (player1.distance >= RACE_DISTANCE || player2.distance >= RACE_DISTANCE) {
             gameState = 'finished';
-            if (player1.speed > player2.speed) {
+            if (player1.distance > player2.distance) {
                 winner = 1;
                 statusEl.textContent = '🏆 Player 1 (Cyan) Wins!';
                 statusEl.style.color = '#06b6d4';
-            } else if (player2.speed > player1.speed) {
+            } else if (player2.distance > player1.distance) {
                 winner = 2;
                 statusEl.textContent = '🏆 Player 2 (Blue) Wins!';
                 statusEl.style.color = '#3b82f6';
@@ -351,13 +370,15 @@ document.addEventListener('DOMContentLoaded', function() {
         statusEl.textContent = 'Press SPACE to Start Race!';
         statusEl.style.color = '#06b6d4';
         
-        player1.x = 150;
+        player1.x = 130;
         player1.y = TRACK_HEIGHT - 100;
         player1.speed = 0;
+        player1.distance = 0;
         
-        player2.x = 650;
+        player2.x = 630;
         player2.y = TRACK_HEIGHT - 100;
         player2.speed = 0;
+        player2.distance = 0;
         
         obstacles = [];
         boosts = [];
