@@ -41,9 +41,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     // AI turn
                     if (currentPlayer === 2 && !gameOver) {
                         aiThinking = true;
+                        updateStatus();
                         setTimeout(() => {
                             aiMove();
                             aiThinking = false;
+                            updateStatus();
+                            draw();
                         }, 500);
                     }
                 }
