@@ -222,6 +222,8 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            console.log('Form submitted, sending to Formspree...');
+            
             const formData = new FormData(form);
             
             try {
@@ -233,7 +235,12 @@
                     }
                 });
 
+                console.log('Response status:', response.status);
+                const data = await response.json();
+                console.log('Response data:', data);
+
                 if (response.ok) {
+                    console.log('Success!');
                     successMessage.style.display = 'block';
                     errorMessage.style.display = 'none';
                     form.reset();
@@ -246,13 +253,14 @@
                         successMessage.style.display = 'none';
                     }, 5000);
                 } else {
-                    const data = await response.json();
+                    console.error('Form submission failed:', data);
+                    errorMessage.textContent = '❌ ' + (data.error || 'Form submission failed. Please try again.');
                     throw new Error(data.error || 'Form submission failed');
                 }
             } catch (error) {
+                console.error('Error submitting form:', error);
                 errorMessage.style.display = 'block';
                 successMessage.style.display = 'none';
-                console.error('Error:', error);
             }
         });
     </script>
