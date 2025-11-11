@@ -59,14 +59,20 @@ document.addEventListener('DOMContentLoaded', function() {
     let obstaclesLane1 = [];
     let obstacleTimer0 = 0;
     let obstacleTimer1 = 0;
-    const OBSTACLE_INTERVAL = 100; // Reduced from 120 for more frequent obstacles
+    let nextObstacleInterval0 = 100;
+    let nextObstacleInterval1 = 100;
+    const OBSTACLE_INTERVAL_MIN = 60;
+    const OBSTACLE_INTERVAL_MAX = 140;
     
     // Speed boosts (separate for each lane)
     let boostsLane0 = [];
     let boostsLane1 = [];
     let boostTimer0 = 0;
     let boostTimer1 = 0;
-    const BOOST_INTERVAL = 150; // Reduced from 180 for more frequent boosts
+    let nextBoostInterval0 = 150;
+    let nextBoostInterval1 = 150;
+    const BOOST_INTERVAL_MIN = 120;
+    const BOOST_INTERVAL_MAX = 200;
     
     // Track scroll
     let distanceTraveled = 0;
@@ -74,19 +80,34 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function createObstacle(lane, obstacleArray) {
         const laneX = lane === 0 ? 130 : 630;
+        const minX = lane === 0 ? 105 : 605;
+        const maxX = lane === 0 ? 175 : 675;
+        
+        // Random position within lane
+        const randomX = minX + Math.random() * (maxX - minX - 50);
+        
+        // Random size
+        const size = 40 + Math.random() * 20; // 40-60px
+        
         obstacleArray.push({
-            x: laneX - 25, // Center obstacle (50px wide)
+            x: randomX,
             y: -50,
-            width: 50,
-            height: 50,
+            width: size,
+            height: size,
             lane: lane
         });
     }
     
     function createBoost(lane, boostArray) {
         const laneX = lane === 0 ? 130 : 630;
+        const minX = lane === 0 ? 105 : 605;
+        const maxX = lane === 0 ? 175 : 675;
+        
+        // Random position within lane
+        const randomX = minX + Math.random() * (maxX - minX - 40);
+        
         boostArray.push({
-            x: laneX - 20, // Center boost (40px wide)
+            x: randomX,
             y: -30,
             width: 40,
             height: 40,
@@ -164,32 +185,44 @@ document.addEventListener('DOMContentLoaded', function() {
         // Spawn obstacles for lane 0 (player 1)
         if (player1.speed > 0) {
             obstacleTimer0++;
-            if (obstacleTimer0 >= OBSTACLE_INTERVAL) {
+            if (obstacleTimer0 >= nextObstacleInterval0) {
                 createObstacle(0, obstaclesLane0);
                 obstacleTimer0 = 0;
+                // Set next random interval
+                nextObstacleInterval0 = OBSTACLE_INTERVAL_MIN + 
+                    Math.random() * (OBSTACLE_INTERVAL_MAX - OBSTACLE_INTERVAL_MIN);
             }
             
             // Spawn boosts
             boostTimer0++;
-            if (boostTimer0 >= BOOST_INTERVAL) {
+            if (boostTimer0 >= nextBoostInterval0) {
                 createBoost(0, boostsLane0);
                 boostTimer0 = 0;
+                // Set next random interval
+                nextBoostInterval0 = BOOST_INTERVAL_MIN + 
+                    Math.random() * (BOOST_INTERVAL_MAX - BOOST_INTERVAL_MIN);
             }
         }
         
         // Spawn obstacles for lane 1 (player 2)
         if (player2.speed > 0) {
             obstacleTimer1++;
-            if (obstacleTimer1 >= OBSTACLE_INTERVAL) {
+            if (obstacleTimer1 >= nextObstacleInterval1) {
                 createObstacle(1, obstaclesLane1);
                 obstacleTimer1 = 0;
+                // Set next random interval
+                nextObstacleInterval1 = OBSTACLE_INTERVAL_MIN + 
+                    Math.random() * (OBSTACLE_INTERVAL_MAX - OBSTACLE_INTERVAL_MIN);
             }
             
             // Spawn boosts
             boostTimer1++;
-            if (boostTimer1 >= BOOST_INTERVAL) {
+            if (boostTimer1 >= nextBoostInterval1) {
                 createBoost(1, boostsLane1);
                 boostTimer1 = 0;
+                // Set next random interval
+                nextBoostInterval1 = BOOST_INTERVAL_MIN + 
+                    Math.random() * (BOOST_INTERVAL_MAX - BOOST_INTERVAL_MIN);
             }
         }
         
