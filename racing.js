@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Track scroll
     let distanceTraveled = 0;
-    const RACE_DISTANCE = 4000; // Increased from 2500 for longer races
+    const RACE_DISTANCE = 20000; // 5x longer race distance
     
     function createObstacle(lane, obstacleArray) {
         const laneX = lane === 0 ? 130 : 630;
