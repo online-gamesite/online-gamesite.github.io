@@ -216,6 +216,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function aiMove() {
+        console.log('AI Move called, currentPlayer:', currentPlayer);
         // Find all possible moves
         const allMoves = [];
         for (let row = 0; row < 8; row++) {
@@ -229,8 +230,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
+        console.log('AI found', allMoves.length, 'possible moves');
+        
         if (allMoves.length === 0) {
+            console.log('AI has no moves, checking win');
             checkWin();
+            aiThinking = false;
             updateStatus();
             draw();
             return;
@@ -246,21 +251,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         const bestMove = allMoves[0];
+        console.log('AI making move from', bestMove.fromRow, bestMove.fromCol, 'to', bestMove.row, bestMove.col);
         aiMakeMove(bestMove);
     }
     
     function aiMakeMove(move) {
+        console.log('AI making move:', move);
         const result = movePiece(move.fromRow, move.fromCol, move.row, move.col, move);
+        console.log('Move result:', result);
         draw();
         
         // Handle multi-jump
         if (result.multiJump) {
+            console.log('Multi-jump available');
             setTimeout(() => {
                 const nextJumps = getValidMoves(result.row, result.col).filter(m => m.jump);
+                console.log('Next jumps available:', nextJumps.length);
                 if (nextJumps.length > 0) {
                     aiMakeMove({ fromRow: result.row, fromCol: result.col, ...nextJumps[0] });
                 } else {
                     // No more jumps, end AI turn
+                    console.log('No more jumps, ending AI turn');
                     aiThinking = false;
                     if (!checkWin()) {
                         currentPlayer = 1;
@@ -271,6 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }, 400);
         } else {
+            console.log('Single move complete, ending AI turn');
             aiThinking = false;
             if (!checkWin()) {
                 currentPlayer = 1;
