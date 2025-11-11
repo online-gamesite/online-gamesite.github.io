@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Track scroll
     let trackOffset = 0;
     let distanceTraveled = 0;
-    const RACE_DISTANCE = 2500; // Reduced from 3000 for faster races
+    const RACE_DISTANCE = 4000; // Increased from 2500 for longer races
     
     function createObstacle() {
         const lanes = [130, 630]; // Match player lane centers
