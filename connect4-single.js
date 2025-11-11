@@ -25,8 +25,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    function dropPiece(col) {
-        if (gameOver || aiThinking) return false;
+    function dropPiece(col, isAI = false) {
+        console.log('dropPiece called, col:', col, 'player:', currentPlayer, 'aiThinking:', aiThinking, 'isAI:', isAI);
+        if (gameOver) return false;
+        if (!isAI && aiThinking) return false; // Only block human moves when AI is thinking
         if (col < 0 || col >= COLS) return false;
         
         // Find lowest empty row
@@ -142,6 +144,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function aiMove() {
+        console.log('AI Move called');
         // Simple AI: Try to win, block opponent, or pick random
         let move = -1;
         
@@ -188,7 +191,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         if (move !== -1) {
-            dropPiece(move);
+            console.log('AI making move at column:', move);
+            dropPiece(move, true); // Pass true to indicate this is an AI move
+        } else {
+            console.log('No valid move found!');
         }
     }
     
