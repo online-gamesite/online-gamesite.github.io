@@ -113,30 +113,33 @@ document.addEventListener('DOMContentLoaded', function() {
         if (player.keys.up) moveDirection = 1;
         if (player.keys.down) moveDirection = -1;
         
-        const dx = Math.cos(player.angle) * moveDirection;
-        const dy = Math.sin(player.angle) * moveDirection;
-        
-        // Move with collision detection
-        const newX = player.x + dx * player.speed;
-        const newY = player.y + dy * player.speed;
-        
-        // Check boundaries
-        if (newX >= 0 && newX + player.width <= WIDTH) {
-            player.x = newX;
-        }
-        if (newY >= 0 && newY + player.height <= HEIGHT) {
-            player.y = newY;
-        }
-        
-        // Check wall collisions
-        for (const wall of walls) {
-            if (checkCollision({ x: player.x, y: player.y, width: player.width, height: player.height }, wall)) {
-                // Revert movement
-                if (moveDirection !== 0) {
-                    player.x -= dx * player.speed;
-                    player.y -= dy * player.speed;
+        // Apply movement if there is any
+        if (moveDirection !== 0) {
+            const dx = Math.cos(player.angle) * moveDirection * player.speed;
+            const dy = Math.sin(player.angle) * moveDirection * player.speed;
+            
+            // Calculate new position
+            const newX = player.x + dx;
+            const newY = player.y + dy;
+            
+            // Check boundaries
+            let canMoveX = newX >= 0 && newX + player.width <= WIDTH;
+            let canMoveY = newY >= 0 && newY + player.height <= HEIGHT;
+            
+            // Tentatively move
+            if (canMoveX) player.x = newX;
+            if (canMoveY) player.y = newY;
+            
+            // Check wall collisions
+            let collided = false;
+            for (const wall of walls) {
+                if (checkCollision({ x: player.x, y: player.y, width: player.width, height: player.height }, wall)) {
+                    // Revert movement
+                    if (canMoveX) player.x -= dx;
+                    if (canMoveY) player.y -= dy;
+                    collided = true;
+                    break;
                 }
-                break;
             }
         }
         
