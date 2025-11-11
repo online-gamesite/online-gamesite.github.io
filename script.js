@@ -32,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('hashchange', checkHash);
     
     navSingleplayer.addEventListener('click', function (e) {
-      e.preventDefault();
       window.location.hash = '';
       sectionSingleplayer.style.display = 'block';
       sectionMultiplayer.style.display = 'none';
@@ -44,7 +43,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     navMultiplayer.addEventListener('click', function (e) {
-      e.preventDefault();
       window.location.hash = 'multiplayer';
       sectionSingleplayer.style.display = 'none';
       sectionMultiplayer.style.display = 'block';
