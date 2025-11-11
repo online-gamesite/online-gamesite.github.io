@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
         laneX: 130,
         minX: 105,
         maxX: 175,
-        distance: 0
+        distance: 0,
+        trackOffset: 0
     };
     
     // Player 2 (Blue - right lane)
@@ -49,45 +50,47 @@ document.addEventListener('DOMContentLoaded', function() {
         laneX: 630,
         minX: 605,
         maxX: 675,
-        distance: 0
+        distance: 0,
+        trackOffset: 0
     };
     
-    // Obstacles
-    let obstacles = [];
-    let obstacleTimer = 0;
+    // Obstacles (separate for each lane)
+    let obstaclesLane0 = [];
+    let obstaclesLane1 = [];
+    let obstacleTimer0 = 0;
+    let obstacleTimer1 = 0;
     const OBSTACLE_INTERVAL = 100; // Reduced from 120 for more frequent obstacles
     
-    // Speed boosts
-    let boosts = [];
-    let boostTimer = 0;
+    // Speed boosts (separate for each lane)
+    let boostsLane0 = [];
+    let boostsLane1 = [];
+    let boostTimer0 = 0;
+    let boostTimer1 = 0;
     const BOOST_INTERVAL = 150; // Reduced from 180 for more frequent boosts
     
     // Track scroll
-    let trackOffset = 0;
     let distanceTraveled = 0;
     const RACE_DISTANCE = 4000; // Increased from 2500 for longer races
     
-    function createObstacle() {
-        const lanes = [130, 630]; // Match player lane centers
-        const laneIndex = Math.floor(Math.random() * 2);
-        obstacles.push({
-            x: lanes[laneIndex] - 25, // Center obstacle (50px wide)
+    function createObstacle(lane, obstacleArray) {
+        const laneX = lane === 0 ? 130 : 630;
+        obstacleArray.push({
+            x: laneX - 25, // Center obstacle (50px wide)
             y: -50,
             width: 50,
             height: 50,
-            lane: laneIndex
+            lane: lane
         });
     }
     
-    function createBoost() {
-        const lanes = [130, 630]; // Match player lane centers
-        const laneIndex = Math.floor(Math.random() * 2);
-        boosts.push({
-            x: lanes[laneIndex] - 20, // Center boost (40px wide)
+    function createBoost(lane, boostArray) {
+        const laneX = lane === 0 ? 130 : 630;
+        boostArray.push({
+            x: laneX - 20, // Center boost (40px wide)
             y: -30,
             width: 40,
             height: 40,
-            lane: laneIndex
+            lane: lane
         });
     }
     
@@ -98,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
                player.y + player.height > obj.y;
     }
     
-    function updatePlayer(player) {
+    function updatePlayer(player, obstacleArray, boostArray) {
         // Acceleration and braking
         if (player.keys.up) {
             player.speed = Math.min(player.speed + player.acceleration, player.maxSpeed);
@@ -127,18 +130,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Check collisions with obstacles
-        for (let i = obstacles.length - 1; i >= 0; i--) {
-            if (checkCollision(player, obstacles[i])) {
+        for (let i = obstacleArray.length - 1; i >= 0; i--) {
+            if (checkCollision(player, obstacleArray[i])) {
                 player.speed *= 0.3; // Slow down on collision
-                obstacles.splice(i, 1);
+                obstacleArray.splice(i, 1);
             }
         }
         
         // Check collisions with boosts
-        for (let i = boosts.length - 1; i >= 0; i--) {
-            if (checkCollision(player, boosts[i])) {
+        for (let i = boostArray.length - 1; i >= 0; i--) {
+            if (checkCollision(player, boostArray[i])) {
                 player.speed = Math.min(player.speed + 3, player.maxSpeed + 2);
-                boosts.splice(i, 1);
+                boostArray.splice(i, 1);
             }
         }
     }
@@ -146,48 +149,81 @@ document.addEventListener('DOMContentLoaded', function() {
     function update() {
         if (gameState !== 'playing') return;
         
-        updatePlayer(player1);
-        updatePlayer(player2);
+        updatePlayer(player1, obstaclesLane0, boostsLane0);
+        updatePlayer(player2, obstaclesLane1, boostsLane1);
         
-        // Update individual player distances
+        // Update individual player distances and track offsets
         player1.distance += player1.speed;
+        player1.trackOffset += player1.speed;
         player2.distance += player2.speed;
+        player2.trackOffset += player2.speed;
         
-        // Update track offset based on maximum speed (faster car drives the visual)
-        const maxSpeed = Math.max(player1.speed, player2.speed);
-        trackOffset += maxSpeed;
-        distanceTraveled += maxSpeed;
+        // Update global distance for progress bar
+        distanceTraveled = Math.max(player1.distance, player2.distance);
         
-        // Spawn obstacles (only if cars are moving)
-        if (maxSpeed > 0) {
-            obstacleTimer++;
-            if (obstacleTimer >= OBSTACLE_INTERVAL) {
-                createObstacle();
-                obstacleTimer = 0;
+        // Spawn obstacles for lane 0 (player 1)
+        if (player1.speed > 0) {
+            obstacleTimer0++;
+            if (obstacleTimer0 >= OBSTACLE_INTERVAL) {
+                createObstacle(0, obstaclesLane0);
+                obstacleTimer0 = 0;
             }
             
             // Spawn boosts
-            boostTimer++;
-            if (boostTimer >= BOOST_INTERVAL) {
-                createBoost();
-                boostTimer = 0;
+            boostTimer0++;
+            if (boostTimer0 >= BOOST_INTERVAL) {
+                createBoost(0, boostsLane0);
+                boostTimer0 = 0;
             }
         }
         
-        // Move obstacles based on max speed (track moves faster when cars go faster)
-        const obstacleSpeed = 3 + maxSpeed * 0.5; // Base speed + proportional to car speed
-        for (let i = obstacles.length - 1; i >= 0; i--) {
-            obstacles[i].y += obstacleSpeed;
-            if (obstacles[i].y > TRACK_HEIGHT) {
-                obstacles.splice(i, 1);
+        // Spawn obstacles for lane 1 (player 2)
+        if (player2.speed > 0) {
+            obstacleTimer1++;
+            if (obstacleTimer1 >= OBSTACLE_INTERVAL) {
+                createObstacle(1, obstaclesLane1);
+                obstacleTimer1 = 0;
+            }
+            
+            // Spawn boosts
+            boostTimer1++;
+            if (boostTimer1 >= BOOST_INTERVAL) {
+                createBoost(1, boostsLane1);
+                boostTimer1 = 0;
             }
         }
         
-        // Move boosts
-        for (let i = boosts.length - 1; i >= 0; i--) {
-            boosts[i].y += obstacleSpeed;
-            if (boosts[i].y > TRACK_HEIGHT) {
-                boosts.splice(i, 1);
+        // Move obstacles for lane 0 based on player 1 speed
+        const obstacleSpeed0 = 3 + player1.speed * 0.5;
+        for (let i = obstaclesLane0.length - 1; i >= 0; i--) {
+            obstaclesLane0[i].y += obstacleSpeed0;
+            if (obstaclesLane0[i].y > TRACK_HEIGHT) {
+                obstaclesLane0.splice(i, 1);
+            }
+        }
+        
+        // Move boosts for lane 0
+        for (let i = boostsLane0.length - 1; i >= 0; i--) {
+            boostsLane0[i].y += obstacleSpeed0;
+            if (boostsLane0[i].y > TRACK_HEIGHT) {
+                boostsLane0.splice(i, 1);
+            }
+        }
+        
+        // Move obstacles for lane 1 based on player 2 speed
+        const obstacleSpeed1 = 3 + player2.speed * 0.5;
+        for (let i = obstaclesLane1.length - 1; i >= 0; i--) {
+            obstaclesLane1[i].y += obstacleSpeed1;
+            if (obstaclesLane1[i].y > TRACK_HEIGHT) {
+                obstaclesLane1.splice(i, 1);
+            }
+        }
+        
+        // Move boosts for lane 1
+        for (let i = boostsLane1.length - 1; i >= 0; i--) {
+            boostsLane1[i].y += obstacleSpeed1;
+            if (boostsLane1[i].y > TRACK_HEIGHT) {
+                boostsLane1.splice(i, 1);
             }
         }
         
@@ -226,17 +262,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Right lane
         ctx.strokeRect(600, 0, 100, TRACK_HEIGHT);
         
-        // Draw lane dividers (animated)
+        // Draw lane dividers (animated independently for each lane)
         ctx.setLineDash([20, 20]);
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-        const offset = (trackOffset % 40);
-        ctx.lineDashOffset = -offset;
         
+        // Left lane divider (based on player 1 movement)
+        const offset0 = (player1.trackOffset % 40);
+        ctx.lineDashOffset = -offset0;
         ctx.beginPath();
         ctx.moveTo(150, 0);
         ctx.lineTo(150, TRACK_HEIGHT);
         ctx.stroke();
         
+        // Right lane divider (based on player 2 movement)
+        const offset1 = (player2.trackOffset % 40);
+        ctx.lineDashOffset = -offset1;
         ctx.beginPath();
         ctx.moveTo(650, 0);
         ctx.lineTo(650, TRACK_HEIGHT);
@@ -305,7 +345,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function drawObstacles() {
         ctx.fillStyle = '#ef4444';
-        obstacles.forEach(obs => {
+        
+        // Draw obstacles for lane 0
+        obstaclesLane0.forEach(obs => {
+            ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+            // Warning stripes
+            ctx.fillStyle = '#fbbf24';
+            ctx.fillRect(obs.x + 5, obs.y + 5, obs.width - 10, 5);
+            ctx.fillRect(obs.x + 5, obs.y + obs.height - 10, obs.width - 10, 5);
+            ctx.fillStyle = '#ef4444';
+        });
+        
+        // Draw obstacles for lane 1
+        obstaclesLane1.forEach(obs => {
             ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
             // Warning stripes
             ctx.fillStyle = '#fbbf24';
@@ -316,7 +368,22 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function drawBoosts() {
-        boosts.forEach(boost => {
+        // Draw boosts for lane 0
+        boostsLane0.forEach(boost => {
+            ctx.fillStyle = '#10b981';
+            ctx.beginPath();
+            ctx.arc(boost.x + boost.width / 2, boost.y + boost.height / 2, 
+                   boost.width / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Star shape
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 20px Arial';
+            ctx.fillText('⚡', boost.x + 10, boost.y + 28);
+        });
+        
+        // Draw boosts for lane 1
+        boostsLane1.forEach(boost => {
             ctx.fillStyle = '#10b981';
             ctx.beginPath();
             ctx.arc(boost.x + boost.width / 2, boost.y + boost.height / 2, 
@@ -357,15 +424,20 @@ document.addEventListener('DOMContentLoaded', function() {
         statusEl.textContent = 'Race to the finish!';
         statusEl.style.color = '#06b6d4';
         distanceTraveled = 0;
-        trackOffset = 0;
-        obstacles = [];
-        boosts = [];
-        obstacleTimer = 0;
-        boostTimer = 0;
+        obstaclesLane0 = [];
+        obstaclesLane1 = [];
+        boostsLane0 = [];
+        boostsLane1 = [];
+        obstacleTimer0 = 0;
+        obstacleTimer1 = 0;
+        boostTimer0 = 0;
+        boostTimer1 = 0;
         winner = null;
         
         player1.speed = 0;
+        player1.trackOffset = 0;
         player2.speed = 0;
+        player2.trackOffset = 0;
     }
     
     function resetGame() {
@@ -377,16 +449,19 @@ document.addEventListener('DOMContentLoaded', function() {
         player1.y = TRACK_HEIGHT - 100;
         player1.speed = 0;
         player1.distance = 0;
+        player1.trackOffset = 0;
         
         player2.x = 630;
         player2.y = TRACK_HEIGHT - 100;
         player2.speed = 0;
         player2.distance = 0;
+        player2.trackOffset = 0;
         
-        obstacles = [];
-        boosts = [];
+        obstaclesLane0 = [];
+        obstaclesLane1 = [];
+        boostsLane0 = [];
+        boostsLane1 = [];
         distanceTraveled = 0;
-        trackOffset = 0;
         winner = null;
     }
     
