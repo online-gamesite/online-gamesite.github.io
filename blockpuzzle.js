@@ -86,17 +86,14 @@ function drawGrid() {
                 const x = GRID_OFFSET_X + col * CELL_SIZE;
                 const y = GRID_OFFSET_Y + row * CELL_SIZE;
                 
-                // Dark blue block
-                const gradient = ctx.createLinearGradient(x, y, x + CELL_SIZE, y + CELL_SIZE);
-                gradient.addColorStop(0, '#1e293b');
-                gradient.addColorStop(1, '#0f172a');
-                ctx.fillStyle = gradient;
+                // Use the color stored in the grid
+                ctx.fillStyle = grid[row][col];
                 ctx.fillRect(x + 3, y + 3, CELL_SIZE - 6, CELL_SIZE - 6);
                 
-                // Glowing edge
-                ctx.strokeStyle = '#475569';
+                // Glowing edge with matching color
+                ctx.strokeStyle = grid[row][col];
                 ctx.lineWidth = 2;
-                ctx.shadowColor = '#475569';
+                ctx.shadowColor = grid[row][col];
                 ctx.shadowBlur = 4;
                 ctx.strokeRect(x + 3, y + 3, CELL_SIZE - 6, CELL_SIZE - 6);
                 
