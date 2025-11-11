@@ -231,6 +231,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (allMoves.length === 0) {
             checkWin();
+            updateStatus();
+            draw();
             return;
         }
         
@@ -244,20 +246,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         const bestMove = allMoves[0];
-        const result = movePiece(bestMove.fromRow, bestMove.fromCol, bestMove.row, bestMove.col, bestMove);
+        aiMakeMove(bestMove);
+    }
+    
+    function aiMakeMove(move) {
+        const result = movePiece(move.fromRow, move.fromCol, move.row, move.col, move);
+        draw();
         
         // Handle multi-jump
         if (result.multiJump) {
             setTimeout(() => {
-                selectedPiece = { row: result.row, col: result.col };
-                validMoves = getValidMoves(result.row, result.col).filter(m => m.jump);
-                draw();
-                setTimeout(() => {
-                    selectedPiece = null;
-                    validMoves = [];
-                    aiMove();
-                }, 300);
-            }, 300);
+                const nextJumps = getValidMoves(result.row, result.col).filter(m => m.jump);
+                if (nextJumps.length > 0) {
+                    aiMakeMove({ fromRow: result.row, fromCol: result.col, ...nextJumps[0] });
+                } else {
+                    // No more jumps, end AI turn
+                    if (!checkWin()) {
+                        currentPlayer = 1;
+                        mustJump = hasJumps(1);
+                    }
+                    updateStatus();
+                    draw();
+                }
+            }, 400);
         } else {
             if (!checkWin()) {
                 currentPlayer = 1;
