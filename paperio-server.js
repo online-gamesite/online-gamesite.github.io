@@ -161,6 +161,12 @@ function floodFill(ownTerritory, trail) {
   const height = (maxY - minY) / GRID_SIZE;
   const totalCells = width * height;
   
+  // Reasonable limit: max 300x300 = 90,000 cells to prevent server freezing
+  if (width > 300 || height > 300 || totalCells > 90000) {
+    console.log(`Area too large (${width}x${height}, ${totalCells} cells), limiting fill to prevent lag`);
+    return [];
+  }
+  
   console.log(`Filling area: ${width}x${height} = ${totalCells} cells to check`);
   
   // Check all grid positions within bounding box using point-in-polygon test
