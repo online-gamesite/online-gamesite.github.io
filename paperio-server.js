@@ -157,50 +157,26 @@ function floodFill(ownTerritory, trail) {
     maxY = Math.max(maxY, point.y);
   }
   
-  // Limit the area we check to prevent lag
-  const maxArea = 500 * GRID_SIZE; // Max 500 tiles in each dimension
-  const width = maxX - minX;
-  const height = maxY - minY;
+  // Limit the area we check to prevent excessive lag (max 300x300 tiles)
+  const width = (maxX - minX) / GRID_SIZE;
+  const height = (maxY - minY) / GRID_SIZE;
   
-  if (width > maxArea || height > maxArea) {
-    // Area too large, just return the trail
+  if (width > 300 || height > 300) {
+    console.log('Area too large, skipping fill');
     return [];
   }
   
-  // Use scanline algorithm for faster filling
-  for (let y = minY; y <= maxY; y += GRID_SIZE) {
-    let inside = false;
-    let lastX = minX;
-    
-    for (let x = minX; x <= maxX; x += GRID_SIZE) {
+  // Check all grid positions within bounding box using point-in-polygon test
+  for (let x = minX; x <= maxX; x += GRID_SIZE) {
+    for (let y = minY; y <= maxY; y += GRID_SIZE) {
       const key = `${x},${y}`;
       
-      // Check if we're crossing a trail boundary
-      if (trailSet.has(key)) {
-        // Fill the scanline segment if we were inside
-        if (inside) {
-          for (let fx = lastX; fx < x; fx += GRID_SIZE) {
-            const fkey = `${fx},${y}`;
-            if (!territorySet.has(fkey) && !trailSet.has(fkey)) {
-              filled.push({ x: fx, y });
-            }
-          }
-        }
-        inside = !inside;
-        lastX = x + GRID_SIZE;
-      }
-    }
-  }
-  
-  // If scanline didn't work well, fall back to simple point-in-polygon
-  if (filled.length === 0 && width * height < 100 * GRID_SIZE * GRID_SIZE) {
-    for (let x = minX; x <= maxX; x += GRID_SIZE) {
-      for (let y = minY; y <= maxY; y += GRID_SIZE) {
-        const key = `${x},${y}`;
-        if (territorySet.has(key) || trailSet.has(key)) continue;
-        if (isInsidePolygon(x + GRID_SIZE/2, y + GRID_SIZE/2, trail)) {
-          filled.push({ x, y });
-        }
+      // Skip if already territory or part of trail
+      if (territorySet.has(key) || trailSet.has(key)) continue;
+      
+      // Check if this point is inside the polygon formed by trail
+      if (isInsidePolygon(x + GRID_SIZE/2, y + GRID_SIZE/2, trail)) {
+        filled.push({ x, y });
       }
     }
   }
