@@ -5,16 +5,24 @@ const socket = io('https://188.166.220.144', {
     rejectUnauthorized: false
 });
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+let canvas, ctx;
 
-// Set canvas size
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-window.addEventListener('resize', () => {
+// Initialize canvas when page loads
+window.addEventListener('DOMContentLoaded', () => {
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+    
+    // Start render loop
+    render();
 });
 
 // Game state
@@ -370,11 +378,10 @@ function updateUI() {
 }
 
 // Start game when Enter is pressed on name input
-document.getElementById('playerName').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        joinGame();
-    }
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('playerName').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            joinGame();
+        }
+    });
 });
-
-// Start render loop
-render();
