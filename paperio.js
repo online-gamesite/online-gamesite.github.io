@@ -114,14 +114,25 @@ function render() {
     // Draw grid
     drawGrid();
 
+    // Calculate visible area
+    const visibleMinX = camera.x;
+    const visibleMaxX = camera.x + canvas.width;
+    const visibleMinY = camera.y;
+    const visibleMaxY = camera.y + canvas.height;
+
     // Draw territories
     for (const playerId in territories) {
         const player = players[playerId];
         if (!player) continue;
 
         ctx.fillStyle = player.color + '40'; // Semi-transparent
+        
+        // Only draw tiles that are visible on screen
         for (const tile of territories[playerId]) {
-            ctx.fillRect(tile.x, tile.y, GRID_SIZE, GRID_SIZE);
+            if (tile.x + GRID_SIZE >= visibleMinX && tile.x <= visibleMaxX &&
+                tile.y + GRID_SIZE >= visibleMinY && tile.y <= visibleMaxY) {
+                ctx.fillRect(tile.x, tile.y, GRID_SIZE, GRID_SIZE);
+            }
         }
 
         // Draw territory border
@@ -234,6 +245,12 @@ function drawGrid() {
 function drawTerritoryBorder(territory) {
     if (territory.length === 0) return;
 
+    // Calculate visible area
+    const visibleMinX = camera.x - GRID_SIZE;
+    const visibleMaxX = camera.x + canvas.width + GRID_SIZE;
+    const visibleMinY = camera.y - GRID_SIZE;
+    const visibleMaxY = camera.y + canvas.height + GRID_SIZE;
+
     // Draw border segments only on edges
     const tileSet = new Set(territory.map(t => `${t.x},${t.y}`));
     
@@ -242,6 +259,12 @@ function drawTerritoryBorder(territory) {
     for (const tile of territory) {
         const x = tile.x;
         const y = tile.y;
+        
+        // Skip tiles not visible
+        if (x + GRID_SIZE < visibleMinX || x > visibleMaxX ||
+            y + GRID_SIZE < visibleMinY || y > visibleMaxY) {
+            continue;
+        }
         
         // Check each edge and draw a line if there's no neighbor
         // Top edge
