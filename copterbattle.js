@@ -1,25 +1,84 @@
 // Copter Battle Arena - Client-side JavaScript
-const SERVER_URL = window.location.protocol + '//' + window.location.host;
+// Detect if we're on the game server or GitHub Pages
+let SERVER_URL;
+if (window.location.hostname === '188.166.220.144') {
+    // On game server - use same origin
+    SERVER_URL = window.location.origin;
+} else {
+    // On GitHub Pages - connect to game server
+    SERVER_URL = 'https://188.166.220.144';
+}
+
+console.log('Connecting to:', SERVER_URL);
+
 const socket = io(SERVER_URL, {
     transports: ['websocket', 'polling'],
     reconnection: true,
     reconnectionAttempts: 10,
     reconnectionDelay: 1000,
-    timeout: 10000
+    timeout: 20000,
+    forceNew: true,
+    secure: true,
+    rejectUnauthorized: false // Accept self-signed certificates
 });
 
 // Connection status
 socket.on('connect', () => {
     console.log('✅ Connected to server!', socket.id);
+    
+    // Update UI to show connected
+    const connectingMsg = document.getElementById('connectingMsg');
+    const joinBtn = document.getElementById('joinBtn');
+    const connectionStatus = document.getElementById('connectionStatus');
+    
+    if (connectingMsg) {
+        connectingMsg.innerHTML = '✅ Connected! Ready to play';
+        connectingMsg.style.color = '#4ECDC4';
+    }
+    if (joinBtn) {
+        joinBtn.disabled = false;
+        joinBtn.style.opacity = '1';
+    }
+    if (connectionStatus) {
+        connectionStatus.style.background = 'rgba(76,209,196,0.2)';
+        connectionStatus.style.border = '2px solid #4ECDC4';
+    }
+    
+    // Hide any connection error messages
+    const loginScreen = document.getElementById('loginScreen');
+    if (loginScreen) {
+        const existingError = loginScreen.querySelector('.connection-error');
+        if (existingError) existingError.remove();
+    }
 });
 
 socket.on('connect_error', (error) => {
     console.error('❌ Connection error:', error);
-    alert('Failed to connect to game server. Please refresh the page.');
+    
+    const connectingMsg = document.getElementById('connectingMsg');
+    const joinBtn = document.getElementById('joinBtn');
+    const connectionStatus = document.getElementById('connectionStatus');
+    
+    if (connectingMsg) {
+        connectingMsg.innerHTML = '❌ Connection failed. Retrying...';
+        connectingMsg.style.color = '#FF6B6B';
+    }
+    if (joinBtn) {
+        joinBtn.disabled = true;
+        joinBtn.style.opacity = '0.5';
+    }
+    if (connectionStatus) {
+        connectionStatus.style.background = 'rgba(255,107,107,0.2)';
+        connectionStatus.style.border = '2px solid #FF6B6B';
+    }
 });
 
 socket.on('disconnect', (reason) => {
     console.log('Disconnected:', reason);
+    if (reason === 'io server disconnect') {
+        // Server kicked us, reconnect manually
+        socket.connect();
+    }
 });
 
 const canvas = document.getElementById('gameCanvas');

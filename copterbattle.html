@@ -82,7 +82,12 @@
             font-weight: bold;
         }
         
-        .login-box button:hover {
+        .login-box button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .login-box button:hover:not(:disabled) {
             background: #45B7D1;
             transform: scale(1.05);
         }
@@ -285,9 +290,12 @@
         <div class="login-box">
             <h1>🚁 Copter Battle</h1>
             <p>Real-time Multiplayer Combat Arena</p>
+            <div id="connectionStatus" style="margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 8px; font-size: 14px;">
+                <div id="connectingMsg">🔄 Connecting to server...</div>
+            </div>
             <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" autofocus>
             <br>
-            <button onclick="joinGame()">🔫 Join Battle</button>
+            <button onclick="joinGame()" id="joinBtn" disabled>🔫 Join Battle</button>
         </div>
     </div>
 
