@@ -142,16 +142,17 @@ function render() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Update camera to follow player
+    const zoom = 2;
     if (myId && players[myId]) {
         const player = players[myId];
-        camera.x = player.x - canvas.width / 2;
-        camera.y = player.y - canvas.height / 2;
+        // Adjust camera for zoom - divide by zoom to center properly
+        camera.x = player.x - (canvas.width / zoom) / 2;
+        camera.y = player.y - (canvas.height / zoom) / 2;
     }
 
     ctx.save();
     
     // Apply zoom (2x zoom = closer view)
-    const zoom = 2;
     ctx.scale(zoom, zoom);
     
     // Adjust camera translation for zoom
