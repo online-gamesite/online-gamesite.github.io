@@ -461,9 +461,9 @@ function render() {
         ctx.fillRect(-1.5, -28, 3, 56);
         ctx.restore();
         
-        // Tail boom
+        // Tail boom (behind)
         ctx.fillStyle = shadeColor(player.color, -15);
-        ctx.fillRect(8, -2, 24, 4);
+        ctx.fillRect(-32, -2, 24, 4);
         
         // Main body
         ctx.fillStyle = player.color;
@@ -471,10 +471,10 @@ function render() {
         ctx.ellipse(0, 0, 16, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Cockpit window
+        // Cockpit window (front)
         ctx.fillStyle = 'rgba(150, 180, 220, 0.7)';
         ctx.beginPath();
-        ctx.ellipse(-5, 0, 8, 6, 0, 0, Math.PI * 2);
+        ctx.ellipse(5, 0, 8, 6, 0, 0, Math.PI * 2);
         ctx.fill();
         
         // Rotor center
