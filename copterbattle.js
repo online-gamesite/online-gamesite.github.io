@@ -1,48 +1,34 @@
-// Copter Battle - Client-side JavaScript
-
-// Check if we're on HTTPS (GitHub Pages) and show warning
-if (window.location.protocol === 'https:') {
-    const warning = document.getElementById('httpsWarning');
-    if (warning) {
-        warning.style.display = 'block';
-    }
-    // Try to connect anyway, but it might be blocked by browser
-}
-
-// Use window.location.protocol to auto-detect if we're on HTTP or HTTPS
-const SERVER_URL = 'http://188.166.220.144:3000';
+// Copter Battle Arena - Client-side JavaScript
+const SERVER_URL = window.location.protocol + '//' + window.location.host;
 const socket = io(SERVER_URL, {
     transports: ['websocket', 'polling'],
-    reconnection: true,
-    reconnectionDelay: 1000,
-    reconnectionAttempts: 10
-});
-
-// Handle connection errors
-socket.on('connect_error', (error) => {
-    console.error('Connection error:', error);
-    if (window.location.protocol === 'https:') {
-        showNotification('❌ Cannot connect: Mixed content blocked. Please use the HTTP version button above!');
-    } else {
-        showNotification('❌ Cannot connect to game server. Please try again.');
-    }
-});
-
-socket.on('connect', () => {
-    console.log('Connected to game server!');
-    const warning = document.getElementById('httpsWarning');
-    if (warning) {
-        warning.style.display = 'none';
-    }
+    reconnection: true
 });
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Resize canvas to window
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+
+// Game state
 let myId = null;
 let players = {};
-let obstacles = [];
-let isFlying = false;
+let bullets = [];
+let gameWorld = { width: 3000, height: 3000 };
+let camera = { x: 0, y: 0 };
+
+// Input state
+let keys = {};
+let mouseX = 0;
+let mouseY = 0;
+let isShooting = false;
 
 // Join game
 function joinGame() {
@@ -50,223 +36,335 @@ function joinGame() {
     const name = nameInput.value.trim() || `Player${Math.floor(Math.random() * 1000)}`;
     
     socket.emit('joinGame', { name: name });
-    
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'block';
 }
 
-// Socket event handlers
+// Socket handlers
 socket.on('joined', (data) => {
     myId = data.id;
-    players = data.players;
-    obstacles = data.obstacles;
-    showNotification('🚁 You joined the battle!');
+    gameWorld = data.gameWorld;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'block';
+    showNotification('🚁 Joined the battle!');
+    
+    // Start game loop
+    requestAnimationFrame(gameLoop);
 });
 
 socket.on('playerJoined', (player) => {
     players[player.id] = player;
     if (player.id !== myId) {
-        showNotification(`🚁 ${player.name} joined the battle`);
+        showNotification(`${player.name} joined the battle`);
     }
-    updateStats();
 });
 
 socket.on('playerLeft', (data) => {
     delete players[data.id];
-    showNotification(`👋 ${data.name} left the game`);
-    updateStats();
-});
-
-socket.on('playerDied', (data) => {
-    if (players[data.id]) {
-        players[data.id].alive = false;
-    }
-    if (data.id === myId) {
-        showNotification('💥 You crashed! Watch the others battle...');
-    } else {
-        showNotification(`💥 ${data.name} crashed!`);
-    }
-    updateStats();
+    showNotification(`${data.name} left the game`);
 });
 
 socket.on('gameState', (state) => {
     players = state.players;
-    obstacles = state.obstacles;
+    bullets = state.bullets;
+    updateHUD();
+});
+
+socket.on('playerKilled', (data) => {
+    if (data.victim === myId) {
+        showDeathScreen(data.killerName);
+    } else if (data.killer === myId) {
+        showNotification(`💀 You killed ${data.victimName}! +100`);
+    } else {
+        showNotification(`💀 ${data.killerName} killed ${data.victimName}`);
+    }
+});
+
+socket.on('playerRespawned', (playerId) => {
+    if (playerId === myId) {
+        hideDeathScreen();
+        showNotification('🚁 Respawned!');
+    }
+});
+
+socket.on('upgradeSuccess', (data) => {
+    showNotification(`⚡ Upgraded ${data.upgradeType}!`);
+    updateUpgradeMenu();
+});
+
+// Input handlers
+document.addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+    
+    if (e.key.toLowerCase() === 'u') {
+        toggleUpgradeMenu();
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouseX = e.clientX - rect.left;
+    mouseY = e.clientY - rect.top;
+});
+
+canvas.addEventListener('mousedown', () => {
+    isShooting = true;
+});
+
+canvas.addEventListener('mouseup', () => {
+    isShooting = false;
+});
+
+// Prevent context menu on right click
+canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// Game loop
+function gameLoop() {
+    update();
     render();
-    updateStats();
-});
-
-socket.on('gameWinner', (data) => {
-    showWinner(data.name);
-    if (data.id === myId) {
-        showNotification('🏆 YOU WON! You are the last copter flying!');
-    }
-});
-
-// Controls
-function startFlying() {
-    if (players[myId] && players[myId].alive) {
-        socket.emit('flap');
-    }
+    requestAnimationFrame(gameLoop);
 }
 
-// Mouse/touch controls
-canvas.addEventListener('mousedown', startFlying);
-canvas.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    startFlying();
-});
-
-// Keyboard controls
-document.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' || e.code === 'ArrowUp') {
-        e.preventDefault();
-        startFlying();
+function update() {
+    if (!myId || !players[myId] || !players[myId].alive) return;
+    
+    const player = players[myId];
+    let moved = false;
+    
+    // Movement (WASD)
+    const speed = 5; // Will be modified by upgrades on server
+    let dx = 0;
+    let dy = 0;
+    
+    if (keys['w'] || keys['arrowup']) dy -= speed;
+    if (keys['s'] || keys['arrowdown']) dy += speed;
+    if (keys['a'] || keys['arrowleft']) dx -= speed;
+    if (keys['d'] || keys['arrowright']) dx += speed;
+    
+    if (dx !== 0 || dy !== 0) {
+        player.x += dx;
+        player.y += dy;
+        
+        // Keep in bounds
+        player.x = Math.max(0, Math.min(gameWorld.width, player.x));
+        player.y = Math.max(0, Math.min(gameWorld.height, player.y));
+        
+        moved = true;
     }
-});
-
-// Prevent spacebar from scrolling
-window.addEventListener('keydown', (e) => {
-    if (e.code === 'Space' && e.target === document.body) {
-        e.preventDefault();
+    
+    // Calculate angle to mouse
+    const worldMouseX = mouseX + camera.x;
+    const worldMouseY = mouseY + camera.y;
+    player.angle = Math.atan2(worldMouseY - player.y, worldMouseX - player.x);
+    
+    // Send update to server
+    if (moved || player.angle) {
+        socket.emit('playerMove', {
+            x: player.x,
+            y: player.y,
+            angle: player.angle
+        });
     }
-});
+    
+    // Shooting
+    if (isShooting || keys[' ']) {
+        socket.emit('shoot', { angle: player.angle });
+    }
+    
+    // Update camera to follow player
+    camera.x = player.x - canvas.width / 2;
+    camera.y = player.y - canvas.height / 2;
+    
+    // Keep camera in bounds
+    camera.x = Math.max(0, Math.min(gameWorld.width - canvas.width, camera.x));
+    camera.y = Math.max(0, Math.min(gameWorld.height - canvas.height, camera.y));
+}
 
-// Render game
 function render() {
     // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw sky gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#87CEEB');
-    gradient.addColorStop(1, '#E0F6FF');
-    ctx.fillStyle = gradient;
+    ctx.fillStyle = '#2d2d44';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
-    // Draw clouds
-    drawClouds();
+    // Draw grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
     
-    // Draw obstacles
-    obstacles.forEach(obstacle => {
-        // Top obstacle
-        ctx.fillStyle = '#2C3E50';
-        ctx.fillRect(obstacle.x, 0, 80, obstacle.topHeight);
+    const gridSize = 100;
+    const startX = Math.floor(camera.x / gridSize) * gridSize;
+    const startY = Math.floor(camera.y / gridSize) * gridSize;
+    
+    for (let x = startX; x < camera.x + canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x - camera.x, 0);
+        ctx.lineTo(x - camera.x, canvas.height);
+        ctx.stroke();
+    }
+    
+    for (let y = startY; y < camera.y + canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y - camera.y);
+        ctx.lineTo(canvas.width, y - camera.y);
+        ctx.stroke();
+    }
+    
+    // Draw bullets
+    bullets.forEach(bullet => {
+        const screenX = bullet.x - camera.x;
+        const screenY = bullet.y - camera.y;
         
-        // Bottom obstacle
-        ctx.fillRect(obstacle.x, obstacle.bottomY, 80, canvas.height - obstacle.bottomY);
+        if (screenX < -50 || screenX > canvas.width + 50 || 
+            screenY < -50 || screenY > canvas.height + 50) return;
         
-        // Obstacle border
-        ctx.strokeStyle = '#1A252F';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(obstacle.x, 0, 80, obstacle.topHeight);
-        ctx.strokeRect(obstacle.x, obstacle.bottomY, 80, canvas.height - obstacle.bottomY);
+        const player = players[bullet.playerId];
+        ctx.fillStyle = player ? player.color : '#FFD700';
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, bullet.size || 5, 0, Math.PI * 2);
+        ctx.fill();
         
-        // Gap highlight
-        ctx.fillStyle = 'rgba(76, 209, 55, 0.2)';
-        ctx.fillRect(obstacle.x, obstacle.topHeight, 80, obstacle.bottomY - obstacle.topHeight);
+        // Bullet trail
+        ctx.strokeStyle = player ? player.color + '80' : '#FFD70080';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(screenX, screenY);
+        const trailX = screenX - Math.cos(bullet.angle) * 10;
+        const trailY = screenY - Math.sin(bullet.angle) * 10;
+        ctx.lineTo(trailX, trailY);
+        ctx.stroke();
     });
     
     // Draw players
     Object.values(players).forEach(player => {
-        if (!player.alive) {
-            // Draw ghost/dead copter
-            ctx.globalAlpha = 0.3;
-        }
+        if (!player.alive) return;
         
-        // Copter body
+        const screenX = player.x - camera.x;
+        const screenY = player.y - camera.y;
+        
+        if (screenX < -100 || screenX > canvas.width + 100 || 
+            screenY < -100 || screenY > canvas.height + 100) return;
+        
+        ctx.save();
+        ctx.translate(screenX, screenY);
+        ctx.rotate(player.angle);
+        
+        // Helicopter body
         ctx.fillStyle = player.color;
-        ctx.fillRect(player.x, player.y, 30, 20);
+        ctx.fillRect(-20, -15, 40, 30);
         
-        // Copter cockpit
+        // Cockpit
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fillRect(player.x + 5, player.y + 5, 10, 10);
+        ctx.fillRect(-10, -10, 20, 20);
         
         // Rotor
-        const rotorY = player.y - 5;
         ctx.strokeStyle = player.color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(player.x - 10, rotorY);
-        ctx.lineTo(player.x + 40, rotorY);
+        ctx.moveTo(-30, -20);
+        ctx.lineTo(30, -20);
         ctx.stroke();
         
         // Tail
         ctx.fillStyle = player.color;
-        ctx.fillRect(player.x + 30, player.y + 8, 10, 4);
+        ctx.fillRect(20, -5, 15, 10);
+        
+        // Gun
+        ctx.fillStyle = '#333';
+        ctx.fillRect(20, -2, 15, 4);
+        
+        ctx.restore();
+        
+        // Health bar
+        const barWidth = 50;
+        const barHeight = 5;
+        const healthPercent = player.health / player.maxHealth;
+        
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(screenX - barWidth/2, screenY - 30, barWidth, barHeight);
+        
+        const healthColor = healthPercent > 0.5 ? '#4ECDC4' : healthPercent > 0.25 ? '#FFA07A' : '#FF6B6B';
+        ctx.fillStyle = healthColor;
+        ctx.fillRect(screenX - barWidth/2, screenY - 30, barWidth * healthPercent, barHeight);
         
         // Player name
-        ctx.globalAlpha = 1;
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'black';
         ctx.lineWidth = 3;
         ctx.font = 'bold 12px Arial';
         ctx.textAlign = 'center';
-        ctx.strokeText(player.name, player.x + 15, player.y - 8);
-        ctx.fillText(player.name, player.x + 15, player.y - 8);
+        ctx.strokeText(player.name, screenX, screenY - 38);
+        ctx.fillText(player.name, screenX, screenY - 38);
         
-        // Score
-        ctx.font = 'bold 10px Arial';
-        ctx.strokeText(`⭐${player.score}`, player.x + 15, player.y + 45);
-        ctx.fillText(`⭐${player.score}`, player.x + 15, player.y + 45);
-        
-        ctx.globalAlpha = 1;
+        // Level badge
+        if (player.level > 1) {
+            ctx.fillStyle = '#FFD700';
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.font = 'bold 10px Arial';
+            ctx.strokeText(`Lv.${player.level}`, screenX, screenY + 35);
+            ctx.fillText(`Lv.${player.level}`, screenX, screenY + 35);
+        }
     });
 }
 
-// Draw decorative clouds
-let cloudOffset = 0;
-function drawClouds() {
-    cloudOffset += 0.2;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-    
-    for (let i = 0; i < 5; i++) {
-        const x = ((i * 200 + cloudOffset) % (canvas.width + 100)) - 50;
-        const y = 50 + i * 30;
-        
-        ctx.beginPath();
-        ctx.arc(x, y, 20, 0, Math.PI * 2);
-        ctx.arc(x + 25, y, 25, 0, Math.PI * 2);
-        ctx.arc(x + 50, y, 20, 0, Math.PI * 2);
-        ctx.fill();
-    }
-}
-
-// Update stats display
-function updateStats() {
+// HUD functions
+function updateHUD() {
     if (!myId || !players[myId]) return;
     
-    document.getElementById('yourScore').textContent = players[myId].score;
-    document.getElementById('totalPlayers').textContent = Object.keys(players).length;
+    const player = players[myId];
     
-    const alivePlayers = Object.values(players).filter(p => p.alive).length;
-    document.getElementById('playersAlive').textContent = alivePlayers;
+    document.getElementById('playerName').textContent = player.name;
+    document.getElementById('playerLevel').textContent = player.level;
+    document.getElementById('playerXP').textContent = player.xp;
+    document.getElementById('playerKD').textContent = `${player.kills}/${player.deaths}`;
     
-    // Update players list
-    const playersList = document.getElementById('playersList');
-    playersList.innerHTML = '';
+    const healthPercent = (player.health / player.maxHealth) * 100;
+    document.getElementById('healthFill').style.width = healthPercent + '%';
+    document.getElementById('healthText').textContent = `${Math.ceil(player.health)}/${player.maxHealth}`;
     
-    // Sort by score
-    const sortedPlayers = Object.values(players).sort((a, b) => b.score - a.score);
+    // Update leaderboard
+    const sorted = Object.values(players).sort((a, b) => b.score - a.score).slice(0, 10);
+    const leaderboard = document.getElementById('leaderboardList');
+    leaderboard.innerHTML = '';
     
-    sortedPlayers.forEach(player => {
-        const playerDiv = document.createElement('div');
-        playerDiv.className = 'player-item' + (!player.alive ? ' player-dead' : '');
-        
-        playerDiv.innerHTML = `
-            <span class="player-name">
-                <span class="player-color" style="background-color: ${player.color}"></span>
-                ${player.name} ${player.id === myId ? '(You)' : ''}
-                ${!player.alive ? '💀' : '🚁'}
-            </span>
-            <span class="player-score">⭐ ${player.score}</span>
+    sorted.forEach((p, i) => {
+        const div = document.createElement('div');
+        div.className = 'leaderboard-item' + (p.id === myId ? ' me' : '');
+        div.innerHTML = `
+            <span>${i + 1}. ${p.name}</span>
+            <span>${p.kills} kills</span>
         `;
-        
-        playersList.appendChild(playerDiv);
+        leaderboard.appendChild(div);
     });
 }
 
-// Show notification
+function toggleUpgradeMenu() {
+    const menu = document.getElementById('upgradeMenu');
+    menu.style.display = menu.style.display === 'none' || !menu.style.display ? 'block' : 'none';
+    updateUpgradeMenu();
+}
+
+function updateUpgradeMenu() {
+    if (!myId || !players[myId]) return;
+    
+    const player = players[myId];
+    const availablePoints = Math.floor(player.xp / 10);
+    const spentPoints = Object.values(player.upgrades).reduce((sum, level) => sum + level, 0);
+    
+    document.getElementById('availablePoints').textContent = availablePoints - spentPoints;
+    
+    // Update upgrade buttons
+    ['FIRE_RATE', 'BULLET_DAMAGE', 'MAX_HEALTH', 'MOVE_SPEED', 'BULLET_SIZE'].forEach(type => {
+        const level = player.upgrades[type] || 0;
+        document.getElementById(`upgrade-${type}`).textContent = level;
+    });
+}
+
+function buyUpgrade(upgradeType) {
+    socket.emit('upgrade', upgradeType);
+}
+
+// Notifications
 function showNotification(message) {
     const notification = document.createElement('div');
     notification.className = 'notification';
@@ -279,21 +377,23 @@ function showNotification(message) {
     }, 3000);
 }
 
-// Show winner banner
-function showWinner(name) {
-    const banner = document.createElement('div');
-    banner.className = 'winner-banner';
-    banner.innerHTML = `
-        🏆<br>
-        ${name}<br>
-        WINS!
-    `;
-    document.body.appendChild(banner);
+function showDeathScreen(killerName) {
+    const deathScreen = document.getElementById('deathScreen');
+    document.getElementById('killerName').textContent = killerName || 'Unknown';
+    deathScreen.style.display = 'block';
     
-    setTimeout(() => {
-        banner.style.animation = 'slideIn 0.3s ease-out reverse';
-        setTimeout(() => banner.remove(), 300);
-    }, 5000);
+    let timer = 3;
+    document.getElementById('respawnTimer').textContent = timer;
+    
+    const interval = setInterval(() => {
+        timer--;
+        document.getElementById('respawnTimer').textContent = timer;
+        if (timer <= 0) clearInterval(interval);
+    }, 1000);
+}
+
+function hideDeathScreen() {
+    document.getElementById('deathScreen').style.display = 'none';
 }
 
 // Handle enter key on name input
@@ -302,10 +402,3 @@ document.getElementById('playerName').addEventListener('keypress', (e) => {
         joinGame();
     }
 });
-
-// Start rendering loop
-setInterval(() => {
-    if (Object.keys(players).length > 0) {
-        render();
-    }
-}, 1000 / 60);

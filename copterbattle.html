@@ -3,21 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Copter Battle - Multiplayer Online Game</title>
-    <meta name="description" content="Play Copter Battle online with friends! Control your helicopter, avoid obstacles, and be the last copter flying in this real-time multiplayer game.">
-    <link rel="canonical" href="https://sanjith-esp32.github.io/copterbattle.html">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://sanjith-esp32.github.io/copterbattle.html">
-    <meta property="og:title" content="Copter Battle - Multiplayer Online Game">
-    <meta property="og:description" content="Control your helicopter and battle other players in real-time! Avoid obstacles and be the last copter flying.">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://sanjith-esp32.github.io/copterbattle.html">
-    <meta property="twitter:title" content="Copter Battle - Multiplayer Online Game">
-    <meta property="twitter:description" content="Control your helicopter and battle other players in real-time!">
+    <title>Copter Battle Arena - Multiplayer Combat Game</title>
+    <meta name="description" content="Real-time multiplayer helicopter combat! Shoot enemies, level up, unlock upgrades in this intense .io style battle arena.">
     
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-33Q7MTCK21"></script>
@@ -28,24 +15,6 @@
       gtag('config', 'G-33Q7MTCK21');
     </script>
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "VideoGame",
-      "name": "Copter Battle",
-      "description": "Real-time multiplayer helicopter battle game. Control your copter, avoid obstacles, and be the last one flying!",
-      "genre": ["Action", "Multiplayer", "Arcade"],
-      "playMode": "MultiPlayer",
-      "gamePlatform": "Web Browser",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      }
-    }
-    </script>
-    
     <style>
         * {
             margin: 0;
@@ -55,58 +24,53 @@
         
         body {
             font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
+            background: #1a1a2e;
             color: white;
-        }
-        
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-        
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-        
-        .subtitle {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            opacity: 0.9;
+            overflow: hidden;
         }
         
         #loginScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .login-box {
             background: rgba(255,255,255,0.1);
             backdrop-filter: blur(10px);
             padding: 40px;
             border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
             text-align: center;
+            max-width: 400px;
         }
         
-        #loginScreen h2 {
-            margin-bottom: 20px;
+        .login-box h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
         }
         
-        #loginScreen input {
+        .login-box p {
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .login-box input {
             padding: 15px;
             font-size: 16px;
             border: none;
             border-radius: 10px;
             width: 100%;
-            max-width: 300px;
             margin-bottom: 20px;
         }
         
-        #loginScreen button {
+        .login-box button {
             padding: 15px 40px;
             font-size: 18px;
             background: #4ECDC4;
@@ -118,178 +82,151 @@
             font-weight: bold;
         }
         
-        #loginScreen button:hover {
+        .login-box button:hover {
             background: #45B7D1;
             transform: scale(1.05);
         }
         
         #gameScreen {
             display: none;
+            width: 100vw;
+            height: 100vh;
+            position: relative;
         }
         
         #gameCanvas {
-            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 100%);
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             display: block;
-            margin: 0 auto 20px;
-            cursor: pointer;
+            cursor: crosshair;
+            background: #2d2d44;
         }
         
-        .stats {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
+        #hud {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            pointer-events: none;
+        }
+        
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .player-stats {
+            background: rgba(0,0,0,0.7);
+            padding: 15px 20px;
+            border-radius: 10px;
+            pointer-events: all;
+        }
+        
+        .health-bar {
+            width: 200px;
+            height: 25px;
+            background: rgba(255,255,255,0.2);
             border-radius: 15px;
-            margin-bottom: 20px;
+            overflow: hidden;
+            margin-top: 10px;
+            position: relative;
         }
         
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B6B, #FF8E53);
+            transition: width 0.3s;
         }
         
-        .stat-card {
-            background: rgba(255,255,255,0.1);
+        .health-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 12px;
+        }
+        
+        .leaderboard {
+            background: rgba(0,0,0,0.7);
             padding: 15px;
             border-radius: 10px;
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 5px;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.8;
-        }
-        
-        #playersList {
-            max-height: 200px;
+            min-width: 250px;
+            max-height: 300px;
             overflow-y: auto;
         }
         
-        .player-item {
-            background: rgba(255,255,255,0.1);
-            padding: 10px 15px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .leaderboard h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-align: center;
         }
         
-        .player-name {
-            font-weight: bold;
+        .leaderboard-item {
             display: flex;
-            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            margin: 3px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        
+        .leaderboard-item.me {
+            background: rgba(76,209,196,0.3);
+            border: 1px solid #4ECDC4;
+        }
+        
+        #upgradeMenu {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            padding: 20px;
+            border-radius: 15px;
+            display: none;
+            pointer-events: all;
+        }
+        
+        .upgrade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
         }
         
-        .player-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-        
-        .player-score {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 15px;
-            border-radius: 15px;
-        }
-        
-        .player-dead {
-            opacity: 0.5;
-            text-decoration: line-through;
-        }
-        
-        .controls {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-        }
-        
-        .controls h3 {
-            margin-bottom: 15px;
-        }
-        
-        .control-hint {
-            font-size: 1.2em;
-            margin-bottom: 10px;
-        }
-        
-        .back-button {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: rgba(255,255,255,0.2);
+        .upgrade-btn {
+            background: rgba(76,209,196,0.3);
+            border: 2px solid #4ECDC4;
             color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            transition: all 0.3s;
-        }
-        
-        .back-button:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.05);
-        }
-        
-        .warning-box {
-            background: rgba(255, 193, 7, 0.2);
-            border: 2px solid rgba(255, 193, 7, 0.5);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .warning-box h3 {
-            color: #FFC107;
-            margin-bottom: 10px;
-        }
-        
-        .warning-box p {
-            margin-bottom: 15px;
-            line-height: 1.6;
-        }
-        
-        .warning-box .btn {
-            background: #FFC107;
-            color: #333;
-            padding: 12px 30px;
-            border: none;
+            padding: 10px;
             border-radius: 8px;
-            font-weight: bold;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
             transition: all 0.3s;
+            font-size: 12px;
         }
         
-        .warning-box .btn:hover {
-            background: #FFD54F;
+        .upgrade-btn:hover {
+            background: rgba(76,209,196,0.5);
             transform: scale(1.05);
+        }
+        
+        .upgrade-btn.maxed {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666;
         }
         
         .notification {
             position: fixed;
-            top: 20px;
+            top: 100px;
             right: 20px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: white;
             padding: 15px 25px;
             border-radius: 10px;
             animation: slideIn 0.3s ease-out;
-            z-index: 1000;
+            pointer-events: none;
+            max-width: 300px;
         }
         
         @keyframes slideIn {
@@ -303,98 +240,134 @@
             }
         }
         
-        .winner-banner {
+        .death-screen {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(255,215,0,0.95);
-            color: #333;
-            padding: 40px 60px;
+            background: rgba(0,0,0,0.9);
+            padding: 40px;
             border-radius: 20px;
-            font-size: 2em;
-            font-weight: bold;
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-            animation: bounce 0.5s ease-out;
-            z-index: 2000;
             text-align: center;
+            display: none;
+            z-index: 500;
         }
         
-        @keyframes bounce {
-            0%, 100% { transform: translate(-50%, -50%) scale(1); }
-            50% { transform: translate(-50%, -50%) scale(1.1); }
+        .death-screen h2 {
+            color: #FF6B6B;
+            margin-bottom: 20px;
+            font-size: 2.5em;
         }
         
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-            
-            #gameCanvas {
-                max-width: 100%;
-                height: auto;
-            }
+        .death-screen .stats {
+            margin: 20px 0;
+            font-size: 1.2em;
+        }
+        
+        .controls-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+        
+        .controls-hint div {
+            margin: 5px 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚁 Copter Battle</h1>
-        <p class="subtitle">Real-time Multiplayer Helicopter Game</p>
-        
-        <!-- HTTPS Warning (only shows on HTTPS) -->
-        <div class="warning-box" id="httpsWarning" style="display:none;">
-            <h3>⚠️ Connection Issue</h3>
-            <p>This game requires an HTTP connection to work properly. Click the button below to open the game in a new tab where it will work:</p>
-            <a href="http://188.166.220.144/copterbattle.html" class="btn" target="_blank">🚀 Open Game (HTTP Version)</a>
-            <p style="margin-top:15px;font-size:0.9em;opacity:0.8;">
-                Note: The HTTP version is hosted on our game server. We're working on getting an SSL certificate for full HTTPS support!
-            </p>
-        </div>
-        
-        <!-- Login Screen -->
-        <div id="loginScreen">
-            <h2>Join the Battle!</h2>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1>🚁 Copter Battle</h1>
+            <p>Real-time Multiplayer Combat Arena</p>
             <input type="text" id="playerName" placeholder="Enter your name" maxlength="20" autofocus>
             <br>
-            <button onclick="joinGame()">🚁 Start Flying</button>
+            <button onclick="joinGame()">🔫 Join Battle</button>
         </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="gameScreen">
+        <canvas id="gameCanvas"></canvas>
         
-        <!-- Game Screen -->
-        <div id="gameScreen">
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
-            
-            <div class="stats">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <span class="stat-value" id="yourScore">0</span>
-                        <span class="stat-label">Your Score</span>
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-top">
+                <div class="player-stats">
+                    <div id="playerName" style="font-weight:bold;font-size:16px;margin-bottom:5px;">Player</div>
+                    <div style="display:flex;gap:15px;margin-bottom:5px;">
+                        <div>Level: <span id="playerLevel">1</span></div>
+                        <div>XP: <span id="playerXP">0</span></div>
+                        <div>K/D: <span id="playerKD">0/0</span></div>
                     </div>
-                    <div class="stat-card">
-                        <span class="stat-value" id="totalPlayers">0</span>
-                        <span class="stat-label">Players</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-value" id="playersAlive">0</span>
-                        <span class="stat-label">Alive</span>
+                    <div class="health-bar">
+                        <div class="health-fill" id="healthFill" style="width:100%"></div>
+                        <div class="health-text" id="healthText">100/100</div>
                     </div>
                 </div>
                 
-                <h3 style="margin-bottom: 10px;">🏆 Players</h3>
-                <div id="playersList"></div>
-            </div>
-            
-            <div class="controls">
-                <h3>Controls</h3>
-                <div class="control-hint">
-                    🖱️ <strong>Click</strong> or <strong>Tap</strong> or <strong>Spacebar</strong> to fly up
+                <div class="leaderboard">
+                    <h3>🏆 Leaderboard</h3>
+                    <div id="leaderboardList"></div>
                 </div>
-                <p style="opacity: 0.8; margin-top: 10px;">
-                    Release to fall down • Avoid obstacles and other copters!
-                </p>
             </div>
-            
-            <a href="index.html#online-multiplayer" class="back-button">← Back to Games</a>
+        </div>
+        
+        <!-- Upgrade Menu -->
+        <div id="upgradeMenu">
+            <h3 style="text-align:center;margin-bottom:15px;">⚡ Upgrades (Press U to toggle)</h3>
+            <div class="upgrade-grid">
+                <button class="upgrade-btn" onclick="buyUpgrade('FIRE_RATE')">
+                    <div><strong>🔫 Fire Rate</strong></div>
+                    <div>Level: <span id="upgrade-FIRE_RATE">0</span>/5</div>
+                    <div>Cost: 1 point</div>
+                </button>
+                <button class="upgrade-btn" onclick="buyUpgrade('BULLET_DAMAGE')">
+                    <div><strong>💥 Damage</strong></div>
+                    <div>Level: <span id="upgrade-BULLET_DAMAGE">0</span>/5</div>
+                    <div>Cost: 1 point</div>
+                </button>
+                <button class="upgrade-btn" onclick="buyUpgrade('MAX_HEALTH')">
+                    <div><strong>❤️ Max Health</strong></div>
+                    <div>Level: <span id="upgrade-MAX_HEALTH">0</span>/5</div>
+                    <div>Cost: 2 points</div>
+                </button>
+                <button class="upgrade-btn" onclick="buyUpgrade('MOVE_SPEED')">
+                    <div><strong>⚡ Speed</strong></div>
+                    <div>Level: <span id="upgrade-MOVE_SPEED">0</span>/5</div>
+                    <div>Cost: 2 points</div>
+                </button>
+                <button class="upgrade-btn" onclick="buyUpgrade('BULLET_SIZE')">
+                    <div><strong>🎯 Bullet Size</strong></div>
+                    <div>Level: <span id="upgrade-BULLET_SIZE">0</span>/3</div>
+                    <div>Cost: 1 point</div>
+                </button>
+            </div>
+            <div style="text-align:center;margin-top:10px;font-size:14px;">
+                Available Points: <span id="availablePoints">0</span>
+            </div>
+        </div>
+        
+        <!-- Death Screen -->
+        <div id="deathScreen" class="death-screen">
+            <h2>💀 YOU DIED!</h2>
+            <div class="stats">
+                Killed by: <span id="killerName">Unknown</span>
+            </div>
+            <div style="font-size:14px;opacity:0.7;">Respawning in <span id="respawnTimer">3</span>s...</div>
+        </div>
+        
+        <!-- Controls Hint -->
+        <div class="controls-hint">
+            <div><strong>WASD</strong> - Move</div>
+            <div><strong>Mouse</strong> - Aim</div>
+            <div><strong>Click/Space</strong> - Shoot</div>
+            <div><strong>U</strong> - Upgrades</div>
         </div>
     </div>
 
