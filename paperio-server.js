@@ -157,14 +157,18 @@ function floodFill(ownTerritory, trail) {
     maxY = Math.max(maxY, point.y);
   }
   
-  // Limit the area we check to prevent excessive lag (max 300x300 tiles)
+  // Limit the area we check to prevent excessive lag (max 150x150 tiles = 22,500 checks)
   const width = (maxX - minX) / GRID_SIZE;
   const height = (maxY - minY) / GRID_SIZE;
   
-  if (width > 300 || height > 300) {
-    console.log('Area too large, skipping fill');
+  if (width > 150 || height > 150) {
+    console.log(`Area too large (${width}x${height}), skipping fill`);
     return [];
   }
+  
+  // Batch process in smaller chunks to avoid blocking
+  const maxChecksPerBatch = 5000;
+  let checksThisBatch = 0;
   
   // Check all grid positions within bounding box using point-in-polygon test
   for (let x = minX; x <= maxX; x += GRID_SIZE) {
@@ -178,14 +182,26 @@ function floodFill(ownTerritory, trail) {
       if (isInsidePolygon(x + GRID_SIZE/2, y + GRID_SIZE/2, trail)) {
         filled.push({ x, y });
       }
+      
+      checksThisBatch++;
+      if (checksThisBatch >= maxChecksPerBatch) {
+        // Prevent server from hanging on huge areas
+        break;
+      }
+    }
+    if (checksThisBatch >= maxChecksPerBatch) break;
+  }
     }
   }
   
   return filled;
 }
 
-// Game loop
+// Game loop - run at 60 FPS but only send updates at 30 FPS
+let tickCount = 0;
 setInterval(() => {
+  tickCount++;
+  
   for (const id in players) {
     const player = players[id];
     if (!player.alive) continue;
@@ -258,12 +274,14 @@ setInterval(() => {
     }
   }
   
-  // Send game state
-  io.emit('update', {
-    players,
-    territories,
-    trails
-  });
+  // Send game state updates only every 2 ticks (30 FPS instead of 60)
+  if (tickCount % 2 === 0) {
+    io.emit('update', {
+      players,
+      territories,
+      trails
+    });
+  }
 }, 1000 / 60);
 
 function killPlayer(playerId) {
