@@ -23,6 +23,22 @@ window.addEventListener('DOMContentLoaded', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
     });
+    
+    // Add button click handler
+    const startButton = document.querySelector('.login-box button');
+    if (startButton) {
+        startButton.addEventListener('click', joinGame);
+    }
+    
+    // Add Enter key handler
+    const playerNameInput = document.getElementById('playerName');
+    if (playerNameInput) {
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinGame();
+            }
+        });
+    }
 });
 
 // Game state
