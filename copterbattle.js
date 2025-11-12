@@ -449,101 +449,38 @@ function render() {
         // Shadow
         ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
         ctx.beginPath();
-        ctx.ellipse(2, 2, 22, 16, 0, 0, Math.PI * 2);
+        ctx.ellipse(2, 2, 20, 12, 0, 0, Math.PI * 2);
         ctx.fill();
         
         // Main rotor blades (spinning)
         const rotorSpeed = Date.now() * 0.02;
         ctx.save();
         ctx.rotate(rotorSpeed);
-        
-        // Rotor blade 1
-        ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
-        ctx.fillRect(-30, -2, 60, 4);
-        
-        // Rotor blade 2
-        ctx.save();
-        ctx.rotate(Math.PI / 2);
-        ctx.fillRect(-30, -2, 60, 4);
-        ctx.restore();
-        
+        ctx.fillStyle = 'rgba(80, 80, 80, 0.3)';
+        ctx.fillRect(-28, -1.5, 56, 3);
+        ctx.fillRect(-1.5, -28, 3, 56);
         ctx.restore();
         
         // Tail boom
-        ctx.fillStyle = shadeColor(player.color, -20);
-        ctx.fillRect(10, -3, 28, 6);
+        ctx.fillStyle = shadeColor(player.color, -15);
+        ctx.fillRect(8, -2, 24, 4);
         
-        // Tail rotor (small vertical spinning)
-        ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(38, -6);
-        ctx.lineTo(38, 6);
-        ctx.stroke();
-        
-        // Main body (fuselage) - teardrop shape
+        // Main body
         ctx.fillStyle = player.color;
         ctx.beginPath();
-        ctx.ellipse(0, 0, 18, 12, 0, 0, Math.PI * 2);
+        ctx.ellipse(0, 0, 16, 10, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Body shading for 3D effect
-        const gradient = ctx.createRadialGradient(-5, -5, 0, 0, 0, 18);
-        gradient.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
-        gradient.addColorStop(1, 'rgba(0, 0, 0, 0.2)');
-        ctx.fillStyle = gradient;
+        // Cockpit window
+        ctx.fillStyle = 'rgba(150, 180, 220, 0.7)';
         ctx.beginPath();
-        ctx.ellipse(0, 0, 18, 12, 0, 0, Math.PI * 2);
+        ctx.ellipse(-5, 0, 8, 6, 0, 0, Math.PI * 2);
         ctx.fill();
         
-        // Cockpit windshield
-        ctx.fillStyle = 'rgba(100, 150, 200, 0.6)';
+        // Rotor center
+        ctx.fillStyle = '#555';
         ctx.beginPath();
-        ctx.ellipse(-6, 0, 8, 6, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Windshield reflection
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-        ctx.beginPath();
-        ctx.ellipse(-8, -2, 4, 3, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Engine/cargo compartment
-        ctx.fillStyle = shadeColor(player.color, -30);
-        ctx.beginPath();
-        ctx.ellipse(6, 0, 8, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Landing skids (left)
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(-12, -14);
-        ctx.lineTo(-8, -14);
-        ctx.lineTo(-6, -10);
-        ctx.stroke();
-        
-        // Landing skids (right)
-        ctx.beginPath();
-        ctx.moveTo(-12, 14);
-        ctx.lineTo(-8, 14);
-        ctx.lineTo(-6, 10);
-        ctx.stroke();
-        
-        // Rotor hub/mast
-        ctx.fillStyle = '#444';
-        ctx.beginPath();
-        ctx.arc(0, 0, 4, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Gun mounted on nose
-        ctx.fillStyle = '#222';
-        ctx.fillRect(-20, -1.5, 8, 3);
-        
-        // Gun muzzle flash (when firing could add animation here)
-        ctx.fillStyle = '#333';
-        ctx.beginPath();
-        ctx.arc(-21, 0, 2, 0, Math.PI * 2);
+        ctx.arc(0, 0, 3, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.restore();
