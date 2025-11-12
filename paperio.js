@@ -123,14 +123,14 @@ function render() {
     // Draw territories
     for (const playerId in territories) {
         const player = players[playerId];
-        if (!player) continue;
+        if (!player || !territories[playerId]) continue;
 
         ctx.fillStyle = player.color + '40'; // Semi-transparent
         
-        // Use Path2D for much faster batch rendering
+        // Batch render visible tiles
         ctx.beginPath();
         let visibleCount = 0;
-        const maxVisibleTiles = 1000; // Limit tiles drawn per player
+        const maxVisibleTiles = 2000; // Limit tiles drawn per player
         
         for (const tile of territories[playerId]) {
             if (tile.x + GRID_SIZE >= visibleMinX && tile.x <= visibleMaxX &&
@@ -140,7 +140,11 @@ function render() {
                 if (visibleCount >= maxVisibleTiles) break;
             }
         }
-        ctx.fill();
+        
+        // Only fill if we added rectangles
+        if (visibleCount > 0) {
+            ctx.fill();
+        }
 
         // Draw territory border
         ctx.strokeStyle = player.color;
