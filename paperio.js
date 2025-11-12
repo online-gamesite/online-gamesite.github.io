@@ -7,9 +7,6 @@ const socket = io('https://188.166.220.144', {
 
 let canvas, ctx;
 
-// Start render loop immediately (it will wait for canvas)
-render();
-
 // Initialize canvas when page loads
 window.addEventListener('DOMContentLoaded', () => {
     canvas = document.getElementById('gameCanvas');
@@ -39,6 +36,9 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // Start render loop after canvas is ready
+    render();
 });
 
 // Game state
