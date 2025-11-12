@@ -7,40 +7,6 @@ const socket = io('https://188.166.220.144', {
 
 let canvas, ctx;
 
-// Initialize canvas when page loads
-window.addEventListener('DOMContentLoaded', () => {
-    canvas = document.getElementById('gameCanvas');
-    ctx = canvas.getContext('2d');
-    
-    // Set canvas size
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    window.addEventListener('resize', () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    });
-    
-    // Add button click handler
-    const startButton = document.querySelector('.login-box button');
-    if (startButton) {
-        startButton.addEventListener('click', joinGame);
-    }
-    
-    // Add Enter key handler
-    const playerNameInput = document.getElementById('playerName');
-    if (playerNameInput) {
-        playerNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                joinGame();
-            }
-        });
-    }
-    
-    // Start render loop after canvas is ready
-    render();
-});
-
 // Game state
 let myId = null;
 let players = {};
@@ -57,13 +23,57 @@ const GAME_HEIGHT = 2000;
 const keys = {};
 let currentDirection = { x: 0, y: 0 };
 
-// Join game
+// Join game function - defined early so it's available
 function joinGame() {
+    console.log('joinGame called!');
     const name = document.getElementById('playerName').value.trim() || 'Player';
+    console.log('Player name:', name);
     socket.emit('joinGame', { name });
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('gameContainer').style.display = 'block';
 }
+
+// Make joinGame globally accessible
+window.joinGame = joinGame;
+
+// Initialize canvas when page loads
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded!');
+    canvas = document.getElementById('gameCanvas');
+    ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    });
+    
+    // Add button click handler
+    const startButton = document.querySelector('.login-box button');
+    console.log('Start button:', startButton);
+    if (startButton) {
+        startButton.addEventListener('click', function() {
+            console.log('Button clicked!');
+            joinGame();
+        });
+    }
+    
+    // Add Enter key handler
+    const playerNameInput = document.getElementById('playerName');
+    if (playerNameInput) {
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinGame();
+            }
+        });
+    }
+    
+    // Start render loop after canvas is ready
+    render();
+});
 
 // Socket events
 socket.on('gameState', (data) => {
@@ -154,7 +164,6 @@ function render() {
     drawGrid();
 
     // Calculate visible area (adjusted for zoom)
-    const zoom = 2;
     const visibleMinX = camera.x - (canvas.width / zoom) / 2;
     const visibleMaxX = camera.x + (canvas.width / zoom) * 1.5;
     const visibleMinY = camera.y - (canvas.height / zoom) / 2;
