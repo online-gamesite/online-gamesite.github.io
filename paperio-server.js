@@ -191,8 +191,6 @@ function floodFill(ownTerritory, trail) {
     }
     if (checksThisBatch >= maxChecksPerBatch) break;
   }
-    }
-  }
   
   return filled;
 }
