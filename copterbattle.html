@@ -245,6 +245,17 @@
             }
         }
         
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            }
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 6px 25px rgba(76,209,196,0.6);
+            }
+        }
+        
         .death-screen {
             position: fixed;
             top: 50%;
@@ -281,6 +292,49 @@
         
         .controls-hint div {
             margin: 5px 0;
+        }
+        
+        .upgrade-button-mobile {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: rgba(76,209,196,0.9);
+            border: 3px solid #4ECDC4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .upgrade-button-mobile:active {
+            transform: scale(0.9);
+            background: rgba(76,209,196,1);
+        }
+        
+        .upgrade-button-mobile .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #FF6B6B;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            border: 2px solid white;
         }
     </style>
 </head>
@@ -378,6 +432,12 @@
             <div><strong>Touch</strong> - Left: Move, Right: Aim & Shoot</div>
             <div><strong>U</strong> - Upgrades</div>
         </div>
+        
+        <!-- Mobile Upgrade Button -->
+        <button class="upgrade-button-mobile" onclick="toggleUpgradeMenu()" id="mobileUpgradeBtn">
+            ⚡
+            <span class="badge" id="upgradePointsBadge" style="display:none;">0</span>
+        </button>
     </div>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>

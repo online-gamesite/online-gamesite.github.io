@@ -573,8 +573,24 @@ function updateUpgradeMenu() {
     const player = players[myId];
     const availablePoints = Math.floor(player.xp / 50);
     const spentPoints = Object.values(player.upgrades).reduce((sum, level) => sum + level, 0);
+    const pointsRemaining = availablePoints - spentPoints;
     
-    document.getElementById('availablePoints').textContent = availablePoints - spentPoints;
+    document.getElementById('availablePoints').textContent = pointsRemaining;
+    
+    // Update mobile button badge
+    const badge = document.getElementById('upgradePointsBadge');
+    const mobileBtn = document.getElementById('mobileUpgradeBtn');
+    if (pointsRemaining > 0) {
+        badge.textContent = pointsRemaining;
+        badge.style.display = 'flex';
+        // Add pulse animation
+        if (!mobileBtn.classList.contains('pulse')) {
+            mobileBtn.style.animation = 'pulse 1.5s infinite';
+        }
+    } else {
+        badge.style.display = 'none';
+        mobileBtn.style.animation = '';
+    }
     
     // Update upgrade buttons
     ['FIRE_RATE', 'BULLET_DAMAGE', 'MAX_HEALTH', 'MOVE_SPEED', 'BULLET_SIZE'].forEach(type => {
