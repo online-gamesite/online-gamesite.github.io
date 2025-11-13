@@ -97,6 +97,7 @@ window.addEventListener('resize', () => {
 let myId = null;
 let players = {};
 let bullets = [];
+let tanks = {};
 let gameWorld = { width: 5000, height: 5000 };
 let camera = { x: 0, y: 0 };
 
@@ -156,6 +157,7 @@ socket.on('playerLeft', (data) => {
 socket.on('gameState', (state) => {
     players = state.players;
     bullets = state.bullets;
+    tanks = state.tanks || {};
     updateHUD();
 });
 
@@ -422,6 +424,51 @@ function render() {
         ctx.stroke();
     });
     
+    // Draw tanks (AI enemies)
+    Object.values(tanks).forEach(tank => {
+        const screenX = tank.x - camera.x;
+        const screenY = tank.y - camera.y;
+        
+        if (screenX < -100 || screenX > canvas.width + 100 || 
+            screenY < -100 || screenY > canvas.height + 100) return;
+        
+        ctx.save();
+        ctx.translate(screenX, screenY);
+        ctx.rotate(tank.angle);
+        
+        // Tank body (darker gray)
+        ctx.fillStyle = '#555555';
+        ctx.fillRect(-17.5, -17.5, 35, 35);
+        
+        // Tank turret (slightly lighter)
+        ctx.fillStyle = '#666666';
+        ctx.beginPath();
+        ctx.arc(0, 0, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Tank barrel
+        ctx.fillStyle = '#444444';
+        ctx.fillRect(0, -3, 20, 6);
+        
+        // Tank outline
+        ctx.strokeStyle = '#333333';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-17.5, -17.5, 35, 35);
+        
+        ctx.restore();
+        
+        // Tank health bar
+        const barWidth = 40;
+        const barHeight = 5;
+        const healthPercent = tank.health / 60; // TANK_HEALTH = 60
+        
+        ctx.fillStyle = '#333333';
+        ctx.fillRect(screenX - barWidth/2, screenY - 30, barWidth, barHeight);
+        
+        ctx.fillStyle = healthPercent > 0.5 ? '#4ECDC4' : healthPercent > 0.25 ? '#FFA500' : '#FF4444';
+        ctx.fillRect(screenX - barWidth/2, screenY - 30, barWidth * healthPercent, barHeight);
+    });
+    
     // Draw touch joysticks
     if (leftJoystick.active) {
         drawJoystick(leftJoystick.startX, leftJoystick.startY, 
@@ -561,6 +608,15 @@ function drawMinimap() {
             ctx.lineWidth = 2;
             ctx.stroke();
         }
+    }
+    
+    // Draw tanks on minimap
+    ctx.fillStyle = '#888888';
+    for (const id in tanks) {
+        const tank = tanks[id];
+        const tx = minimapX + tank.x * mapScaleX;
+        const ty = minimapY + tank.y * mapScaleY;
+        ctx.fillRect(tx - 1.5, ty - 1.5, 3, 3);
     }
     
     // Draw bullets on minimap
