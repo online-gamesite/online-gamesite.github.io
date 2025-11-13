@@ -224,12 +224,9 @@ setInterval(() => {
           // Create a closed polygon by connecting trail back to territory
           const trail = [...trails[id], { x: gridX, y: gridY }];
           
-          // Find where we left the territory originally to close the loop properly
-          const firstTrailPoint = trails[id][0];
-          
-          // Create the complete closed polygon for filling
-          // This ensures the polygon is properly closed for the fill algorithm
-          const closedPolygon = [...trail];
+          // Close the loop by connecting back to the first trail point
+          // This creates a proper closed polygon for the flood fill
+          const closedPolygon = [...trail, trails[id][0]];
           
           // Fill enclosed area
           const newTerritory = floodFill(territories[id], closedPolygon);
