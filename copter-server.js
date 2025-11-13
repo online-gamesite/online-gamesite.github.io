@@ -15,8 +15,8 @@ const io = socketIO(server, {
 app.use(cors());
 
 // Game constants
-const GAME_WIDTH = 3000;
-const GAME_HEIGHT = 3000;
+const GAME_WIDTH = 5000;
+const GAME_HEIGHT = 5000;
 const PLAYER_SIZE = 40;
 const PLAYER_SPEED = 5;
 const BULLET_SPEED = 15;

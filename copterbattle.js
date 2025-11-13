@@ -97,7 +97,7 @@ window.addEventListener('resize', () => {
 let myId = null;
 let players = {};
 let bullets = [];
-let gameWorld = { width: 3000, height: 3000 };
+let gameWorld = { width: 5000, height: 5000 };
 let camera = { x: 0, y: 0 };
 
 // Input state
@@ -538,16 +538,16 @@ function drawMinimap() {
     ctx.lineWidth = 2;
     ctx.strokeRect(minimapX, minimapY, minimapSize, minimapSize);
     
-    // Map scale (assuming 2000x2000 game world)
-    const WORLD_SIZE = 2000;
-    const mapScale = minimapSize / WORLD_SIZE;
+    // Map scale using gameWorld dimensions
+    const mapScaleX = minimapSize / gameWorld.width;
+    const mapScaleY = minimapSize / gameWorld.height;
     
     // Draw all players on minimap
     for (const id in players) {
         const player = players[id];
         
-        const minimapPlayerX = minimapX + player.x * mapScale;
-        const minimapPlayerY = minimapY + player.y * mapScale;
+        const minimapPlayerX = minimapX + player.x * mapScaleX;
+        const minimapPlayerY = minimapY + player.y * mapScaleY;
         
         // Draw player dot
         ctx.fillStyle = player.color;
@@ -567,8 +567,8 @@ function drawMinimap() {
     ctx.fillStyle = 'rgba(255, 255, 0, 0.6)';
     for (const id in bullets) {
         const bullet = bullets[id];
-        const bx = minimapX + bullet.x * mapScale;
-        const by = minimapY + bullet.y * mapScale;
+        const bx = minimapX + bullet.x * mapScaleX;
+        const by = minimapY + bullet.y * mapScaleY;
         ctx.fillRect(bx, by, 1, 1);
     }
 }
