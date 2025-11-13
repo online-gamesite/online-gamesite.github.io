@@ -253,12 +253,20 @@
 
         <div id="controls">
             <p style="text-align: center; margin-bottom: 0.5rem; font-size: 0.8rem; color: #9ca3af;">
-                WASD or Arrow Keys to Move
+                <span style="display: none;" class="desktop-hint">WASD or Arrow Keys • </span>
+                <span class="mobile-hint">Swipe to Move</span>
             </p>
         </div>
     </div>
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="paperio.js?v=1762952515"></script>
+    <script>
+        // Show appropriate control hint based on device
+        if (window.innerWidth > 768) {
+            document.querySelector('.desktop-hint').style.display = 'inline';
+            document.querySelector('.mobile-hint').textContent = 'Touch Swipe to Move';
+        }
+    </script>
 </body>
 </html>

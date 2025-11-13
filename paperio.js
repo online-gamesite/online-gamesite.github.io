@@ -100,6 +100,11 @@ socket.on('update', (data) => {
 });
 
 // Input handling
+const keys = {};
+let touchStartX = 0;
+let touchStartY = 0;
+let touchActive = false;
+
 window.addEventListener('keydown', (e) => {
     keys[e.key.toLowerCase()] = true;
     updateDirection();
@@ -109,6 +114,49 @@ window.addEventListener('keyup', (e) => {
     keys[e.key.toLowerCase()] = false;
     updateDirection();
 });
+
+// Touch controls
+window.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchActive = true;
+    }
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+    if (!touchActive || e.touches.length === 0) return;
+    
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    
+    const deltaX = touchX - touchStartX;
+    const deltaY = touchY - touchStartY;
+    
+    // Minimum swipe distance to register
+    const minSwipe = 20;
+    
+    if (Math.abs(deltaX) > minSwipe || Math.abs(deltaY) > minSwipe) {
+        // Determine dominant direction
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // Horizontal swipe
+            currentDirection = { x: deltaX > 0 ? 1 : -1, y: 0 };
+        } else {
+            // Vertical swipe
+            currentDirection = { x: 0, y: deltaY > 0 ? 1 : -1 };
+        }
+        
+        socket.emit('move', { direction: currentDirection });
+        
+        // Update start position for continuous swiping
+        touchStartX = touchX;
+        touchStartY = touchY;
+    }
+}, { passive: true });
+
+window.addEventListener('touchend', () => {
+    touchActive = false;
+}, { passive: true });
 
 function updateDirection() {
     let x = 0;
