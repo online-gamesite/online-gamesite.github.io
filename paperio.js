@@ -99,8 +99,7 @@ socket.on('update', (data) => {
     trails = data.trails;
 });
 
-// Input handling
-const keys = {};
+// Input handling - touch variables
 let touchStartX = 0;
 let touchStartY = 0;
 let touchActive = false;
