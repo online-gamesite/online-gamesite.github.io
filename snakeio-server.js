@@ -165,11 +165,12 @@ setInterval(() => {
             player.segments.pop();
         }
 
-        // Check self collision (skip first few segments)
-        for (let i = 5; i < player.segments.length; i++) {
+        // Check self collision (skip more segments to allow tight turns)
+        const skipSegments = Math.max(10, Math.floor(player.segments.length * 0.1));
+        for (let i = skipSegments; i < player.segments.length; i++) {
             const segment = player.segments[i];
             const dist = Math.hypot(newHead.x - segment.x, newHead.y - segment.y);
-            if (dist < SEGMENT_SIZE * 0.8) {
+            if (dist < SEGMENT_SIZE * 0.6) {
                 player.alive = false;
                 // Drop food where snake died
                 for (let j = 0; j < Math.min(player.segments.length, 20); j++) {
@@ -192,11 +193,11 @@ setInterval(() => {
                 const other = players[otherId];
                 if (!other.alive) continue;
 
-                // Check collision with other snake's body (not head)
-                for (let i = 1; i < other.segments.length; i++) {
+                // Check collision with other snake's body (skip head to allow crossing)
+                for (let i = 3; i < other.segments.length; i++) {
                     const segment = other.segments[i];
                     const dist = Math.hypot(newHead.x - segment.x, newHead.y - segment.y);
-                    if (dist < SEGMENT_SIZE * 0.8) {
+                    if (dist < SEGMENT_SIZE * 0.7) {
                         player.alive = false;
                         // Drop food
                         for (let j = 0; j < Math.min(player.segments.length, 20); j++) {
