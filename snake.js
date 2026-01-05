@@ -38,7 +38,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function draw(){
-    ctx.fillStyle = '#000';
+    // Create gradient background to match website theme
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, 'rgba(30,41,59,0.6)');
+    gradient.addColorStop(1, 'rgba(15,23,42,0.7)');
+    ctx.fillStyle = gradient;
     ctx.fillRect(0,0,canvas.width,canvas.height);
     // subtle themed grid lines for smoother visual feel
     ctx.strokeStyle = 'rgba(255,255,255,0.03)';
