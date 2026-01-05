@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     ctx.fillStyle = gradient;
     ctx.fillRect(0,0,canvas.width,canvas.height);
     // subtle themed grid lines for smoother visual feel
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.01)';
     ctx.lineWidth = 1;
     for(let gx = 0; gx <= cols; gx++){
       ctx.beginPath();
