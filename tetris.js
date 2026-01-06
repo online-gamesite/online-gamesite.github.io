@@ -234,10 +234,53 @@ function merge() {
     });
 }
 
-// Rotate piece
+// Rotate piece clockwise
 function rotate(piece) {
     const rotated = piece.shape[0].map((_, i) =>
         piece.shape.map(row => row[i]).reverse()
+    );
+    
+    const previousShape = piece.shape;
+    const previousX = piece.x;
+    const previousY = piece.y;
+    
+    // Temporarily apply rotation
+    piece.shape = rotated;
+    
+    // Try basic rotation at current position
+    if (!collide(piece, board, piece.x, piece.y)) {
+        return;
+    }
+    
+    // Wall kick - try different positions (standard SRS-like kicks)
+    const kickTests = [
+        {x: 1, y: 0},
+        {x: -1, y: 0},
+        {x: 2, y: 0},
+        {x: -2, y: 0},
+        {x: 0, y: -1},
+        {x: 1, y: -1},
+        {x: -1, y: -1}
+    ];
+    
+    for (let kick of kickTests) {
+        piece.x = previousX + kick.x;
+        piece.y = previousY + kick.y;
+        if (!collide(piece, board, piece.x, piece.y)) {
+            return;
+        }
+    }
+    
+    // If no valid position found, revert all changes
+    piece.shape = previousShape;
+    piece.x = previousX;
+    piece.y = previousY;
+}
+
+// Rotate piece counterclockwise
+function rotateCounterClockwise(piece) {
+    const rotated = piece.shape[0].map((_, i) =>
+        piece.shape.map(row => row[row.length - 1 - i])
     );
     
     const previousShape = piece.shape;
@@ -423,6 +466,10 @@ document.addEventListener('keydown', e => {
             break;
         case 'ArrowUp':
             rotate(currentPiece);
+            break;
+        case 'z':
+        case 'Z':
+            rotateCounterClockwise(currentPiece);
             break;
         case ' ':
             e.preventDefault();
