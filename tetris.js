@@ -242,25 +242,39 @@ function rotate(piece) {
     
     const previousShape = piece.shape;
     const previousX = piece.x;
+    const previousY = piece.y;
+    
+    // Temporarily apply rotation
     piece.shape = rotated;
     
-    // Try basic rotation first
-    if (!collide(piece, board)) {
+    // Try basic rotation at current position
+    if (!collide(piece, board, piece.x, piece.y)) {
         return;
     }
     
-    // Wall kick - try shifting left and right
-    const kicks = [1, -1, 2, -2];
-    for (let kick of kicks) {
-        piece.x = previousX + kick;
-        if (!collide(piece, board)) {
+    // Wall kick - try different positions (standard SRS-like kicks)
+    const kickTests = [
+        {x: 1, y: 0},
+        {x: -1, y: 0},
+        {x: 2, y: 0},
+        {x: -2, y: 0},
+        {x: 0, y: -1},
+        {x: 1, y: -1},
+        {x: -1, y: -1}
+    ];
+    
+    for (let kick of kickTests) {
+        piece.x = previousX + kick.x;
+        piece.y = previousY + kick.y;
+        if (!collide(piece, board, piece.x, piece.y)) {
             return;
         }
     }
     
-    // If no valid position found, revert rotation
+    // If no valid position found, revert all changes
     piece.shape = previousShape;
     piece.x = previousX;
+    piece.y = previousY;
 }
 
 // Clear completed lines
