@@ -2,6 +2,8 @@ const canvas = document.getElementById('tetrisCanvas');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('nextCanvas');
 const nextCtx = nextCanvas.getContext('2d');
+const holdCanvas = document.getElementById('holdCanvas');
+const holdCtx = holdCanvas ? holdCanvas.getContext('2d') : null;
 const statusEl = document.getElementById('tetris-status');
 
 const BLOCK_SIZE = 30;
@@ -32,6 +34,8 @@ const COLORS = {
 let board = [];
 let currentPiece = null;
 let nextPiece = null;
+let holdPiece = null;
+let canHold = true;
 let score = 0;
 let lines = 0;
 let level = 1;
@@ -146,6 +150,55 @@ function drawNextPiece() {
     }
 }
 
+// Draw hold piece preview
+function drawHoldPiece() {
+    if (!holdCtx) return;
+    holdCtx.clearRect(0, 0, holdCanvas.width, holdCanvas.height);
+    
+    if (holdPiece) {
+        const offsetX = (4 - holdPiece.shape[0].length) / 2;
+        const offsetY = (4 - holdPiece.shape.length) / 2;
+        holdPiece.shape.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value) {
+                    drawBlock(holdCtx, x + offsetX, y + offsetY, holdPiece.color);
+                }
+            });
+        });
+    }
+}
+
+// Hold piece function
+function hold() {
+    if (!canHold) return;
+    
+    canHold = false;
+    
+    if (holdPiece === null) {
+        // First time holding - store current piece and get next piece
+        holdPiece = {
+            shape: SHAPES[currentPiece.type],
+            color: currentPiece.color,
+            type: currentPiece.type
+        };
+        currentPiece = nextPiece;
+        nextPiece = createPiece();
+        currentPiece.x = Math.floor(COLS / 2) - Math.floor(currentPiece.shape[0].length / 2);
+        currentPiece.y = 0;
+    } else {
+        // Swap current piece with held piece
+        const temp = {
+            shape: SHAPES[currentPiece.type],
+            color: currentPiece.color,
+            type: currentPiece.type
+        };
+        currentPiece = createPiece(holdPiece.type);
+        holdPiece = temp;
+    }
+    
+    drawHoldPiece();
+}
+
 // Check collision
 function collide(piece, board, x = piece.x, y = piece.y) {
     for (let row = 0; row < piece.shape.length; row++) {
@@ -252,6 +305,7 @@ function drop() {
         clearLines();
         currentPiece = nextPiece;
         nextPiece = createPiece();
+        canHold = true; // Reset hold ability when piece locks
         
         if (collide(currentPiece, board)) {
             gameOver = true;
@@ -321,6 +375,7 @@ function update(time = 0) {
     drawGhostPiece(currentPiece);
     drawPiece(currentPiece);
     drawNextPiece();
+    drawHoldPiece();
     
     requestAnimationFrame(update);
 }
@@ -358,6 +413,10 @@ document.addEventListener('keydown', e => {
         case ' ':
             e.preventDefault();
             hardDrop();
+            break;
+        case 'c':
+        case 'C':
+            hold();
             break;
         case 'p':
         case 'P':
@@ -420,6 +479,8 @@ if (restartBtn) {
     dropInterval = 1000;
     gameOver = false;
     isPaused = false;
+    holdPiece = null;
+    canHold = true;
     createBoard();
     currentPiece = createPiece();
     nextPiece = createPiece();

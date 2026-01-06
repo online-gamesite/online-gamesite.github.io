@@ -104,6 +104,10 @@
         </div>
         
         <div style="display: flex; gap: 2rem; justify-content: center; align-items: flex-start; flex-wrap: wrap; margin-bottom: 1.5rem;">
+            <div style="text-align:center;">
+                <h3 style="margin-bottom:0.5rem;">Hold</h3>
+                <canvas id="holdCanvas" width="120" height="120" class="seamless-canvas" style="margin-bottom:1.5rem;"></canvas>
+            </div>
             <canvas id="tetrisCanvas" width="300" height="600" class="seamless-canvas"></canvas>
             <div style="text-align:center;">
                 <h3 style="margin-bottom:0.5rem;">Next Piece</h3>
@@ -114,6 +118,7 @@
                     <p style="margin:0.25rem 0;">⬆️ Rotate</p>
                     <p style="margin:0.25rem 0;">⬇️ Soft Drop</p>
                     <p style="margin:0.25rem 0;">SPACE Hard Drop</p>
+                    <p style="margin:0.25rem 0;">C Hold Piece</p>
                     <p style="margin:0.25rem 0;">P Pause</p>
                 </div>
                 <button id="restartBtn" class="btn">New Game</button>
