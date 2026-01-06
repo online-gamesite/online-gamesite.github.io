@@ -98,6 +98,37 @@ function drawPiece(piece, context = ctx, offsetX = 0, offsetY = 0) {
     });
 }
 
+// Calculate where the piece will land
+function getGhostY(piece) {
+    let ghostY = piece.y;
+    while (!collide(piece, board, piece.x, ghostY + 1)) {
+        ghostY++;
+    }
+    return ghostY;
+}
+
+// Draw ghost piece (outline showing where piece will land)
+function drawGhostPiece(piece) {
+    const ghostY = getGhostY(piece);
+    if (ghostY === piece.y) return; // Don't draw if already at landing position
+    
+    piece.shape.forEach((row, y) => {
+        row.forEach((value, x) => {
+            if (value) {
+                const blockX = (piece.x + x) * BLOCK_SIZE;
+                const blockY = (ghostY + y) * BLOCK_SIZE;
+                
+                // Draw semi-transparent outline
+                ctx.strokeStyle = piece.color;
+                ctx.globalAlpha = 0.3;
+                ctx.lineWidth = 3;
+                ctx.strokeRect(blockX, blockY, BLOCK_SIZE, BLOCK_SIZE);
+                ctx.globalAlpha = 1.0;
+            }
+        });
+    });
+}
+
 // Draw next piece preview
 function drawNextPiece() {
     nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
@@ -279,6 +310,7 @@ function update(time = 0) {
     }
     
     drawBoard();
+    drawGhostPiece(currentPiece);
     drawPiece(currentPiece);
     drawNextPiece();
     
