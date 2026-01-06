@@ -106,6 +106,12 @@ let touchActive = false;
 
 window.addEventListener('keydown', (e) => {
     keys[e.key.toLowerCase()] = true;
+    
+    // Prevent page scrolling with arrow keys
+    if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+    }
+    
     updateDirection();
 });
 

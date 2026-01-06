@@ -187,6 +187,11 @@ socket.on('upgradeSuccess', (data) => {
 document.addEventListener('keydown', (e) => {
     keys[e.key.toLowerCase()] = true;
     
+    // Prevent page scrolling with arrow keys
+    if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+    }
+    
     if (e.key.toLowerCase() === 'u') {
         toggleUpgradeMenu();
     }

@@ -87,6 +87,11 @@ socket.on('gameState', (data) => {
 window.addEventListener('keydown', (e) => {
     keys[e.key.toLowerCase()] = true;
     
+    // Prevent page scrolling with arrow keys
+    if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+    }
+    
     // Update direction
     if ((keys['w'] || keys['arrowup']) && currentDirection.y !== 1) {
         currentDirection = { x: 0, y: -1 };

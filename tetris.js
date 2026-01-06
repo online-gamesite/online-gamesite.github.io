@@ -271,6 +271,11 @@ function update(time = 0) {
 document.addEventListener('keydown', e => {
     if (gameOver) return;
     
+    // Prevent page scrolling with arrow keys
+    if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+    }
+    
     switch(e.key) {
         case 'ArrowLeft':
             move(-1);

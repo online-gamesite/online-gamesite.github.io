@@ -241,6 +241,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   document.addEventListener('keydown', (e)=>{
+    // Prevent page scrolling with arrow keys
+    if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+    }
     // If game is over, any key should restart first (prevent immediate resume glitch)
     if(gameOver){
       reset();

@@ -281,6 +281,11 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', (e) => {
     keys[e.key] = true;
     
+    // Prevent page scrolling with arrow keys
+    if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+    }
+    
     if (e.key === ' ') {
       e.preventDefault();
       if (!gameStarted && !gameOver) {
