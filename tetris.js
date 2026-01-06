@@ -41,6 +41,12 @@ let dropCounter = 0;
 let dropInterval = 1000;
 let lastTime = 0;
 
+// Key repeat for faster left/right movement
+let leftPressed = false;
+let rightPressed = false;
+let moveCounter = 0;
+const moveDelay = 100; // milliseconds between moves when key is held
+
 // Initialize board
 function createBoard() {
     board = Array(ROWS).fill(null).map(() => Array(COLS).fill(0));
@@ -255,6 +261,18 @@ function update(time = 0) {
     const deltaTime = time - lastTime;
     lastTime = time;
     dropCounter += deltaTime;
+    moveCounter += deltaTime;
+    
+    // Handle continuous left/right movement
+    if (moveCounter > moveDelay) {
+        if (leftPressed) {
+            move(-1);
+        }
+        if (rightPressed) {
+            move(1);
+        }
+        moveCounter = 0;
+    }
     
     if (dropCounter > dropInterval) {
         drop();
@@ -278,10 +296,18 @@ document.addEventListener('keydown', e => {
     
     switch(e.key) {
         case 'ArrowLeft':
-            move(-1);
+            if (!leftPressed) {
+                move(-1);
+                leftPressed = true;
+                moveCounter = 0;
+            }
             break;
         case 'ArrowRight':
-            move(1);
+            if (!rightPressed) {
+                move(1);
+                rightPressed = true;
+                moveCounter = 0;
+            }
             break;
         case 'ArrowDown':
             drop();
@@ -296,6 +322,17 @@ document.addEventListener('keydown', e => {
         case 'p':
         case 'P':
             isPaused = !isPaused;
+            break;
+    }
+});
+
+document.addEventListener('keyup', e => {
+    switch(e.key) {
+        case 'ArrowLeft':
+            leftPressed = false;
+            break;
+        case 'ArrowRight':
+            rightPressed = false;
             break;
     }
 });
