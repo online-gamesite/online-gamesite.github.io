@@ -14,14 +14,14 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   function reset(){
     if(isMultiplayer) {
-      snake = [{x:5, y:Math.floor(rows/2)}];
-      snake2 = [{x:cols-6, y:Math.floor(rows/2)}];
+      snake = [{x:5, y:Math.floor(rows/2)}, {x:4, y:Math.floor(rows/2)}, {x:3, y:Math.floor(rows/2)}];
+      snake2 = [{x:cols-6, y:Math.floor(rows/2)}, {x:cols-5, y:Math.floor(rows/2)}, {x:cols-4, y:Math.floor(rows/2)}];
       dir = {x:1,y:0};
       dir2 = {x:-1,y:0};
       p1Score = 0;
       p2Score = 0;
     } else {
-      snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}];
+      snake = [{x:Math.floor(cols/2), y:Math.floor(rows/2)}, {x:Math.floor(cols/2)-1, y:Math.floor(rows/2)}, {x:Math.floor(cols/2)-2, y:Math.floor(rows/2)}];
       dir = {x:1,y:0};
     }
     placeFood();
