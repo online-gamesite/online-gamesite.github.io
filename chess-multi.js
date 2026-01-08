@@ -288,7 +288,8 @@
                 }
                 
                 // Castling
-                if (!piece.hasMoved && !isInCheck[piece.color]) {
+                const isKingInCheck = piece.color === WHITE ? isInCheck.white : isInCheck.black;
+                if (!piece.hasMoved && !isKingInCheck) {
                     // Kingside castling
                     const kingsideRook = board[row][7];
                     if (kingsideRook && kingsideRook.type === PIECES.ROOK && 
@@ -365,8 +366,9 @@
         const rawMoves = getRawMoves(row, col);
         
         // Filter out moves that would put own king in check
+        // But don't filter castling moves - they're already validated
         return rawMoves.filter(move => 
-            !wouldBeInCheck(row, col, move.row, move.col, piece.color)
+            move.isCastling || !wouldBeInCheck(row, col, move.row, move.col, piece.color)
         );
     }
 
