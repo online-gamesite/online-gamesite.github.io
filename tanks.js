@@ -122,26 +122,47 @@ document.addEventListener('DOMContentLoaded', function() {
             const oldX = player.x;
             const oldY = player.y;
             
-            // Calculate new position
+            // Try moving in both directions
             player.x += dx;
             player.y += dy;
             
-            // Check boundaries
-            if (player.x < 0 || player.x + player.width > WIDTH) {
-                player.x = oldX;
-            }
-            if (player.y < 0 || player.y + player.height > HEIGHT) {
-                player.y = oldY;
-            }
+            // Check boundaries and wall collisions
+            let collisionX = player.x < 0 || player.x + player.width > WIDTH;
+            let collisionY = player.y < 0 || player.y + player.height > HEIGHT;
             
             // Check wall collisions
             for (const wall of walls) {
                 if (checkCollision({ x: player.x, y: player.y, width: player.width, height: player.height }, wall)) {
-                    // Revert to old position
+                    // Try sliding along wall by reverting only one axis at a time
                     player.x = oldX;
-                    player.y = oldY;
+                    if (!checkCollision({ x: player.x, y: player.y, width: player.width, height: player.height }, wall)) {
+                        // Can slide horizontally
+                        collisionY = true;
+                    } else {
+                        // Try reverting Y instead
+                        player.x = oldX + dx;
+                        player.y = oldY;
+                        if (!checkCollision({ x: player.x, y: player.y, width: player.width, height: player.height }, wall)) {
+                            // Can slide vertically
+                            collisionX = true;
+                        } else {
+                            // Can't slide, revert both
+                            player.x = oldX;
+                            player.y = oldY;
+                            collisionX = true;
+                            collisionY = true;
+                        }
+                    }
                     break;
                 }
+            }
+            
+            // Handle boundary collisions
+            if (collisionX && (player.x < 0 || player.x + player.width > WIDTH)) {
+                player.x = oldX;
+            }
+            if (collisionY && (player.y < 0 || player.y + player.height > HEIGHT)) {
+                player.y = oldY;
             }
         }
         
