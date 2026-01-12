@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let score1 = 0;
   let score2 = 0;
   let mode = 'single'; // 'single' or 'multi'
+  let isPenalized = false; // Track if player is in penalty timeout
 
   // Helper to get current score elements
   function getScoreElements(){
@@ -49,6 +50,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
 
   function onHit(e){
+    // Ignore clicks during penalty timeout
+    if(isPenalized) return;
+    
     const idx = Number(e.currentTarget.dataset.idx);
     if(idx === molePos){
       const moleType = holes[molePos].textContent;
@@ -70,6 +74,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
       
       holes[molePos].textContent=''; 
       molePos=-1;
+    } else {
+      // Wrong tile clicked - apply penalty
+      isPenalized = true;
+      
+      // Visual feedback: flash the wrong tile red
+      const tile = e.currentTarget;
+      const originalBg = tile.style.backgroundColor;
+      tile.style.backgroundColor = '#ef4444';
+      tile.style.transition = 'background-color 0.1s';
+      
+      setTimeout(() => {
+        tile.style.backgroundColor = originalBg;
+        isPenalized = false;
+      }, 500); // 500ms penalty
     }
   }
 

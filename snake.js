@@ -59,17 +59,131 @@ document.addEventListener('DOMContentLoaded', ()=>{
       ctx.lineTo(canvas.width, gy*size);
       ctx.stroke();
     }
-    // food
-    ctx.fillStyle = '#e11d48';
-    ctx.fillRect(food.x*size, food.y*size, size, size);
-    // snake 1
-    ctx.fillStyle = '#10b981';
-    snake.forEach(s=>ctx.fillRect(s.x*size, s.y*size, size-1, size-1));
+    // food - styled apple with website theme colors
+    const appleX = food.x * size;
+    const appleY = food.y * size;
+    const appleRadius = size / 2.5;
     
-    // snake 2 in multiplayer
+    // Apple glow
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = 'rgba(6, 182, 212, 0.6)';
+    
+    // Apple gradient
+    const appleGradient = ctx.createRadialGradient(
+      appleX + size/2 - appleRadius/3, 
+      appleY + size/2 - appleRadius/3, 
+      appleRadius/4,
+      appleX + size/2, 
+      appleY + size/2, 
+      appleRadius
+    );
+    appleGradient.addColorStop(0, '#14b8a6');
+    appleGradient.addColorStop(0.6, '#06b6d4');
+    appleGradient.addColorStop(1, '#0891b2');
+    
+    ctx.fillStyle = appleGradient;
+    ctx.beginPath();
+    ctx.arc(appleX + size/2, appleY + size/2, appleRadius, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Apple highlight
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(appleX + size/2 - appleRadius/3, appleY + size/2 - appleRadius/3, appleRadius/3, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // snake 1 - styled with gradient and glow
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = 'rgba(59, 130, 246, 0.5)';
+    
+    snake.forEach((s, i) => {
+      const snakeGradient = ctx.createLinearGradient(
+        s.x * size, 
+        s.y * size, 
+        s.x * size + size, 
+        s.y * size + size
+      );
+      if(i === 0) {
+        // Head is brighter
+        snakeGradient.addColorStop(0, '#60a5fa');
+        snakeGradient.addColorStop(1, '#3b82f6');
+      } else {
+        snakeGradient.addColorStop(0, '#3b82f6');
+        snakeGradient.addColorStop(1, '#2563eb');
+      }
+      ctx.fillStyle = snakeGradient;
+      
+      // Rounded rectangle for snake segments
+      const padding = 1;
+      const radius = 4;
+      const x = s.x * size + padding;
+      const y = s.y * size + padding;
+      const w = size - padding * 2;
+      const h = size - padding * 2;
+      
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + w - radius, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+      ctx.lineTo(x + w, y + h - radius);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+      ctx.lineTo(x + radius, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.fill();
+    });
+    
+    ctx.shadowBlur = 0;
+    ctx.shadowBlur = 0;
+    
+    // snake 2 in multiplayer - styled with gradient and glow
     if(isMultiplayer) {
-      ctx.fillStyle = '#3b82f6';
-      snake2.forEach(s=>ctx.fillRect(s.x*size, s.y*size, size-1, size-1));
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = 'rgba(6, 182, 212, 0.5)';
+      
+      snake2.forEach((s, i) => {
+        const snakeGradient = ctx.createLinearGradient(
+          s.x * size, 
+          s.y * size, 
+          s.x * size + size, 
+          s.y * size + size
+        );
+        if(i === 0) {
+          // Head is brighter
+          snakeGradient.addColorStop(0, '#22d3ee');
+          snakeGradient.addColorStop(1, '#06b6d4');
+        } else {
+          snakeGradient.addColorStop(0, '#06b6d4');
+          snakeGradient.addColorStop(1, '#0891b2');
+        }
+        ctx.fillStyle = snakeGradient;
+        
+        // Rounded rectangle for snake segments
+        const padding = 1;
+        const radius = 4;
+        const x = s.x * size + padding;
+        const y = s.y * size + padding;
+        const w = size - padding * 2;
+        const h = size - padding * 2;
+        
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + w - radius, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+        ctx.lineTo(x + w, y + h - radius);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+        ctx.lineTo(x + radius, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fill();
+      });
+      
+      ctx.shadowBlur = 0;
     }
     
     // Show instruction if not started
@@ -111,10 +225,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Game Over! Hit a wall', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillText('Game Over! Hit a wall', canvas.width/2, canvas.height/2 - 40);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '18px Arial, sans-serif';
+        ctx.fillText(`Score: ${snake.length - 1} | High: ${highScore}`, canvas.width/2, canvas.height/2 - 10);
         ctx.fillStyle = '#fff';
         ctx.font = '16px Arial, sans-serif';
-        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 25);
         return;
       }
     }
@@ -145,10 +262,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('Game Over! Hit yourself', canvas.width/2, canvas.height/2 - 20);
+        ctx.fillText('Game Over! Hit yourself', canvas.width/2, canvas.height/2 - 40);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '18px Arial, sans-serif';
+        ctx.fillText(`Score: ${snake.length - 1} | High: ${highScore}`, canvas.width/2, canvas.height/2 - 10);
         ctx.fillStyle = '#fff';
         ctx.font = '16px Arial, sans-serif';
-        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 20);
+        ctx.fillText('Press any key or tap to restart', canvas.width/2, canvas.height/2 + 25);
         return;
       }
     }
@@ -232,7 +352,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
     running = true;
     gameStarted = true;
     // faster tick for smoother movement
-    loopId = setInterval(step, 90);
+    loopId = setInterval(step, 130);
   }
   
   function stop(){
