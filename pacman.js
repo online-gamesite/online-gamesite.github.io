@@ -390,8 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
       
-      const newGX = ghost.x + ghost.dir.x * 0.5;
-      const newGY = ghost.y + ghost.dir.y * 0.5;
+      const newGX = ghost.x + ghost.dir.x * 0.3;
+      const newGY = ghost.y + ghost.dir.y * 0.3;
       
       if (canMove(Math.floor(newGX), Math.floor(newGY))) {
         ghost.x = newGX;
@@ -430,9 +430,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function gameLoop() {
-    update();
-    draw();
+  let lastTime = 0;
+  const targetFPS = 15; // Slower game speed
+  const frameDelay = 1000 / targetFPS;
+
+  function gameLoop(currentTime) {
+    if (currentTime - lastTime >= frameDelay) {
+      update();
+      draw();
+      lastTime = currentTime;
+    }
     requestAnimationFrame(gameLoop);
   }
 
