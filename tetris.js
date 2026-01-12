@@ -585,6 +585,29 @@ if (restartBtn) {
     });
 }
 
+// Reset button
+const resetBtn = document.getElementById('reset');
+if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+        score = 0;
+        lines = 0;
+        level = 1;
+        dropInterval = 1000;
+        gameOver = false;
+        isPaused = false;
+        holdPiece = null;
+        canHold = true;
+        createBoard();
+        currentPiece = createPiece();
+        nextPiece = createPiece();
+        updateScore();
+        if(statusEl){
+            statusEl.textContent = '';
+            statusEl.style.color = '#9ca3af';
+        }
+    });
+}
+
 // Initialize game
 createBoard();
 currentPiece = createPiece();
