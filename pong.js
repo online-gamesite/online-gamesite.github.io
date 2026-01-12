@@ -114,8 +114,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     ball.y += ball.dy;
 
     // Ball collision with top/bottom
-    if(ball.y - ball.size/2 <= 0 || ball.y + ball.size/2 >= canvas.height){
-      ball.dy = -ball.dy;
+    if(ball.y - ball.size/2 <= 0){
+      ball.y = ball.size/2;
+      ball.dy = Math.abs(ball.dy);
+    }
+    if(ball.y + ball.size/2 >= canvas.height){
+      ball.y = canvas.height - ball.size/2;
+      ball.dy = -Math.abs(ball.dy);
     }
 
     // Ball collision with player paddle
