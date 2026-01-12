@@ -65,6 +65,54 @@
             min-height: 30px;
             color: var(--accent);
         }
+        .touch-controls {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 200px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        @media (max-width: 768px), (hover: none) {
+            .touch-controls {
+                display: block;
+            }
+        }
+        .touch-btn {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            pointer-events: all;
+            user-select: none;
+            touch-action: none;
+            border: 3px solid;
+        }
+        .touch-btn.left-side {
+            background: rgba(6, 182, 212, 0.3);
+            border-color: #06b6d4;
+        }
+        .touch-btn.right-side {
+            background: rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+        .touch-btn:active {
+            transform: scale(0.9);
+        }
+        .touch-btn.gas-left { bottom: 100px; left: 30px; }
+        .touch-btn.brake-left { bottom: 20px; left: 30px; }
+        .touch-btn.left-btn-left { bottom: 60px; left: 120px; }
+        .touch-btn.right-btn-left { bottom: 60px; left: 200px; }
+        
+        .touch-btn.gas-right { bottom: 100px; right: 30px; }
+        .touch-btn.brake-right { bottom: 20px; right: 30px; }
+        .touch-btn.left-btn-right { bottom: 60px; right: 200px; }
+        .touch-btn.right-btn-right { bottom: 60px; right: 120px; }
     </style>
 </head>
 <body>
@@ -128,6 +176,21 @@
             <button id="resetBtn" class="btn">Reset Race</button>
             <button onclick="window.location.href='index.html#multiplayer'" class="btn">Back to Games</button>
         </div>
+    </div>
+    
+    <!-- Touch Controls -->
+    <div class="touch-controls">
+        <!-- Player 1 controls (left side) -->
+        <div class="touch-btn gas-left left-side" id="p1-gas">⬆️</div>
+        <div class="touch-btn brake-left left-side" id="p1-brake">⬇️</div>
+        <div class="touch-btn left-btn-left left-side" id="p1-left">⬅️</div>
+        <div class="touch-btn right-btn-left left-side" id="p1-right">➡️</div>
+        
+        <!-- Player 2 controls (right side) -->
+        <div class="touch-btn gas-right right-side" id="p2-gas">⬆️</div>
+        <div class="touch-btn brake-right right-side" id="p2-brake">⬇️</div>
+        <div class="touch-btn left-btn-right right-side" id="p2-left">⬅️</div>
+        <div class="touch-btn right-btn-right right-side" id="p2-right">➡️</div>
     </div>
     
     </main>

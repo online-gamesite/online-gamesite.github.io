@@ -573,6 +573,108 @@ document.addEventListener('DOMContentLoaded', function() {
     
     resetBtn.addEventListener('click', resetGame);
     
+    // Touch controls setup
+    function setupTouchControls() {
+        // Player 1 touch controls
+        const p1Gas = document.getElementById('p1-gas');
+        const p1Brake = document.getElementById('p1-brake');
+        const p1Left = document.getElementById('p1-left');
+        const p1Right = document.getElementById('p1-right');
+        
+        // Player 2 touch controls
+        const p2Gas = document.getElementById('p2-gas');
+        const p2Brake = document.getElementById('p2-brake');
+        const p2Left = document.getElementById('p2-left');
+        const p2Right = document.getElementById('p2-right');
+        
+        if (!p1Gas || !p2Gas) return; // Touch controls not available
+        
+        // Player 1 gas
+        p1Gas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player1.keys.up = true;
+            if (gameState === 'ready') startGame();
+        });
+        p1Gas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player1.keys.up = false;
+        });
+        
+        // Player 1 brake
+        p1Brake.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player1.keys.down = true;
+        });
+        p1Brake.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player1.keys.down = false;
+        });
+        
+        // Player 1 left
+        p1Left.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player1.keys.left = true;
+        });
+        p1Left.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player1.keys.left = false;
+        });
+        
+        // Player 1 right
+        p1Right.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player1.keys.right = true;
+        });
+        p1Right.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player1.keys.right = false;
+        });
+        
+        // Player 2 gas
+        p2Gas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player2.keys.up = true;
+            if (gameState === 'ready') startGame();
+        });
+        p2Gas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player2.keys.up = false;
+        });
+        
+        // Player 2 brake
+        p2Brake.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player2.keys.down = true;
+        });
+        p2Brake.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player2.keys.down = false;
+        });
+        
+        // Player 2 left
+        p2Left.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player2.keys.left = true;
+        });
+        p2Left.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player2.keys.left = false;
+        });
+        
+        // Player 2 right
+        p2Right.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player2.keys.right = true;
+        });
+        p2Right.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            player2.keys.right = false;
+        });
+    }
+    
+    // Initialize touch controls
+    setupTouchControls();
+    
     // Click handler for changing car colors
     canvas.addEventListener('click', (e) => {
         const rect = canvas.getBoundingClientRect();
