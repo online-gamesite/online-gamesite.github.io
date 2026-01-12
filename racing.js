@@ -14,6 +14,18 @@ document.addEventListener('DOMContentLoaded', function() {
     let gameState = 'ready'; // ready, playing, finished
     let winner = null;
     
+    // Available car colors
+    const carColors = [
+        '#06b6d4', // cyan
+        '#3b82f6', // blue
+        '#ef4444', // red
+        '#10b981', // green
+        '#f59e0b', // amber
+        '#8b5cf6', // purple
+        '#ec4899', // pink
+        '#f97316'  // orange
+    ];
+    
     // Player 1 (Cyan - left lane)
     const player1 = {
         x: 130, // Centered in left lane (100-200)
@@ -25,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         acceleration: 0.4, // Increased from 0.3
         friction: 0.12, // Reduced for less slowdown
         color: '#06b6d4',
+        colorIndex: 0,
         keys: { up: false, down: false, left: false, right: false },
         lane: 0,
         laneX: 130,
@@ -45,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         acceleration: 0.4, // Increased from 0.3
         friction: 0.12, // Reduced for less slowdown
         color: '#3b82f6',
+        colorIndex: 1,
         keys: { up: false, down: false, left: false, right: false },
         lane: 1,
         laneX: 630,
@@ -558,6 +572,50 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     resetBtn.addEventListener('click', resetGame);
+    
+    // Click handler for changing car colors
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        
+        // Check if click is on player 1 car
+        if (clickX >= player1.x && clickX <= player1.x + player1.width &&
+            clickY >= player1.y && clickY <= player1.y + player1.height) {
+            player1.colorIndex = (player1.colorIndex + 1) % carColors.length;
+            player1.color = carColors[player1.colorIndex];
+        }
+        
+        // Check if click is on player 2 car
+        if (clickX >= player2.x && clickX <= player2.x + player2.width &&
+            clickY >= player2.y && clickY <= player2.y + player2.height) {
+            player2.colorIndex = (player2.colorIndex + 1) % carColors.length;
+            player2.color = carColors[player2.colorIndex];
+        }
+    });
+    
+    // Touch handler for mobile
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const touchX = touch.clientX - rect.left;
+        const touchY = touch.clientY - rect.top;
+        
+        // Check if touch is on player 1 car
+        if (touchX >= player1.x && touchX <= player1.x + player1.width &&
+            touchY >= player1.y && touchY <= player1.y + player1.height) {
+            player1.colorIndex = (player1.colorIndex + 1) % carColors.length;
+            player1.color = carColors[player1.colorIndex];
+        }
+        
+        // Check if touch is on player 2 car
+        if (touchX >= player2.x && touchX <= player2.x + player2.width &&
+            touchY >= player2.y && touchY <= player2.y + player2.height) {
+            player2.colorIndex = (player2.colorIndex + 1) % carColors.length;
+            player2.color = carColors[player2.colorIndex];
+        }
+    });
     
     // Start game loop
     gameLoop();
