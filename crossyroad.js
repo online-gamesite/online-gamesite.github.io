@@ -4,9 +4,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreEl = document.getElementById('crossy-score');
   const resetBtn = document.getElementById('reset');
 
-  const tileSize = 50;
+  // Responsive canvas sizing
+  function resizeCanvas() {
+    const maxWidth = Math.min(600, window.innerWidth - 40);
+    canvas.width = maxWidth;
+    canvas.height = maxWidth * 1.2;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
   const cols = 10;
   const rows = 12;
+  let tileSize = canvas.width / cols;
 
   // Game state
   let score = 0;
@@ -146,9 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     ctx.fillRect(0, y * tileSize, canvas.width, tileSize);
     
-    // Road markings
+    // Road markings - themed
     if (lane.type === 'road') {
-      ctx.fillStyle = '#fbbf24';
+      ctx.fillStyle = '#f59e0b';
       ctx.fillRect(0, y * tileSize + tileSize / 2 - 1, canvas.width, 2);
     }
   }
@@ -157,12 +166,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const px = player.x * tileSize;
     const py = player.y * tileSize;
     
-    // Player character with glow
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#fbbf24';
+    // Player character with glow - themed cyan
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#06b6d4';
     
-    // Body
-    ctx.fillStyle = '#fbbf24';
+    // Body with gradient
+    const playerGradient = ctx.createRadialGradient(
+      px + tileSize / 2, py + tileSize / 2, tileSize / 6,
+      px + tileSize / 2, py + tileSize / 2, tileSize / 3
+    );
+    playerGradient.addColorStop(0, '#22d3ee');
+    playerGradient.addColorStop(1, '#06b6d4');
+    ctx.fillStyle = playerGradient;
     ctx.beginPath();
     ctx.arc(px + tileSize / 2, py + tileSize / 2, tileSize / 3, 0, Math.PI * 2);
     ctx.fill();
@@ -183,11 +198,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const width = obs.width * tileSize;
       
       if (obs.type === 'car') {
-        // Car with gradient
+        // Car with themed gradient
         const carGradient = ctx.createLinearGradient(ox, oy, ox + width, oy);
-        carGradient.addColorStop(0, '#ef4444');
-        carGradient.addColorStop(0.5, '#dc2626');
-        carGradient.addColorStop(1, '#b91c1c');
+        carGradient.addColorStop(0, '#3b82f6');
+        carGradient.addColorStop(0.5, '#2563eb');
+        carGradient.addColorStop(1, '#1d4ed8');
         ctx.fillStyle = carGradient;
         
         // Car body
@@ -227,6 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function draw() {
+    // Update tileSize for responsive canvas
+    tileSize = canvas.width / cols;
+    
     // Background
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
