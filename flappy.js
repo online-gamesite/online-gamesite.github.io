@@ -200,12 +200,28 @@ document.addEventListener('DOMContentLoaded', () => {
   function endGame() {
     gameOver = true;
     gameStarted = false;
+    
+    // Track game over
+    if (typeof gtag === 'function') {
+      gtag('event', 'game_over', {
+        'game_name': 'flappy_bird',
+        'score': score,
+        'high_score': highScore
+      });
+    }
   }
 
   function flap() {
     if (!gameStarted && !gameOver) {
       gameStarted = true;
       createPipe();
+      
+      // Track game start
+      if (typeof gtag === 'function') {
+        gtag('event', 'game_start', {
+          'game_name': 'flappy_bird'
+        });
+      }
     }
     
     if (gameOver) {

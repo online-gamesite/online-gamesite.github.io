@@ -391,6 +391,15 @@ function drop() {
         
         if (collide(currentPiece, board)) {
             gameOver = true;
+            // Track game over
+            if (typeof gtag === 'function') {
+              gtag('event', 'game_over', {
+                'game_name': 'tetris',
+                'score': score,
+                'lines': lines,
+                'level': level
+              });
+            }
             if(statusEl){
                 statusEl.textContent = `Game Over! Final Score: ${score}`;
                 statusEl.style.color = '#ef4444';
@@ -468,6 +477,14 @@ function update(time = 0) {
 // Keyboard controls
 document.addEventListener('keydown', e => {
     if (gameOver) return;
+    
+    // Track game start on first action
+    if (!isPaused && currentPiece && typeof gtag === 'function' && !window.tetrisGameStarted) {
+      window.tetrisGameStarted = true;
+      gtag('event', 'game_start', {
+        'game_name': 'tetris'
+      });
+    }
     
     // Prevent page scrolling with arrow keys
     if(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
@@ -597,6 +614,7 @@ if (resetBtn) {
         isPaused = false;
         holdPiece = null;
         canHold = true;
+        window.tetrisGameStarted = false; // Reset tracking flag
         createBoard();
         currentPiece = createPiece();
         nextPiece = createPiece();

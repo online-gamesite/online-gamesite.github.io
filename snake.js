@@ -254,10 +254,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
         stop();
         gameOver = true;
         // update high score for single player
+        const current = Math.max(0, snake.length - 1);
         try {
-          const current = Math.max(0, snake.length - 1);
           if (checkAndSetHighScore(current)) updateScore();
         } catch (e) {}
+        // Track game over
+        if (typeof gtag === 'function') {
+          gtag('event', 'game_over', {
+            'game_name': 'snake',
+            'score': current,
+            'mode': 'single'
+          });
+        }
         ctx.fillStyle = '#ef4444';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -277,6 +285,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(isMultiplayer && snake2.some(s=>s.x===head.x && s.y===head.y)){
       stop();
       gameOver = true;
+      // Track multiplayer win
+      if (typeof gtag === 'function') {
+        gtag('event', 'game_over', {
+          'game_name': 'snake',
+          'score': p2Score,
+          'mode': 'multiplayer',
+          'winner': 'player2'
+        });
+      }
       ctx.fillStyle = '#3b82f6';
       ctx.font = 'bold 24px Arial, sans-serif';
       ctx.textAlign = 'center';
@@ -306,6 +323,15 @@ document.addEventListener('DOMContentLoaded', ()=>{
       snake.some(s=>s.x===head2.x && s.y===head2.y)){
       stop();
       gameOver = true;
+        // Track multiplayer win
+        if (typeof gtag === 'function') {
+          gtag('event', 'game_over', {
+            'game_name': 'snake',
+            'score': p1Score,
+            'mode': 'multiplayer',
+            'winner': 'player1'
+          });
+        }
         ctx.fillStyle = '#10b981';
         ctx.font = 'bold 24px Arial, sans-serif';
         ctx.textAlign = 'center';
@@ -351,6 +377,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if(running) return;
     running = true;
     gameStarted = true;
+    // Track game start
+    if (typeof gtag === 'function') {
+      gtag('event', 'game_start', {
+        'game_name': 'snake',
+        'mode': isMultiplayer ? 'multiplayer' : 'single'
+      });
+    }
     // faster tick for smoother movement
     loopId = setInterval(step, 130);
   }

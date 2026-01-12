@@ -152,6 +152,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
         gameOver = true;
         winner = 'opponent';
         running = false;
+        
+        // Track game over
+        if (typeof gtag === 'function') {
+          gtag('event', 'game_over', {
+            'game_name': 'pong',
+            'score': playerScore,
+            'opponent_score': opponentScore,
+            'winner': winner
+          });
+        }
       } else {
         reset();
         running = false;
@@ -164,6 +174,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
         gameOver = true;
         winner = 'player';
         running = false;
+        
+        // Track game over
+        if (typeof gtag === 'function') {
+          gtag('event', 'game_over', {
+            'game_name': 'pong',
+            'score': playerScore,
+            'opponent_score': opponentScore,
+            'winner': winner
+          });
+        }
       } else {
         reset();
         running = false;
@@ -220,6 +240,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
       resetGame();
     }
     running = true;
+    
+    // Track game start
+    if (typeof gtag === 'function') {
+      gtag('event', 'game_start', {
+        'game_name': 'pong'
+      });
+    }
   }
 
   // Keyboard controls

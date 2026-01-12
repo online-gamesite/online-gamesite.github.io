@@ -262,6 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function endGame() {
     gameOver = true;
     gameStarted = false;
+    
+    // Track game over
+    if (typeof gtag === 'function') {
+      gtag('event', 'game_over', {
+        'game_name': 'space_invaders',
+        'score': score,
+        'level': level,
+        'lives': lives
+      });
+    }
   }
 
   function shoot() {
@@ -290,9 +300,23 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       if (!gameStarted && !gameOver) {
         gameStarted = true;
+        
+        // Track game start
+        if (typeof gtag === 'function') {
+          gtag('event', 'game_start', {
+            'game_name': 'space_invaders'
+          });
+        }
       } else if (gameOver) {
         resetGame();
         gameStarted = true;
+        
+        // Track game start
+        if (typeof gtag === 'function') {
+          gtag('event', 'game_start', {
+            'game_name': 'space_invaders'
+          });
+        }
       } else {
         shoot();
       }
@@ -324,9 +348,23 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!gameStarted && !gameOver) {
       gameStarted = true;
+      
+      // Track game start
+      if (typeof gtag === 'function') {
+        gtag('event', 'game_start', {
+          'game_name': 'space_invaders'
+        });
+      }
     } else if (gameOver) {
       resetGame();
       gameStarted = true;
+      
+      // Track game start
+      if (typeof gtag === 'function') {
+        gtag('event', 'game_start', {
+          'game_name': 'space_invaders'
+        });
+      }
     } else {
       shoot();
     }

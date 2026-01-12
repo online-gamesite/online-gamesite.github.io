@@ -189,6 +189,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
         if(lives <= 0){
           running = false;
           gameOver = true;
+          
+          // Track game over
+          if (typeof gtag === 'function') {
+            gtag('event', 'game_over', {
+              'game_name': 'breakout',
+              'score': score,
+              'level': level,
+              'mode': 'single'
+            });
+          }
         } else {
           ball.x = canvas.width/2;
           ball.y = canvas.height - 50;
@@ -216,6 +226,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
           if(player1Lives <= 0 && player2Lives <= 0){
             running = false;
             gameOver = true;
+            
+            // Track game over
+            if (typeof gtag === 'function') {
+              gtag('event', 'game_over', {
+                'game_name': 'breakout',
+                'player1_score': player1Score,
+                'player2_score': player2Score,
+                'level': level,
+                'mode': 'multi'
+              });
+            }
           } else if(player2Lives > 0){
             currentPlayer = 1;
             resetBall();
@@ -316,6 +337,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
       reset();
     }
     running = true;
+    
+    // Track game start
+    if (typeof gtag === 'function') {
+      gtag('event', 'game_start', {
+        'game_name': 'breakout'
+      });
+    }
   }
 
   function gameLoop(){
