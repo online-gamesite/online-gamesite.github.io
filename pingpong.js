@@ -372,6 +372,78 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'ArrowDown') player2.keys.down = false;
     });
     
+    // Touch controls
+    let touchActive = {
+        p1Up: false,
+        p1Down: false,
+        p2Up: false,
+        p2Down: false
+    };
+    
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTouch(e.touches);
+    });
+    
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        handleTouch(e.touches);
+    });
+    
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        // Reset all touch states when no touches remain
+        if (e.touches.length === 0) {
+            touchActive.p1Up = false;
+            touchActive.p1Down = false;
+            touchActive.p2Up = false;
+            touchActive.p2Down = false;
+            player1.keys.up = false;
+            player1.keys.down = false;
+            player2.keys.up = false;
+            player2.keys.down = false;
+        } else {
+            handleTouch(e.touches);
+        }
+    });
+    
+    function handleTouch(touches) {
+        // Reset touch states
+        touchActive.p1Up = false;
+        touchActive.p1Down = false;
+        touchActive.p2Up = false;
+        touchActive.p2Down = false;
+        
+        for (let touch of touches) {
+            const rect = canvas.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) * (WIDTH / rect.width);
+            const y = (touch.clientY - rect.top) * (HEIGHT / rect.height);
+            
+            // Left side controls (Player 1)
+            if (x < WIDTH / 4) {
+                if (y < HEIGHT / 2) {
+                    touchActive.p1Up = true;
+                } else {
+                    touchActive.p1Down = true;
+                }
+            }
+            // Right side controls (Player 2)
+            else if (x > WIDTH * 3 / 4) {
+                if (y < HEIGHT / 2) {
+                    touchActive.p2Up = true;
+                } else {
+                    touchActive.p2Down = true;
+                }
+            }
+        }
+        
+        // Apply touch states to player keys
+        player1.keys.up = touchActive.p1Up;
+        player1.keys.down = touchActive.p1Down;
+        player2.keys.up = touchActive.p2Up;
+        player2.keys.down = touchActive.p2Down;
+    }
+    
     resetBtn.addEventListener('click', resetGame);
     
     // Start
