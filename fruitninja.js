@@ -419,17 +419,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Mouse events
-    canvas.addEventListener('mousedown', (e) => {
+    canvas.addEventListener('mouseenter', (e) => {
         const rect = canvas.getBoundingClientRect();
         handleSliceStart(e.clientX - rect.left, e.clientY - rect.top);
     });
     
     canvas.addEventListener('mousemove', (e) => {
         const rect = canvas.getBoundingClientRect();
+        if (!isSlicing) {
+            handleSliceStart(e.clientX - rect.left, e.clientY - rect.top);
+        }
         handleSliceMove(e.clientX - rect.left, e.clientY - rect.top);
     });
     
-    canvas.addEventListener('mouseup', handleSliceEnd);
     canvas.addEventListener('mouseleave', handleSliceEnd);
     
     // Touch events
