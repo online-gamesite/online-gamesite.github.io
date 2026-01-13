@@ -5,8 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const scoreEl = document.getElementById('score');
     const comboEl = document.getElementById('combo');
     const livesEl = document.getElementById('lives');
-    const startBtn = document.getElementById('startBtn');
-    const resetBtn = document.getElementById('resetBtn');
     
     const WIDTH = 800;
     const HEIGHT = 600;
@@ -359,6 +357,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastPos = null;
     
     function handleSliceStart(x, y) {
+        // Auto-start game on first tap/click
+        if (gameState === 'ready') {
+            startGame();
+        } else if (gameState === 'gameover') {
+            resetGame();
+            startGame();
+        }
+        
         if (gameState !== 'playing') return;
         isSlicing = true;
         lastPos = { x, y };
@@ -445,10 +451,6 @@ document.addEventListener('DOMContentLoaded', function() {
         e.preventDefault();
         handleSliceEnd();
     });
-    
-    // Button events
-    startBtn.addEventListener('click', startGame);
-    resetBtn.addEventListener('click', resetGame);
     
     // Initialize
     resetGame();
