@@ -247,19 +247,16 @@ function rotate(piece) {
     const previousX = piece.x;
     const previousY = piece.y;
     
-    // Calculate center offset for pivot rotation
+    // Calculate center offset for pivot rotation (horizontal only)
     const oldWidth = piece.shape[0].length;
-    const oldHeight = piece.shape.length;
     const newWidth = rotated[0].length;
-    const newHeight = rotated.length;
     
     const offsetX = Math.floor((oldWidth - newWidth) / 2);
-    const offsetY = Math.floor((oldHeight - newHeight) / 2);
     
     // Temporarily apply rotation
     piece.shape = rotated;
     piece.x = previousX + offsetX;
-    piece.y = previousY + offsetY;
+    piece.y = previousY; // Keep Y position fixed
     
     // Try basic rotation at current position
     if (!collide(piece, board, piece.x, piece.y)) {
@@ -298,19 +295,16 @@ function rotateCounterClockwise(piece) {
     const previousX = piece.x;
     const previousY = piece.y;
     
-    // Calculate center offset for pivot rotation
+    // Calculate center offset for pivot rotation (horizontal only)
     const oldWidth = piece.shape[0].length;
-    const oldHeight = piece.shape.length;
     const newWidth = rotated[0].length;
-    const newHeight = rotated.length;
     
     const offsetX = Math.floor((oldWidth - newWidth) / 2);
-    const offsetY = Math.floor((oldHeight - newHeight) / 2);
     
     // Temporarily apply rotation
     piece.shape = rotated;
     piece.x = previousX + offsetX;
-    piece.y = previousY + offsetY;
+    piece.y = previousY; // Keep Y position fixed
     
     // Try basic rotation at current position
     if (!collide(piece, board, piece.x, piece.y)) {
