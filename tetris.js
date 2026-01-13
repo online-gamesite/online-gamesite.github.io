@@ -266,15 +266,12 @@ function rotate(piece) {
         return;
     }
     
-    // Wall kick - try different positions (standard SRS-like kicks)
+    // Wall kick - try different positions (horizontal only to prevent upward floating)
     const kickTests = [
         {x: 1, y: 0},
         {x: -1, y: 0},
         {x: 2, y: 0},
-        {x: -2, y: 0},
-        {x: 0, y: -1},
-        {x: 1, y: -1},
-        {x: -1, y: -1}
+        {x: -2, y: 0}
     ];
     
     for (let kick of kickTests) {
@@ -320,15 +317,12 @@ function rotateCounterClockwise(piece) {
         return;
     }
     
-    // Wall kick - try different positions (standard SRS-like kicks)
+    // Wall kick - try different positions (horizontal only to prevent upward floating)
     const kickTests = [
         {x: 1, y: 0},
         {x: -1, y: 0},
         {x: 2, y: 0},
-        {x: -2, y: 0},
-        {x: 0, y: -1},
-        {x: 1, y: -1},
-        {x: -1, y: -1}
+        {x: -2, y: 0}
     ];
     
     for (let kick of kickTests) {
