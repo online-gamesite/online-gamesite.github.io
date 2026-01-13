@@ -98,15 +98,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         intersectsLine(x1, y1, x2, y2) {
-            // Simple circle-line intersection
+            // Simple circle-line intersection with larger hitbox
             const dx = x2 - x1;
             const dy = y2 - y1;
             const fx = x1 - this.x;
             const fy = y1 - this.y;
             
+            // Increased hitbox radius (was size/2, now size * 0.75 for 50% bigger hitbox)
+            const hitboxRadius = this.size * 0.75;
+            
             const a = dx * dx + dy * dy;
             const b = 2 * (fx * dx + fy * dy);
-            const c = (fx * fx + fy * fy) - (this.size / 2) * (this.size / 2);
+            const c = (fx * fx + fy * fy) - hitboxRadius * hitboxRadius;
             
             const discriminant = b * b - 4 * a * c;
             
