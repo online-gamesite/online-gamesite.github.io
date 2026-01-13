@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const x = Math.random() * (WIDTH - 200) + 100; // More centered spawn (x=100 to x=600)
         const y = HEIGHT + 20;
         const vx = (Math.random() - 0.5) * 4; // Horizontal velocity
-        const vy = -(Math.random() * 10 + 18); // Strong upward velocity: -18 to -28
+        const vy = -(Math.random() * 8 + 12); // Reduced upward velocity: -12 to -20
         
         let obj;
         if (isBomb) {
