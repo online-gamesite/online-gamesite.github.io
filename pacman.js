@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dir: { x: 0, y: 0 },
     nextDir: { x: 0, y: 0 },
     mouthOpen: 0,
-    speed: 0.15
+    speed: 0.3
   };
 
   // Ghosts
@@ -456,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   let lastTime = 0;
-  const targetFPS = 10; // Even slower game speed
+  const targetFPS = 30; // Faster game speed
   const frameDelay = 1000 / targetFPS;
 
   function gameLoop(currentTime) {
