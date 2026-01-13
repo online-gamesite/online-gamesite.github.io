@@ -323,16 +323,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Draw piece
                 if (board[row][col] === 1) {
-                    // Player 1 - cyan/teal gradient with glow
+                    // Player 1 - Red/orange gradient with glow
                     ctx.shadowBlur = 20;
-                    ctx.shadowColor = 'rgba(6, 182, 212, 0.8)';
+                    ctx.shadowColor = 'rgba(239, 68, 68, 0.8)';
                     const p1Gradient = ctx.createRadialGradient(
                         x - RADIUS/2.5, y - RADIUS/2.5, RADIUS/6,
                         x, y, RADIUS - 2
                     );
-                    p1Gradient.addColorStop(0, '#67e8f9');
-                    p1Gradient.addColorStop(0.3, '#22d3ee');
-                    p1Gradient.addColorStop(1, '#0891b2');
+                    p1Gradient.addColorStop(0, '#fca5a5');
+                    p1Gradient.addColorStop(0.3, '#ef4444');
+                    p1Gradient.addColorStop(1, '#b91c1c');
                     ctx.fillStyle = p1Gradient;
                     ctx.beginPath();
                     ctx.arc(x, y, RADIUS - 3, 0, Math.PI * 2);
