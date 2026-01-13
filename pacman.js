@@ -546,6 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize
   totalDots = countDots();
+  reset(); // Ensure proper initialization
   updateScore();
   gameLoop();
 });
