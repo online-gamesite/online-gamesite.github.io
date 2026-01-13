@@ -81,12 +81,18 @@ document.addEventListener('DOMContentLoaded', function() {
             // Shadow
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowOffsetX = 2;
+            ctx.shadowOffsetY = 2;
             
             // Draw emoji
             ctx.font = `${this.size}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(this.emoji, 0, 0);
+            
+            // Reset shadow to prevent it from affecting other elements
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
             
             ctx.restore();
         }
