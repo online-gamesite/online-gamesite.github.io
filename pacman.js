@@ -59,8 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Pac-Man
   let pacman = {
-    x: 15,
-    y: 29,
+    x: 14,
+    y: 28,
     dir: { x: 0, y: 0 },
     nextDir: { x: 0, y: 0 },
     mouthOpen: 0,
@@ -70,10 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Ghosts
   const ghostColors = ['#ef4444', '#f59e0b', '#06b6d4', '#ec4899'];
   let ghosts = [
-    { x: 12, y: 14, startX: 12, startY: 14, dir: { x: 1, y: 0 }, color: ghostColors[0], personality: 'chase' },
-    { x: 13, y: 14, startX: 13, startY: 14, dir: { x: -1, y: 0 }, color: ghostColors[1], personality: 'ambush' },
-    { x: 14, y: 14, startX: 14, startY: 14, dir: { x: 0, y: -1 }, color: ghostColors[2], personality: 'random' },
-    { x: 15, y: 14, startX: 15, startY: 14, dir: { x: 0, y: 1 }, color: ghostColors[3], personality: 'patrol' }
+    { x: 13, y: 13, startX: 13, startY: 13, dir: { x: 1, y: 0 }, color: ghostColors[0], personality: 'chase' },
+    { x: 14, y: 13, startX: 14, startY: 13, dir: { x: -1, y: 0 }, color: ghostColors[1], personality: 'ambush' },
+    { x: 15, y: 13, startX: 15, startY: 13, dir: { x: 0, y: -1 }, color: ghostColors[2], personality: 'random' },
+    { x: 16, y: 13, startX: 16, startY: 13, dir: { x: 0, y: 1 }, color: ghostColors[3], personality: 'patrol' }
   ];
 
   function countDots() {
@@ -87,8 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function reset() {
-    pacman.x = 15;
-    pacman.y = 29;
+    pacman.x = 14;
+    pacman.y = 28;
     pacman.dir = { x: 0, y: 0 };
     pacman.nextDir = { x: 0, y: 0 };
     
