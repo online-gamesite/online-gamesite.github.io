@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Pac-Man
   let pacman = {
-    x: 14,
+    x: 15,
     y: 29,
     dir: { x: 0, y: 0 },
     nextDir: { x: 0, y: 0 },
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function reset() {
-    pacman.x = 14;
+    pacman.x = 15;
     pacman.y = 29;
     pacman.dir = { x: 0, y: 0 };
     pacman.nextDir = { x: 0, y: 0 };
