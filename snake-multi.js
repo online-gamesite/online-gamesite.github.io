@@ -188,8 +188,8 @@ async function joinGame(roomCode) {
         players[myPlayerId] = playerData;
         
         // Initialize camera position
-        camera.x = startX - (canvasWidth / camera.zoom) / 2;
-        camera.y = startY - (canvasHeight / camera.zoom) / 2;
+        camera.x = startX;
+        camera.y = startY;
         
         // Initialize foods if needed
         const foodSnapshot = await get(ref(database, `snake-rooms/${currentRoom}/foods`));
@@ -467,8 +467,8 @@ async function respawnPlayer() {
     }
     
     // Initialize camera position
-    camera.x = startX - (canvasWidth / camera.zoom) / 2;
-    camera.y = startY - (canvasHeight / camera.zoom) / 2;
+    camera.x = startX;
+    camera.y = startY;
     
     await update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
         segments: segments,
@@ -494,14 +494,13 @@ function draw() {
     // Update camera to keep player centered
     if (myPlayerId && players[myPlayerId] && players[myPlayerId].alive && players[myPlayerId].segments[0]) {
         const head = players[myPlayerId].segments[0];
-        camera.x = head.x - (canvasWidth / camera.zoom) / 2;
-        camera.y = head.y - (canvasHeight / camera.zoom) / 2;
+        camera.x = head.x;
+        camera.y = head.y;
     }
     
     ctx.save();
     ctx.translate(canvasWidth / 2, canvasHeight / 2);
     ctx.scale(camera.zoom, camera.zoom);
-    ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
     ctx.translate(-camera.x, -camera.y);
     
     // Draw world boundary
