@@ -184,6 +184,13 @@ async function joinGame(roomCode) {
         // Add player to room
         await set(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), playerData);
         
+        // Immediately add to local players object for instant rendering
+        players[myPlayerId] = playerData;
+        
+        // Initialize camera position
+        camera.x = startX - canvasWidth / 2;
+        camera.y = startY - canvasHeight / 2;
+        
         // Initialize foods if needed
         const foodSnapshot = await get(ref(database, `snake-rooms/${currentRoom}/foods`));
         if (!foodSnapshot.exists()) {
@@ -198,6 +205,10 @@ async function joinGame(roomCode) {
         gamePanel.style.display = 'block';
         roomCodeEl.textContent = currentRoom;
         statusEl.textContent = 'Game Active!';
+        scoreEl.textContent = '0';
+        
+        // Draw initial frame before game loop starts
+        draw();
         
         // Start game loop
         startGameLoop();
@@ -447,6 +458,18 @@ async function respawnPlayer() {
     myScore = 0;
     scoreEl.textContent = '0';
     
+    // Update local player immediately
+    if (players[myPlayerId]) {
+        players[myPlayerId].segments = segments;
+        players[myPlayerId].alive = true;
+        players[myPlayerId].score = 0;
+        players[myPlayerId].angle = 0;
+    }
+    
+    // Initialize camera position
+    camera.x = startX - canvasWidth / 2;
+    camera.y = startY - canvasHeight / 2;
+    
     await update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
         segments: segments,
         alive: true,
@@ -457,6 +480,9 @@ async function respawnPlayer() {
     
     statusEl.textContent = 'Game Active!';
     respawnPanel.style.display = 'none';
+    
+    // Draw immediately
+    draw();
 }
 
 // Draw game
