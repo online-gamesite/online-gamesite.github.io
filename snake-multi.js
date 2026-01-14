@@ -502,13 +502,13 @@ function draw() {
     ctx.translate(-camera.x, -camera.y);
     
     // Draw world boundary
-    ctx.strokeStyle = '#1a1f35';
-    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#2a3f5f';
+    ctx.lineWidth = 6;
     ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
     
-    // Draw grid
-    ctx.strokeStyle = '#1a1f35';
-    ctx.lineWidth = 1;
+    // Draw subtle grid
+    ctx.strokeStyle = 'rgba(26, 31, 53, 0.3)';
+    ctx.lineWidth = 0.5;
     const gridSize = 100;
     for (let x = 0; x <= WORLD_SIZE; x += gridSize) {
         ctx.beginPath();
@@ -535,6 +535,19 @@ function draw() {
     for (const playerId in players) {
         const player = players[playerId];
         if (!player.segments || !player.alive) continue;
+        
+        // Draw snake outline (for visibility)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = SEGMENT_SIZE + 4;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        
+        ctx.beginPath();
+        ctx.moveTo(player.segments[0].x, player.segments[0].y);
+        for (let i = 1; i < player.segments.length; i++) {
+            ctx.lineTo(player.segments[i].x, player.segments[i].y);
+        }
+        ctx.stroke();
         
         // Draw snake body
         ctx.strokeStyle = player.color;
