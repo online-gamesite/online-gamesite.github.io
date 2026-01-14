@@ -41,7 +41,7 @@ let gameLoop = null;
 let mouseX = 0;
 let mouseY = 0;
 let isBoosting = false;
-let camera = { x: 0, y: 0, zoom: 0.9 };
+let camera = { x: 0, y: 0, zoom: 1.5 };
 
 // Colors for different players
 const PLAYER_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
