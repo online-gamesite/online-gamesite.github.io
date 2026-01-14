@@ -2,13 +2,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   // --- Firebase Config ---
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
+    apiKey: "AIzaSyC-YQfj_9xZV8Xh4KZ4tLJVPqWr9X3uK8Y",
+    authDomain: "insta-games-a111a.firebaseapp.com",
     databaseURL: "https://insta-games-a111a-default-rtdb.firebaseio.com/",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    projectId: "insta-games-a111a",
+    storageBucket: "insta-games-a111a.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abc123def456"
   };
 
   // --- Initialize Firebase ---
