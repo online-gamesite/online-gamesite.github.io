@@ -18,10 +18,16 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 // Game Constants
-const GRID_SIZE = 20;
-const TILE_SIZE = 30;
 const CANVAS_SIZE = 600;
-const GAME_SPEED = 150;
+const WORLD_SIZE = 3000;
+const SNAKE_SPEED = 3;
+const BOOST_SPEED = 6;
+const SEGMENT_SIZE = 10;
+const SEGMENT_SPACING = 8;
+const FOOD_SIZE = 6;
+const INITIAL_LENGTH = 10;
+const FOOD_COUNT = 200;
+const UPDATE_RATE = 1000 / 60; // 60 FPS
 
 // Game State
 let canvas, ctx;
@@ -29,12 +35,13 @@ let myPlayerId = null;
 let myPlayerName = '';
 let currentRoom = null;
 let players = {};
-let food = null;
+let foods = [];
 let myScore = 0;
 let gameLoop = null;
-let lastMoveTime = 0;
-let direction = { x: 1, y: 0 };
-let nextDirection = { x: 1, y: 0 };
+let mouseX = CANVAS_SIZE / 2;
+let mouseY = CANVAS_SIZE / 2;
+let isBoosting = false;
+let camera = { x: 0, y: 0 };
 
 // Colors for different players
 const PLAYER_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
@@ -62,7 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
     quickPlayBtn.addEventListener('click', () => findOrCreateRoom());
     leaveBtn.addEventListener('click', leaveGame);
     
-    setupKeyboardControls();
+    setupMouseControls();
+    setupTouchControls();
 });
 
 // Generate unique player ID
@@ -121,27 +129,34 @@ async function joinGame(roomCode) {
     myPlayerName = name;
     currentRoom = roomCode;
     
-    // Create initial snake
-    const startX = Math.floor(Math.random() * (GRID_SIZE - 10)) + 5;
-    const startY = Math.floor(Math.random() * (GRID_SIZE - 10)) + 5;
+    // Create initial snake at random position
+    const startX = Math.random() * (WORLD_SIZE - 400) + 200;
+    const startY = Math.random() * (WORLD_SIZE - 400) + 200;
+    
+    const segments = [];
+    for (let i = 0; i < INITIAL_LENGTH; i++) {
+        segments.push({ x: startX - i * SEGMENT_SPACING, y: startY });
+    }
     
     const playerData = {
         name: name,
         score: 0,
         alive: true,
         color: PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)],
-        snake: [
-            { x: startX, y: startY },
-            { x: startX - 1, y: startY },
-            { x: startX - 2, y: startY }
-        ],
-        direction: { x: 1, y: 0 },
+        segments: segments,
+        angle: 0,
         lastUpdate: Date.now()
     };
     
     try {
         // Add player to room
         await set(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), playerData);
+        
+        // Initialize foods if needed
+        const foodSnapshot = await get(ref(database, `snake-rooms/${currentRoom}/foods`));
+        if (!foodSnapshot.exists()) {
+            await initializeFoods();
+        }
         
         // Setup listeners
         setupGameListeners();
@@ -172,45 +187,36 @@ function setupGameListeners() {
         }
     });
     
-    // Listen to food
-    onValue(ref(database, `snake-rooms/${currentRoom}/food`), (snapshot) => {
+    // Listen to foods
+    onValue(ref(database, `snake-rooms/${currentRoom}/foods`), (snapshot) => {
         if (snapshot.exists()) {
-            food = snapshot.val();
-        } else {
-            // Host spawns food
-            if (players && myPlayerId && players[myPlayerId]) {
-                spawnFood();
-            }
+            foods = Object.values(snapshot.val());
         }
     });
 }
 
-// Spawn food
-async function spawnFood() {
-    if (!currentRoom) return;
-    
-    let foodPos;
-    let attempts = 0;
-    do {
-        foodPos = {
-            x: Math.floor(Math.random() * GRID_SIZE),
-            y: Math.floor(Math.random() * GRID_SIZE)
+// Initialize foods
+async function initializeFoods() {
+    const foodData = {};
+    for (let i = 0; i < FOOD_COUNT; i++) {
+        const foodId = 'food_' + i;
+        foodData[foodId] = {
+            x: Math.random() * WORLD_SIZE,
+            y: Math.random() * WORLD_SIZE,
+            color: PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)]
         };
-        attempts++;
-    } while (isFoodOnSnake(foodPos) && attempts < 100);
-    
-    await set(ref(database, `snake-rooms/${currentRoom}/food`), foodPos);
+    }
+    await set(ref(database, `snake-rooms/${currentRoom}/foods`), foodData);
 }
 
-// Check if food spawned on snake
-function isFoodOnSnake(pos) {
-    for (const playerId in players) {
-        const snake = players[playerId].snake;
-        if (snake && snake.some(segment => segment.x === pos.x && segment.y === pos.y)) {
-            return true;
-        }
-    }
-    return false;
+// Spawn food at position
+async function spawnFood(x, y) {
+    const foodId = 'food_' + Date.now() + '_' + Math.random();
+    await set(ref(database, `snake-rooms/${currentRoom}/foods/${foodId}`), {
+        x: x,
+        y: y,
+        color: PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)]
+    });
 }
 
 // Update players list
@@ -231,43 +237,47 @@ function updatePlayersList() {
     });
 }
 
-// Setup keyboard controls
-function setupKeyboardControls() {
-    document.addEventListener('keydown', (e) => {
-        if (!myPlayerId || !players[myPlayerId] || !players[myPlayerId].alive) return;
-        
-        switch(e.key) {
-            case 'ArrowUp':
-            case 'w':
-            case 'W':
-                if (direction.y === 0) nextDirection = { x: 0, y: -1 };
-                e.preventDefault();
-                break;
-            case 'ArrowDown':
-            case 's':
-            case 'S':
-                if (direction.y === 0) nextDirection = { x: 0, y: 1 };
-                e.preventDefault();
-                break;
-            case 'ArrowLeft':
-            case 'a':
-            case 'A':
-                if (direction.x === 0) nextDirection = { x: -1, y: 0 };
-                e.preventDefault();
-                break;
-            case 'ArrowRight':
-            case 'd':
-            case 'D':
-                if (direction.x === 0) nextDirection = { x: 1, y: 0 };
-                e.preventDefault();
-                break;
-        }
+// Setup mouse controls
+function setupMouseControls() {
+    canvas.addEventListener('mousemove', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        mouseX = e.clientX - rect.left;
+        mouseY = e.clientY - rect.top;
+    });
+    
+    canvas.addEventListener('mousedown', () => {
+        isBoosting = true;
+    });
+    
+    canvas.addEventListener('mouseup', () => {
+        isBoosting = false;
+    });
+}
+
+// Setup touch controls
+function setupTouchControls() {
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        mouseX = touch.clientX - rect.left;
+        mouseY = touch.clientY - rect.top;
+    });
+    
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        isBoosting = true;
+    });
+    
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        isBoosting = false;
     });
 }
 
 // Start game loop
 function startGameLoop() {
-    gameLoop = setInterval(updateGame, GAME_SPEED);
+    gameLoop = setInterval(updateGame, UPDATE_RATE);
 }
 
 // Update game
@@ -277,61 +287,99 @@ async function updateGame() {
         return;
     }
     
-    const now = Date.now();
-    if (now - lastMoveTime < GAME_SPEED) return;
-    lastMoveTime = now;
+    const mySnake = players[myPlayerId].segments;
+    const head = mySnake[0];
     
-    // Update direction
-    direction = { ...nextDirection };
+    // Calculate angle to mouse
+    const dx = mouseX - CANVAS_SIZE / 2;
+    const dy = mouseY - CANVAS_SIZE / 2;
+    const targetAngle = Math.atan2(dy, dx);
     
-    const mySnake = players[myPlayerId].snake;
-    const head = { ...mySnake[0] };
+    // Move speed
+    const speed = isBoosting ? BOOST_SPEED : SNAKE_SPEED;
     
-    // Move head
-    head.x += direction.x;
-    head.y += direction.y;
+    // Calculate new head position
+    const newHead = {
+        x: head.x + Math.cos(targetAngle) * speed,
+        y: head.y + Math.sin(targetAngle) * speed
+    };
     
-    // Check wall collision
-    if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
-        await handleDeath();
-        return;
-    }
+    // Wrap around world boundaries
+    if (newHead.x < 0) newHead.x = WORLD_SIZE;
+    if (newHead.x > WORLD_SIZE) newHead.x = 0;
+    if (newHead.y < 0) newHead.y = WORLD_SIZE;
+    if (newHead.y > WORLD_SIZE) newHead.y = 0;
     
-    // Check self collision
-    if (mySnake.some(segment => segment.x === head.x && segment.y === head.y)) {
-        await handleDeath();
-        return;
-    }
-    
-    // Check collision with other snakes
+    // Check collision with other snakes (not self)
     for (const playerId in players) {
-        if (playerId === myPlayerId) continue;
-        const otherSnake = players[playerId].snake;
-        if (otherSnake && otherSnake.some(segment => segment.x === head.x && segment.y === head.y)) {
-            await handleDeath();
-            return;
+        if (playerId === myPlayerId || !players[playerId].alive) continue;
+        const otherSnake = players[playerId].segments;
+        if (otherSnake) {
+            for (let i = 0; i < otherSnake.length; i++) {
+                const segment = otherSnake[i];
+                const dist = Math.hypot(newHead.x - segment.x, newHead.y - segment.y);
+                if (dist < SEGMENT_SIZE) {
+                    await handleDeath();
+                    return;
+                }
+            }
         }
     }
     
     // Add new head
-    mySnake.unshift(head);
+    mySnake.unshift(newHead);
     
-    // Check food collision
-    if (food && head.x === food.x && head.y === food.y) {
-        myScore += 10;
-        scoreEl.textContent = myScore;
-        spawnFood();
-    } else {
-        // Remove tail
-        mySnake.pop();
+    // Check food collisions
+    let ate = false;
+    for (let i = foods.length - 1; i >= 0; i--) {
+        const food = foods[i];
+        const dist = Math.hypot(newHead.x - food.x, newHead.y - food.y);
+        if (dist < SEGMENT_SIZE + FOOD_SIZE) {
+            myScore += 1;
+            scoreEl.textContent = myScore;
+            ate = true;
+            // Remove food from database
+            const foodKeys = Object.keys((await get(ref(database, `snake-rooms/${currentRoom}/foods`))).val() || {});
+            if (foodKeys[i]) {
+                await remove(ref(database, `snake-rooms/${currentRoom}/foods/${foodKeys[i]}`));
+            }
+            // Spawn new food
+            await spawnFood(Math.random() * WORLD_SIZE, Math.random() * WORLD_SIZE);
+            break;
+        }
+    }
+    
+    // Remove tail if didn't eat (or remove multiple if boosting)
+    if (!ate) {
+        if (isBoosting && mySnake.length > INITIAL_LENGTH) {
+            mySnake.pop();
+            mySnake.pop(); // Lose length when boosting
+        } else {
+            mySnake.pop();
+        }
+    }
+    
+    // Maintain segments spacing
+    for (let i = 1; i < mySnake.length; i++) {
+        const prev = mySnake[i - 1];
+        const curr = mySnake[i];
+        const dx = prev.x - curr.x;
+        const dy = prev.y - curr.y;
+        const dist = Math.hypot(dx, dy);
+        
+        if (dist > SEGMENT_SPACING) {
+            const angle = Math.atan2(dy, dx);
+            curr.x = prev.x - Math.cos(angle) * SEGMENT_SPACING;
+            curr.y = prev.y - Math.sin(angle) * SEGMENT_SPACING;
+        }
     }
     
     // Update Firebase
     await update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
-        snake: mySnake,
-        direction: direction,
+        segments: mySnake,
+        angle: targetAngle,
         score: myScore,
-        lastUpdate: now
+        lastUpdate: Date.now()
     });
     
     draw();
@@ -339,10 +387,16 @@ async function updateGame() {
 
 // Handle player death
 async function handleDeath() {
+    // Drop food where snake died
+    const mySnake = players[myPlayerId].segments;
+    for (let i = 0; i < mySnake.length; i += 3) {
+        await spawnFood(mySnake[i].x, mySnake[i].y);
+    }
+    
     await update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
         alive: false
     });
-    statusEl.textContent = 'You died! 💀';
+    statusEl.textContent = 'You died! 💀 Refresh to respawn';
     draw();
 }
 
@@ -352,63 +406,138 @@ function draw() {
     ctx.fillStyle = '#0a0e1a';
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     
+    // Update camera to follow player
+    if (myPlayerId && players[myPlayerId] && players[myPlayerId].alive && players[myPlayerId].segments[0]) {
+        const head = players[myPlayerId].segments[0];
+        camera.x = head.x - CANVAS_SIZE / 2;
+        camera.y = head.y - CANVAS_SIZE / 2;
+    }
+    
+    ctx.save();
+    ctx.translate(-camera.x, -camera.y);
+    
+    // Draw world boundary
+    ctx.strokeStyle = '#1a1f35';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(0, 0, WORLD_SIZE, WORLD_SIZE);
+    
     // Draw grid
     ctx.strokeStyle = '#1a1f35';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= GRID_SIZE; i++) {
+    const gridSize = 100;
+    for (let x = 0; x <= WORLD_SIZE; x += gridSize) {
         ctx.beginPath();
-        ctx.moveTo(i * TILE_SIZE, 0);
-        ctx.lineTo(i * TILE_SIZE, CANVAS_SIZE);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, WORLD_SIZE);
         ctx.stroke();
+    }
+    for (let y = 0; y <= WORLD_SIZE; y += gridSize) {
         ctx.beginPath();
-        ctx.moveTo(0, i * TILE_SIZE);
-        ctx.lineTo(CANVAS_SIZE, i * TILE_SIZE);
+        ctx.moveTo(0, y);
+        ctx.lineTo(WORLD_SIZE, y);
         ctx.stroke();
     }
     
     // Draw food
-    if (food) {
-        ctx.fillStyle = '#ef4444';
+    foods.forEach(food => {
+        ctx.fillStyle = food.color;
         ctx.beginPath();
-        ctx.arc(
-            food.x * TILE_SIZE + TILE_SIZE / 2,
-            food.y * TILE_SIZE + TILE_SIZE / 2,
-            TILE_SIZE / 2 - 2,
-            0,
-            Math.PI * 2
-        );
+        ctx.arc(food.x, food.y, FOOD_SIZE, 0, Math.PI * 2);
         ctx.fill();
-    }
+    });
     
     // Draw snakes
     for (const playerId in players) {
         const player = players[playerId];
-        if (!player.snake || !player.alive) continue;
+        if (!player.segments || !player.alive) continue;
         
+        // Draw snake body
+        ctx.strokeStyle = player.color;
         ctx.fillStyle = player.color;
-        player.snake.forEach((segment, index) => {
-            const alpha = index === 0 ? 1 : 0.7 - (index / player.snake.length) * 0.3;
-            ctx.globalAlpha = alpha;
-            ctx.fillRect(
-                segment.x * TILE_SIZE + 2,
-                segment.y * TILE_SIZE + 2,
-                TILE_SIZE - 4,
-                TILE_SIZE - 4
-            );
-        });
-        ctx.globalAlpha = 1;
+        ctx.lineWidth = SEGMENT_SIZE;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
         
-        // Draw player name above snake
-        if (player.snake[0]) {
-            ctx.fillStyle = player.color;
-            ctx.font = 'bold 12px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(
-                player.name,
-                player.snake[0].x * TILE_SIZE + TILE_SIZE / 2,
-                player.snake[0].y * TILE_SIZE - 5
-            );
+        ctx.beginPath();
+        ctx.moveTo(player.segments[0].x, player.segments[0].y);
+        for (let i = 1; i < player.segments.length; i++) {
+            ctx.lineTo(player.segments[i].x, player.segments[i].y);
         }
+        ctx.stroke();
+        
+        // Draw head
+        const head = player.segments[0];
+        ctx.fillStyle = player.color;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, SEGMENT_SIZE / 2 + 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Draw eyes
+        const angle = player.angle || 0;
+        ctx.fillStyle = '#fff';
+        const eyeOffset = 4;
+        const eyeSize = 2;
+        ctx.beginPath();
+        ctx.arc(
+            head.x + Math.cos(angle + 0.3) * eyeOffset,
+            head.y + Math.sin(angle + 0.3) * eyeOffset,
+            eyeSize, 0, Math.PI * 2
+        );
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(
+            head.x + Math.cos(angle - 0.3) * eyeOffset,
+            head.y + Math.sin(angle - 0.3) * eyeOffset,
+            eyeSize, 0, Math.PI * 2
+        );
+        ctx.fill();
+        
+        // Draw player name
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 3;
+        ctx.strokeText(player.name, head.x, head.y - 20);
+        ctx.fillText(player.name, head.x, head.y - 20);
+    }
+    
+    ctx.restore();
+    
+    // Draw minimap
+    drawMinimap();
+}
+
+// Draw minimap
+function drawMinimap() {
+    const minimapSize = 120;
+    const minimapX = CANVAS_SIZE - minimapSize - 10;
+    const minimapY = 10;
+    const scale = minimapSize / WORLD_SIZE;
+    
+    // Background
+    ctx.fillStyle = 'rgba(10, 14, 26, 0.7)';
+    ctx.fillRect(minimapX, minimapY, minimapSize, minimapSize);
+    ctx.strokeStyle = '#06b6d4';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(minimapX, minimapY, minimapSize, minimapSize);
+    
+    // Draw players
+    for (const playerId in players) {
+        const player = players[playerId];
+        if (!player.segments || !player.alive) continue;
+        
+        const head = player.segments[0];
+        ctx.fillStyle = player.color;
+        ctx.beginPath();
+        ctx.arc(
+            minimapX + head.x * scale,
+            minimapY + head.y * scale,
+            3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
     }
 }
 
