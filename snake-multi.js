@@ -228,6 +228,7 @@ function setupGameListeners() {
     onValue(ref(database, `snake-rooms/${currentRoom}/players`), (snapshot) => {
         if (snapshot.exists()) {
             players = snapshot.val();
+            cleanupInactivePlayers();
             updatePlayersList();
             playerCountEl.textContent = Object.keys(players).length;
         }
@@ -239,6 +240,21 @@ function setupGameListeners() {
             foods = Object.values(snapshot.val());
         }
     });
+}
+
+// Clean up inactive players
+function cleanupInactivePlayers() {
+    const now = Date.now();
+    const timeout = 10000; // 10 seconds without update = inactive
+    
+    for (const playerId in players) {
+        const player = players[playerId];
+        if (player.lastUpdate && (now - player.lastUpdate) > timeout) {
+            // Remove inactive player
+            remove(ref(database, `snake-rooms/${currentRoom}/players/${playerId}`))
+                .catch(err => console.error('Error removing inactive player:', err));
+        }
+    }
 }
 
 // Initialize foods
