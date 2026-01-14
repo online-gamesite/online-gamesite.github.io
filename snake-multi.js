@@ -54,6 +54,8 @@ const roomInput = document.getElementById('roomInput');
 const joinBtn = document.getElementById('joinBtn');
 const quickPlayBtn = document.getElementById('quickPlayBtn');
 const leaveBtn = document.getElementById('leaveBtn');
+const respawnBtn = document.getElementById('respawnBtn');
+const respawnPanel = document.getElementById('respawnPanel');
 const roomCodeEl = document.getElementById('roomCode');
 const statusEl = document.getElementById('status');
 const scoreEl = document.getElementById('score');
@@ -68,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     joinBtn.addEventListener('click', () => joinGame(roomInput.value.toUpperCase()));
     quickPlayBtn.addEventListener('click', () => findOrCreateRoom());
     leaveBtn.addEventListener('click', leaveGame);
+    respawnBtn.addEventListener('click', respawnPlayer);
     
     setupMouseControls();
     setupTouchControls();
@@ -396,8 +399,37 @@ async function handleDeath() {
     await update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
         alive: false
     });
-    statusEl.textContent = 'You died! 💀 Refresh to respawn';
+    statusEl.textContent = 'You died! 💀';
+    respawnPanel.style.display = 'block';
     draw();
+}
+
+// Respawn player
+async function respawnPlayer() {
+    if (!myPlayerId || !currentRoom) return;
+    
+    // Create new snake at random position
+    const startX = Math.random() * (WORLD_SIZE - 400) + 200;
+    const startY = Math.random() * (WORLD_SIZE - 400) + 200;
+    
+    const segments = [];
+    for (let i = 0; i < INITIAL_LENGTH; i++) {
+        segments.push({ x: startX - i * SEGMENT_SPACING, y: startY });
+    }
+    
+    myScore = 0;
+    scoreEl.textContent = '0';
+    
+    await update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
+        segments: segments,
+        alive: true,
+        score: 0,
+        angle: 0,
+        lastUpdate: Date.now()
+    });
+    
+    statusEl.textContent = 'Game Active!';
+    respawnPanel.style.display = 'none';
 }
 
 // Draw game
