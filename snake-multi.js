@@ -299,20 +299,29 @@ function setupMouseControls() {
 // Setup touch controls
 function setupTouchControls() {
     document.addEventListener('touchmove', (e) => {
-        e.preventDefault();
-        const touch = e.touches[0];
-        mouseX = touch.clientX;
-        mouseY = touch.clientY;
+        // Only prevent default if game is active (join panel hidden)
+        if (joinPanel.style.display === 'none') {
+            e.preventDefault();
+            const touch = e.touches[0];
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+        }
     }, { passive: false });
     
     document.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        isBoosting = true;
+        // Only prevent default if game is active (join panel hidden)
+        if (joinPanel.style.display === 'none') {
+            e.preventDefault();
+            isBoosting = true;
+        }
     }, { passive: false });
     
     document.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        isBoosting = false;
+        // Only prevent default if game is active (join panel hidden)
+        if (joinPanel.style.display === 'none') {
+            e.preventDefault();
+            isBoosting = false;
+        }
     }, { passive: false });
 }
 
