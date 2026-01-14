@@ -71,7 +71,14 @@ document.addEventListener('DOMContentLoaded', () => {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     
-    joinBtn.addEventListener('click', () => joinGame(roomInput.value.toUpperCase()));
+    joinBtn.addEventListener('click', () => {
+        const roomCode = roomInput.value.trim().toUpperCase();
+        if (roomCode) {
+            joinGame(roomCode);
+        } else {
+            findOrCreateRoom();
+        }
+    });
     quickPlayBtn.addEventListener('click', () => findOrCreateRoom());
     leaveBtn.addEventListener('click', leaveGame);
     respawnBtn.addEventListener('click', respawnPlayer);
@@ -112,13 +119,20 @@ async function findOrCreateRoom() {
         const roomsSnapshot = await get(ref(database, 'snake-rooms'));
         if (roomsSnapshot.exists()) {
             const rooms = roomsSnapshot.val();
-            // Find room with less than 4 players
+            // Find room with less than 4 players, prioritize rooms with players
+            const availableRooms = [];
             for (const [roomCode, room] of Object.entries(rooms)) {
                 const playerCount = room.players ? Object.keys(room.players).length : 0;
-                if (playerCount < 4) {
-                    joinGame(roomCode);
-                    return;
+                if (playerCount > 0 && playerCount < 4) {
+                    availableRooms.push({ roomCode, playerCount });
                 }
+            }
+            
+            // Sort by player count (join rooms with more players first)
+            if (availableRooms.length > 0) {
+                availableRooms.sort((a, b) => b.playerCount - a.playerCount);
+                joinGame(availableRooms[0].roomCode);
+                return;
             }
         }
         // No available room, create new one
@@ -139,7 +153,8 @@ async function joinGame(roomCode) {
     }
     
     if (!roomCode) {
-        roomCode = generateRoomCode();
+        alert('Invalid room code');
+        return;
     }
     
     myPlayerId = generatePlayerId();
