@@ -69,7 +69,6 @@ const scoreEl = document.getElementById('score');
 const playerCountEl = document.getElementById('playerCount');
 const playersListEl = document.getElementById('playersList');
 const pauseScreen = document.getElementById('pauseScreen');
-const pauseScreen = document.getElementById('pauseScreen');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
