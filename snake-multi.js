@@ -564,9 +564,12 @@ function updateGame() {
 
 // Handle player death
 function handleDeath() {
-    // Drop food where snake died (non-blocking)
+    // Drop food where snake died - one food per segment eaten (beyond initial length)
     const mySnake = players[myPlayerId].segments;
-    for (let i = 0; i < mySnake.length; i += 3) {
+    const foodToDrop = Math.max(0, mySnake.length - INITIAL_LENGTH);
+    
+    // Drop food at intervals along the snake body
+    for (let i = 0; i < foodToDrop && i < mySnake.length; i++) {
         spawnFood(mySnake[i].x, mySnake[i].y);
     }
     
