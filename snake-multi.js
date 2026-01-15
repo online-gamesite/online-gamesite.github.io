@@ -205,7 +205,8 @@ async function joinGame(roomCode) {
         // Setup listeners
         setupGameListeners();
         
-        // Show game panel
+        // Show game panel and hide header/footer
+        document.body.classList.add('game-active');
         joinPanel.style.display = 'none';
         gamePanel.style.display = 'block';
         roomCodeEl.textContent = currentRoom;
@@ -751,6 +752,8 @@ async function leaveGame() {
     foods = [];
     myScore = 0;
     
+    // Show header/footer again
+    document.body.classList.remove('game-active');
     gamePanel.style.display = 'none';
     joinPanel.style.display = 'block';
     
