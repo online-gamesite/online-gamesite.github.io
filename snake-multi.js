@@ -46,6 +46,8 @@ let mouseY = 0;
 let isBoosting = false;
 let boostFrameCounter = 0;
 let camera = { x: 0, y: 0, zoom: 1.5 };
+let isPaused = false;
+let isPaused = false;
 
 // Colors for different players
 const PLAYER_COLORS = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE', '#85C1E2'];
@@ -66,6 +68,8 @@ const statusEl = document.getElementById('status');
 const scoreEl = document.getElementById('score');
 const playerCountEl = document.getElementById('playerCount');
 const playersListEl = document.getElementById('playersList');
+const pauseScreen = document.getElementById('pauseScreen');
+const pauseScreen = document.getElementById('pauseScreen');
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -182,7 +186,8 @@ async function joinGame(roomCode) {
         color: PLAYER_COLORS[Math.floor(Math.random() * PLAYER_COLORS.length)],
         segments: segments,
         angle: 0,
-        lastUpdate: Date.now()
+        lastUpdate: Date.now(),
+        visible: true
     };
     
     try {
@@ -369,6 +374,51 @@ function setupTouchControls() {
     }
 }
 
+// Pause/Unpause handlers
+function pauseGame() {
+    if (!myPlayerId || !players[myPlayerId] || !players[myPlayerId].alive) return;
+    
+    isPaused = true;
+    pauseScreen.style.display = 'block';
+    
+    // Hide player's snake from other players
+    if (myPlayerId && currentRoom) {
+        update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
+            visible: false
+        }).catch(err => console.error('Pause update error:', err));
+    }
+}
+
+function unpauseGame() {
+    isPaused = false;
+    pauseScreen.style.display = 'none';
+    
+    // Show player's snake again
+    if (myPlayerId && currentRoom && players[myPlayerId]) {
+        update(ref(database, `snake-rooms/${currentRoom}/players/${myPlayerId}`), {
+            visible: true
+        }).catch(err => console.error('Unpause update error:', err));
+    }
+}
+
+// Visibility change detection
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        pauseGame();
+    } else {
+        unpauseGame();
+    }
+});
+
+// Also handle window blur/focus as backup
+window.addEventListener('blur', () => {
+    pauseGame();
+});
+
+window.addEventListener('focus', () => {
+    unpauseGame();
+});
+
 // Start game loop
 function startGameLoop() {
     gameLoop = requestAnimationFrame(gameLoopFunction);
@@ -400,7 +450,7 @@ function updateFirebase() {
 
 // Update game
 function updateGame() {
-    if (!myPlayerId || !players[myPlayerId] || !players[myPlayerId].alive) {
+    if (!myPlayerId || !players[myPlayerId] || !players[myPlayerId].alive || isPaused) {
         return;
     }
     
@@ -625,7 +675,7 @@ function draw() {
     // Draw snakes
     for (const playerId in players) {
         const player = players[playerId];
-        if (!player.segments || !player.alive) continue;
+        if (!player.segments || !player.alive || player.visible === false) continue;
         
         // Draw snake outline (for visibility)
         ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
@@ -732,6 +782,10 @@ function drawMinimap() {
 
 // Leave game
 async function leaveGame() {
+    // Unpause if paused
+    isPaused = false;
+    pauseScreen.style.display = 'none';
+    
     if (gameLoop) {
         cancelAnimationFrame(gameLoop);
         gameLoop = null;
