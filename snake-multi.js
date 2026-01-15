@@ -469,10 +469,10 @@ function updateGame() {
     if (!ate) {
         mySnake.pop();
         
-        // Boost penalty: lose extra segment every 30 frames of boosting
+        // Boost penalty: lose extra segment every 15 frames of boosting (1/4 second at 60 FPS)
         if (isBoosting) {
             boostFrameCounter++;
-            if (boostFrameCounter >= 30 && mySnake.length > INITIAL_LENGTH) {
+            if (boostFrameCounter >= 15 && mySnake.length > INITIAL_LENGTH) {
                 mySnake.pop();
                 boostFrameCounter = 0;
             }
