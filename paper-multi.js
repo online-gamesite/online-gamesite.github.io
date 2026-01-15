@@ -661,8 +661,8 @@ function draw() {
         
         // Draw territory with smooth borders
         if (player.territory) {
-            ctx.fillStyle = player.color + '40';
-            ctx.strokeStyle = player.color + '60';
+            ctx.fillStyle = player.color + 'BB';
+            ctx.strokeStyle = player.color;
             ctx.lineWidth = 2;
             
             // Group adjacent cells and draw as larger rectangles
