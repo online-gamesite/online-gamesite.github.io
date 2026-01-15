@@ -245,6 +245,9 @@ async function joinGame(roomCode) {
         // Start game loop
         startGameLoop();
         
+        // Start periodic food check
+        startFoodCheck();
+        
     } catch (error) {
         console.error('Error joining game:', error);
         alert('Error joining game. Please try again.');
@@ -266,13 +269,13 @@ function setupGameListeners() {
     // Listen to foods
     onValue(ref(database, `snake-rooms/${currentRoom}/foods`), (snapshot) => {
         if (snapshot.exists()) {
-            foods = Object.values(snapshot.val());
-            // Ensure minimum food count
-            ensureMinimumFood();
+            const foodData = snapshot.val();
+            foods = [];
+            for (const foodId in foodData) {
+                foods.push({ id: foodId, ...foodData[foodId] });
+            }
         } else {
             foods = [];
-            // No food at all, initialize
-            initializeFoods();
         }
     });
 }
@@ -306,8 +309,9 @@ async function initializeFoods() {
     await set(ref(database, `snake-rooms/${currentRoom}/foods`), foodData);
 }
 
-// Ensure minimum food count
+// Ensure minimum food count (called periodically, not on every food update)
 function ensureMinimumFood() {
+    if (!myPlayerId || !currentRoom) return;
     const minFood = FOOD_COUNT * 0.5; // Keep at least 50% of target food count
     if (foods.length < minFood) {
         const needed = Math.ceil(minFood - foods.length);
@@ -315,6 +319,13 @@ function ensureMinimumFood() {
             spawnFood(Math.random() * WORLD_SIZE, Math.random() * WORLD_SIZE);
         }
     }
+}
+
+// Periodically check food count
+let foodCheckInterval = null;
+function startFoodCheck() {
+    if (foodCheckInterval) clearInterval(foodCheckInterval);
+    foodCheckInterval = setInterval(ensureMinimumFood, 3000); // Check every 3 seconds
 }
 
 // Spawn food at position
@@ -512,8 +523,14 @@ function updateGame() {
         const dy = newHead.y - food.y;
         if (dx * dx + dy * dy < eatRadiusSq) {
             ate = true;
+            // Remove from Firebase
+            if (food.id) {
+                remove(ref(database, `snake-rooms/${currentRoom}/foods/${food.id}`));
+            }
             // Remove from local array immediately
             foods.splice(i, 1);
+            // Spawn new food to maintain count
+            spawnFood(Math.random() * WORLD_SIZE, Math.random() * WORLD_SIZE);
             break;
         }
     }
@@ -804,6 +821,11 @@ async function leaveGame() {
     if (firebaseUpdateLoop) {
         clearInterval(firebaseUpdateLoop);
         firebaseUpdateLoop = null;
+    }
+    
+    if (foodCheckInterval) {
+        clearInterval(foodCheckInterval);
+        foodCheckInterval = null;
     }
     
     if (myPlayerId && currentRoom) {
