@@ -456,8 +456,6 @@ function updateGame() {
         const dx = newHead.x - food.x;
         const dy = newHead.y - food.y;
         if (dx * dx + dy * dy < eatRadiusSq) {
-            myScore += 1;
-            scoreEl.textContent = myScore;
             ate = true;
             // Remove from local array immediately
             foods.splice(i, 1);
@@ -470,15 +468,14 @@ function updateGame() {
         if (isBoosting && mySnake.length > INITIAL_LENGTH) {
             mySnake.pop();
             mySnake.pop(); // Lose length when boosting
-            // Lose points when boosting
-            if (myScore > 0) {
-                myScore -= 1;
-                scoreEl.textContent = myScore;
-            }
         } else {
             mySnake.pop();
         }
     }
+    
+    // Update score to reflect snake length
+    myScore = Math.max(0, mySnake.length - INITIAL_LENGTH);
+    scoreEl.textContent = myScore;
     
     // Maintain segments spacing - optimized
     for (let i = 1; i < mySnake.length; i++) {
