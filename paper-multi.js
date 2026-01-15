@@ -606,34 +606,87 @@ function draw() {
         const player = players[playerId];
         if (!player.alive || player.visible === false) continue;
         
-        // Draw territory
+        // Draw territory with smooth borders
         if (player.territory) {
             ctx.fillStyle = player.color + '40';
-            player.territory.forEach(key => {
-                const [x, y] = key.split(',').map(Number);
-                ctx.fillRect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
-            });
-        }
-        
-        // Draw trail
-        if (player.trail && player.trail.length > 0) {
-            ctx.fillStyle = player.color + '80';
-            player.trail.forEach(key => {
-                const [x, y] = key.split(',').map(Number);
-                ctx.fillRect(x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
-            });
-        }
-        
-        // Draw player
-        if (player.position) {
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.position.x - GRID_SIZE, player.position.y - GRID_SIZE, GRID_SIZE * 2, GRID_SIZE * 2);
+            ctx.strokeStyle = player.color + '60';
+            ctx.lineWidth = 2;
             
-            // Draw name
+            // Group adjacent cells and draw as larger rectangles
+            const drawn = new Set();
+            player.territory.forEach(key => {
+                if (drawn.has(key)) return;
+                
+                const [x, y] = key.split(',').map(Number);
+                
+                // Find continuous horizontal run
+                let width = 1;
+                while (player.territory.includes(`${x + width},${y}`)) {
+                    drawn.add(`${x + width},${y}`);
+                    width++;
+                }
+                
+                // Draw rounded rectangle
+                const px = x * GRID_SIZE;
+                const py = y * GRID_SIZE;
+                const w = width * GRID_SIZE;
+                const h = GRID_SIZE;
+                
+                ctx.beginPath();
+                ctx.roundRect(px, py, w, h, 2);
+                ctx.fill();
+                
+                drawn.add(key);
+            });
+        }
+        
+        // Draw trail as smooth line
+        if (player.trail && player.trail.length > 0) {
+            ctx.strokeStyle = player.color + 'CC';
+            ctx.fillStyle = player.color + '80';
+            ctx.lineWidth = GRID_SIZE * 1.5;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            if (player.trail.length === 1) {
+                const [x, y] = player.trail[0].split(',').map(Number);
+                ctx.beginPath();
+                ctx.arc(x * GRID_SIZE + GRID_SIZE / 2, y * GRID_SIZE + GRID_SIZE / 2, GRID_SIZE * 0.75, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                ctx.beginPath();
+                const [startX, startY] = player.trail[0].split(',').map(Number);
+                ctx.moveTo(startX * GRID_SIZE + GRID_SIZE / 2, startY * GRID_SIZE + GRID_SIZE / 2);
+                
+                for (let i = 1; i < player.trail.length; i++) {
+                    const [x, y] = player.trail[i].split(',').map(Number);
+                    ctx.lineTo(x * GRID_SIZE + GRID_SIZE / 2, y * GRID_SIZE + GRID_SIZE / 2);
+                }
+                ctx.stroke();
+            }
+        }
+        
+        // Draw player as smooth circle
+        if (player.position) {
+            // Player circle
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.position.x, player.position.y, GRID_SIZE * 1.2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // White border
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw name with shadow
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+            ctx.shadowBlur = 4;
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 14px Arial';
             ctx.textAlign = 'center';
             ctx.fillText(player.name, player.position.x, player.position.y - 20);
+            ctx.shadowBlur = 0;
         }
     }
     
