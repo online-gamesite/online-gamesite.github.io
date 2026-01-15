@@ -463,14 +463,9 @@ function updateGame() {
         }
     }
     
-    // Remove tail if didn't eat (or remove multiple if boosting)
+    // Remove tail if didn't eat
     if (!ate) {
-        if (isBoosting && mySnake.length > INITIAL_LENGTH) {
-            mySnake.pop();
-            mySnake.pop(); // Lose length when boosting
-        } else {
-            mySnake.pop();
-        }
+        mySnake.pop();
     }
     
     // Update score to reflect snake length
