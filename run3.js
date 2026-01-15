@@ -17,13 +17,18 @@ const player = {
     x: 3,
     y: 3,
     size: 20,
+    velocityX: 0,
     velocityY: 0,
-    gravity: 0.5,
-    jumpPower: -10,
+    gravity: 0.6,
+    jumpPower: -12,
     isJumping: false,
+    grounded: false,
     rotation: 0, // 0 = floor, 90 = right wall, 180 = ceiling, 270 = left wall
     targetRotation: 0,
-    rotationSpeed: 5
+    rotationSpeed: 8,
+    moveSpeed: 0.15,
+    airControl: 0.12,
+    friction: 0.85
 };
 
 // Tunnel tiles
@@ -68,45 +73,78 @@ function initTunnel() {
 function generateTunnelSegment(z) {
     const segment = [];
     
-    // Create a random pattern for this segment
-    const pattern = Math.floor(Math.random() * 5);
+    // Create a random pattern for this segment with smoother transitions
+    const patternSeed = Math.floor(z / 3); // Change pattern every 3 segments
+    const pattern = patternSeed % 8;
+    const localZ = z % 3;
     
     for (let x = 0; x < TUNNEL_WIDTH; x++) {
         for (let y = 0; y < TUNNEL_HEIGHT; y++) {
             let hasTile = false;
             
-            if (z < 5) {
-                // Start area - always have floor
+            if (z < 10) {
+                // Extended start area - always have floor
                 hasTile = (y === TUNNEL_HEIGHT - 1);
+                // Add some walls for practice
+                if (z >= 5 && (x === 0 || x === TUNNEL_WIDTH - 1)) {
+                    hasTile = Math.random() > 0.4;
+                }
             } else {
                 // Generate patterns based on difficulty
-                const difficulty = Math.min(z / 50, 1);
+                const difficulty = Math.min((z - 10) / 80, 0.8);
+                const gapChance = difficulty * 0.35;
                 
                 switch(pattern) {
-                    case 0: // Floor with some gaps
+                    case 0: // Floor with strategic gaps
                         if (y === TUNNEL_HEIGHT - 1) {
-                            hasTile = Math.random() > difficulty * 0.3;
+                            hasTile = Math.random() > gapChance;
+                            // Ensure minimum path width
+                            if ((x === 2 || x === 4) && localZ === 1) hasTile = true;
                         }
                         break;
-                    case 1: // Walls pattern
-                        if ((x === 0 || x === TUNNEL_WIDTH - 1) && y > 2) {
-                            hasTile = Math.random() > 0.2;
+                    case 1: // Walls with floor
+                        if ((x === 0 || x === TUNNEL_WIDTH - 1) && y >= 2) {
+                            hasTile = Math.random() > 0.15;
                         }
                         if (y === TUNNEL_HEIGHT - 1) {
-                            hasTile = Math.random() > difficulty * 0.4;
+                            hasTile = Math.random() > gapChance * 0.8;
                         }
                         break;
-                    case 2: // Scattered platforms
-                        hasTile = Math.random() > 0.7;
+                    case 2: // Platform hopping
+                        if (y === TUNNEL_HEIGHT - 1 || y === TUNNEL_HEIGHT - 3) {
+                            hasTile = Math.random() > 0.65;
+                        }
                         break;
-                    case 3: // Ceiling and floor
+                    case 3: // Ceiling and floor corridor
                         if (y === 0 || y === TUNNEL_HEIGHT - 1) {
-                            hasTile = Math.random() > difficulty * 0.3;
+                            hasTile = Math.random() > gapChance;
+                        }
+                        if ((y === 2 || y === TUNNEL_HEIGHT - 3) && Math.random() > 0.7) {
+                            hasTile = true; // Extra platforms
                         }
                         break;
-                    case 4: // Side walls
-                        if (x === 0 || x === TUNNEL_WIDTH - 1 || y === TUNNEL_HEIGHT - 1) {
-                            hasTile = Math.random() > 0.3;
+                    case 4: // Side walls maze
+                        if (x === 0 || x === TUNNEL_WIDTH - 1) {
+                            hasTile = Math.random() > 0.25;
+                        }
+                        if (y === TUNNEL_HEIGHT - 1) {
+                            hasTile = Math.random() > gapChance * 0.7;
+                        }
+                        break;
+                    case 5: // Mixed surfaces
+                        if ((x === 0 && y > 2) || (x === TUNNEL_WIDTH - 1 && y > 2) || y === TUNNEL_HEIGHT - 1) {
+                            hasTile = Math.random() > 0.35;
+                        }
+                        break;
+                    case 6: // Spiral pattern
+                        const spiral = (x + y + localZ) % 3 === 0;
+                        if (spiral && (y === TUNNEL_HEIGHT - 1 || x === 0 || x === TUNNEL_WIDTH - 1)) {
+                            hasTile = true;
+                        }
+                        break;
+                    case 7: // Full tunnel
+                        if (y === 0 || y === TUNNEL_HEIGHT - 1 || x === 0 || x === TUNNEL_WIDTH - 1) {
+                            hasTile = Math.random() > gapChance * 0.6;
                         }
                         break;
                 }
@@ -232,65 +270,72 @@ function drawPlayer() {
     ctx.stroke();
 }
 
-// Check if player is on a tile
+// Check if player is on a tile with better collision detection
 function checkCollision() {
     const playerZ = Math.floor(scrollOffset);
+    let closestTile = null;
+    let closestDist = Infinity;
     
     for (let tile of tiles) {
-        if (Math.abs(tile.z - playerZ) < 1) {
-            const dx = Math.abs(tile.x - player.x);
-            const dy = Math.abs(tile.y - player.y);
+        if (Math.abs(tile.z - playerZ) < 1.5) {
+            const dx = tile.x - player.x;
+            const dy = tile.y - player.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
             
-            if (dx < 0.5 && dy < 0.5) {
-                return tile;
+            // Different collision box based on player state
+            const collisionRadius = player.grounded ? 0.4 : 0.45;
+            
+            if (dist < collisionRadius && dist < closestDist) {
+                closestTile = tile;
+                closestDist = dist;
             }
         }
     }
-    return null;
+    return closestTile;
 }
 
-// Check for wall collision to rotate gravity
+// Check for wall collision with smooth gravity transitions
 function checkWallCollision() {
     const playerZ = Math.floor(scrollOffset);
     
     for (let tile of tiles) {
-        if (Math.abs(tile.z - playerZ) < 1) {
+        if (Math.abs(tile.z - playerZ) < 1.2) {
             const dx = tile.x - player.x;
             const dy = tile.y - player.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             
-            if (distance < 0.7 && distance > 0.3) {
-                // Determine which wall was hit
-                if (Math.abs(dx) > Math.abs(dy)) {
-                    // Hit side wall
-                    if (dx > 0) {
-                        // Right wall
-                        player.targetRotation = 90;
-                        player.x = tile.x;
-                        player.y = tile.y;
-                        return true;
-                    } else {
-                        // Left wall
-                        player.targetRotation = 270;
-                        player.x = tile.x;
-                        player.y = tile.y;
-                        return true;
-                    }
+            // Only snap to adjacent tiles
+            if (distance < 0.8 && distance > 0.25) {
+                const angle = Math.atan2(dy, dx);
+                const degrees = (angle * 180 / Math.PI + 360) % 360;
+                
+                // Determine surface based on angle
+                let newRotation = player.targetRotation;
+                
+                if (degrees >= 45 && degrees < 135) {
+                    // Bottom (floor)
+                    newRotation = 0;
+                } else if (degrees >= 135 && degrees < 225) {
+                    // Left wall
+                    newRotation = 270;
+                } else if (degrees >= 225 && degrees < 315) {
+                    // Top (ceiling)
+                    newRotation = 180;
                 } else {
-                    // Hit floor or ceiling
-                    if (dy > 0) {
-                        // Floor
-                        player.targetRotation = 0;
-                        player.x = tile.x;
-                        player.y = tile.y;
-                        return true;
-                    } else {
-                        // Ceiling
-                        player.targetRotation = 180;
-                        player.x = tile.x;
-                        player.y = tile.y;
-                        return true;
-                    }
+                    // Right wall
+                    newRotation = 90;
+                }
+                
+                // Only change rotation if landing on tile
+                if (player.isJumping && distance < 0.5) {
+                    player.targetRotation = newRotation;
+                    player.x = tile.x;
+                    player.y = tile.y;
+                    player.velocityY = 0;
+                    player.velocityX = 0;
+                    player.grounded = true;
+                    player.isJumping = false;
+                    return true;
                 }
             }
         }
@@ -319,90 +364,96 @@ function update() {
     // Remove old tiles
     tiles = tiles.filter(t => t.z > scrollOffset - 10);
     
-    // Handle input
+    // Handle input with better control
+    const moveAmount = player.grounded ? player.moveSpeed : player.airControl;
+    
     if (keys['ArrowLeft']) {
-        player.x -= 0.1;
+        player.velocityX -= moveAmount;
     }
     if (keys['ArrowRight']) {
-        player.x += 0.1;
+        player.velocityX += moveAmount;
     }
     
-    // Apply gravity based on rotation
-    const gravityAngle = (player.rotation * Math.PI) / 180;
+    // Apply friction
+    player.velocityX *= player.friction;
+    
+    // Clamp horizontal velocity
+    const maxSpeed = 0.3;
+    player.velocityX = Math.max(-maxSpeed, Math.min(maxSpeed, player.velocityX));
+    
+    // Apply gravity and movement based on rotation
     player.velocityY += player.gravity;
     
     // Move player based on current rotation
-    switch (player.rotation) {
-        case 0: // Normal gravity (down)
-            player.y += player.velocityY * 0.1;
-            break;
-        case 90: // Right wall is floor
-            player.x += player.velocityY * 0.1;
-            break;
-        case 180: // Ceiling is floor
-            player.y -= player.velocityY * 0.1;
-            break;
-        case 270: // Left wall is floor
-            player.x -= player.velocityY * 0.1;
-            break;
-    }
+    const rotRad = (player.rotation * Math.PI) / 180;
+    const moveX = Math.sin(rotRad) * player.velocityY * 0.08 + Math.cos(rotRad) * player.velocityX;
+    const moveY = Math.cos(rotRad) * player.velocityY * 0.08 - Math.sin(rotRad) * player.velocityX;
     
-    // Smooth rotation
-    if (player.rotation !== player.targetRotation) {
-        const diff = player.targetRotation - player.rotation;
-        if (Math.abs(diff) > 180) {
-            if (diff > 0) {
-                player.rotation -= player.rotationSpeed;
-            } else {
-                player.rotation += player.rotationSpeed;
-            }
-        } else {
-            if (diff > 0) {
-                player.rotation += player.rotationSpeed;
-            } else {
-                player.rotation -= player.rotationSpeed;
-            }
-        }
+    player.x += moveX;
+    player.y += moveY;
+    
+    // Smooth rotation with easing
+    if (Math.abs(player.rotation - player.targetRotation) > 1) {
+        let diff = player.targetRotation - player.rotation;
         
+        // Handle wrap around (0° to 270° or vice versa)
+        if (diff > 180) diff -= 360;
+        if (diff < -180) diff += 360;
+        
+        // Ease rotation
+        const rotationStep = Math.min(Math.abs(diff), player.rotationSpeed);
+        player.rotation += Math.sign(diff) * rotationStep;
         player.rotation = (player.rotation + 360) % 360;
+    } else {
+        player.rotation = player.targetRotation;
     }
     
     // Check ground collision
     const onTile = checkCollision();
+    player.grounded = false;
+    
     if (onTile) {
-        player.velocityY = 0;
-        player.isJumping = false;
-        player.x = onTile.x;
-        player.y = onTile.y;
+        const isMovingTowards = player.velocityY > 0.5;
         
-        // Set rotation based on tile position
-        if (onTile.y >= TUNNEL_HEIGHT - 1.5) {
-            player.targetRotation = 0; // Floor
-        } else if (onTile.y <= 0.5) {
-            player.targetRotation = 180; // Ceiling
-        } else if (onTile.x <= 0.5) {
-            player.targetRotation = 270; // Left wall
-        } else if (onTile.x >= TUNNEL_WIDTH - 1.5) {
-            player.targetRotation = 90; // Right wall
+        if (isMovingTowards || !player.isJumping) {
+            player.velocityY = 0;
+            player.isJumping = false;
+            player.grounded = true;
+            player.x = onTile.x;
+            player.y = onTile.y;
+            
+            // Set rotation based on tile position
+            if (onTile.y >= TUNNEL_HEIGHT - 1.5) {
+                player.targetRotation = 0; // Floor
+            } else if (onTile.y <= 0.5) {
+                player.targetRotation = 180; // Ceiling
+            } else if (onTile.x <= 0.5) {
+                player.targetRotation = 270; // Left wall
+            } else if (onTile.x >= TUNNEL_WIDTH - 1.5) {
+                player.targetRotation = 90; // Right wall
+            }
         }
     }
     
-    // Check wall collisions
-    checkWallCollision();
+    // Check wall collisions for adjacent tiles
+    if (!onTile) {
+        checkWallCollision();
+    }
     
-    // Boundary check
-    if (player.x < -1 || player.x > TUNNEL_WIDTH + 1 || 
-        player.y < -1 || player.y > TUNNEL_HEIGHT + 1) {
+    // Boundary check - more forgiving
+    if (player.x < -1.5 || player.x > TUNNEL_WIDTH + 1.5 || 
+        player.y < -1.5 || player.y > TUNNEL_HEIGHT + 1.5) {
         gameOver();
     }
     
-    // Check if fell through gap
-    if (player.velocityY > 5 && !onTile) {
-        const nearbyTiles = tiles.filter(t => 
-            Math.abs(t.z - scrollOffset) < 2 && 
-            Math.abs(t.x - player.x) < 1.5 && 
-            Math.abs(t.y - player.y) < 1.5
-        );
+    // Check if fell into void
+    if (Math.abs(player.velocityY) > 8 && !onTile && !player.grounded) {
+        const nearbyTiles = tiles.filter(t => {
+            const dz = Math.abs(t.z - scrollOffset);
+            const dx = Math.abs(t.x - player.x);
+            const dy = Math.abs(t.y - player.y);
+            return dz < 3 && dx < 2 && dy < 2;
+        });
         
         if (nearbyTiles.length === 0) {
             gameOver();
@@ -436,8 +487,10 @@ function restartGame() {
     
     player.x = 3;
     player.y = 6;
+    player.velocityX = 0;
     player.velocityY = 0;
     player.isJumping = false;
+    player.grounded = false;
     player.rotation = 0;
     player.targetRotation = 0;
     
