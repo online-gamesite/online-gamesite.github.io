@@ -236,9 +236,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
     }
     
-    // collision with self
-    if(snake.some(s=>s.x===head.x && s.y===head.y)){
-      if(isMultiplayer) {
+    // collision with self (skip the head itself, check body segments only)
+    for(let i = 1; i < snake.length; i++){
+      if(snake[i].x === head.x && snake[i].y === head.y){
+        if(isMultiplayer) {
         stop();
         gameOver = true;
         ctx.fillStyle = '#3b82f6';
@@ -280,6 +281,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
         return;
       }
     }
+    }
     
     // Collision with other snake in multiplayer
     if(isMultiplayer && snake2.some(s=>s.x===head.x && s.y===head.y)){
@@ -318,9 +320,30 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const head2 = {x: snake2[0].x + dir2.x, y: snake2[0].y + dir2.y};
       
       // Check collisions for snake 2
-    if(head2.x < 0 || head2.x >= cols || head2.y < 0 || head2.y >= rows ||
-      snake2.some(s=>s.x===head2.x && s.y===head2.y) ||
-      snake.some(s=>s.x===head2.x && s.y===head2.y)){
+      let snake2Collision = false;
+      
+      // Check wall collision
+      if(head2.x < 0 || head2.x >= cols || head2.y < 0 || head2.y >= rows){
+        snake2Collision = true;
+      }
+      
+      // Check self collision (skip head, check body only)
+      for(let i = 1; i < snake2.length; i++){
+        if(snake2[i].x === head2.x && snake2[i].y === head2.y){
+          snake2Collision = true;
+          break;
+        }
+      }
+      
+      // Check collision with snake 1
+      for(let i = 0; i < snake.length; i++){
+        if(snake[i].x === head2.x && snake[i].y === head2.y){
+          snake2Collision = true;
+          break;
+        }
+      }
+      
+      if(snake2Collision){
       stop();
       gameOver = true;
         // Track multiplayer win
